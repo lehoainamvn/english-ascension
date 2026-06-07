@@ -1,0 +1,18 @@
+package com.englishascension.backend.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+import java.util.List;
+
+@Getter
+@Setter
+public class PlacementTestRequest {
+    private List<AnswerRequest> answers;
+
+    @Getter
+    @Setter
+    public static class AnswerRequest {
+        private Long questionId;
+        private String selectedOption; // A, B, C, D
+    }
+}

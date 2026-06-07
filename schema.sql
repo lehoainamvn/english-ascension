@@ -1,0 +1,295 @@
+-- ====================================================================
+-- ENGLISH ASCENSION - DATABASE INITIALIZATION SCRIPT
+-- ====================================================================
+-- Hướng dẫn chạy trên pgAdmin:
+-- 1. Mở pgAdmin và tạo một Database tên là: english_ascension
+-- 2. Chuột phải vào Database "english_ascension" -> Chọn "Query Tool"
+-- 3. Copy toàn bộ nội dung file này vào Query Tool và nhấn nút "Execute" (F5)
+-- ====================================================================
+
+-- 1. Xóa bảng cũ nếu tồn tại (để có thể chạy lại file này nhiều lần)
+DROP TABLE IF EXISTS quiz_questions CASCADE;
+DROP TABLE IF EXISTS flashcards CASCADE;
+DROP TABLE IF EXISTS learning_modules CASCADE;
+DROP TABLE IF EXISTS learning_roadmaps CASCADE;
+DROP TABLE IF EXISTS questions CASCADE;
+DROP TABLE IF EXISTS player_characters CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- 2. Tạo bảng người dùng (users)
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'ROLE_USER',
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    streak INT NOT NULL DEFAULT 0,
+    coins INT NOT NULL DEFAULT 0,
+    exp INT NOT NULL DEFAULT 0,
+    level INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Tạo bảng nhân vật (player_characters)
+CREATE TABLE player_characters (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    gender VARCHAR(50) NOT NULL,
+    hair_style VARCHAR(100),
+    hair_color VARCHAR(100),
+    face_style VARCHAR(100),
+    outfit_style VARCHAR(100),
+    title VARCHAR(100) NOT NULL DEFAULT 'Novice',
+    CONSTRAINT fk_user_character FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 4. Tạo bảng câu hỏi (questions)
+CREATE TABLE questions (
+    id BIGSERIAL PRIMARY KEY,
+    type VARCHAR(50) NOT NULL, -- VOCABULARY, GRAMMAR, LISTENING, READING
+    difficulty VARCHAR(50) NOT NULL, -- A1, A2, B1, B2, C1, C2
+    question_text TEXT NOT NULL,
+    audio_url VARCHAR(555),
+    image_url VARCHAR(555),
+    option_a VARCHAR(255) NOT NULL,
+    option_b VARCHAR(255) NOT NULL,
+    option_c VARCHAR(255) NOT NULL,
+    option_d VARCHAR(255) NOT NULL,
+    correct_option VARCHAR(10) NOT NULL, -- A, B, C, D
+    explanation TEXT
+);
+
+-- 5. Tạo bảng lộ trình học (learning_roadmaps)
+CREATE TABLE learning_roadmaps (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT UNIQUE NOT NULL,
+    cefr_level VARCHAR(50) NOT NULL,
+    toeic_equivalent VARCHAR(100),
+    overall_evaluation TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_roadmap FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 6. Tạo bảng module học tập (learning_modules)
+CREATE TABLE learning_modules (
+    id BIGSERIAL PRIMARY KEY,
+    roadmap_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    order_index INT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'LOCKED', -- LOCKED, IN_PROGRESS, COMPLETED
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_roadmap_module FOREIGN KEY (roadmap_id) REFERENCES learning_roadmaps(id) ON DELETE CASCADE
+);
+
+-- 7. Tạo bảng từ vựng học tập (flashcards)
+CREATE TABLE flashcards (
+    id BIGSERIAL PRIMARY KEY,
+    module_id BIGINT NOT NULL,
+    word VARCHAR(255) NOT NULL,
+    part_of_speech VARCHAR(50),
+    phonetic VARCHAR(100),
+    definition TEXT NOT NULL,
+    example_sentence TEXT,
+    example_translation TEXT,
+    CONSTRAINT fk_module_flashcard FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
+);
+
+-- 8. Tạo bảng câu hỏi ôn tập (quiz_questions)
+CREATE TABLE quiz_questions (
+    id BIGSERIAL PRIMARY KEY,
+    module_id BIGINT NOT NULL,
+    question_text TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL, -- MULTIPLE_CHOICE, FILL_IN_BLANK, WORD_MATCHING
+    option_a VARCHAR(255),
+    option_b VARCHAR(255),
+    option_c VARCHAR(255),
+    option_d VARCHAR(255),
+    correct_answer VARCHAR(255) NOT NULL,
+    explanation TEXT,
+    CONSTRAINT fk_module_quiz FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
+);
+
+-- ====================================================================
+-- DỮ LIỆU MẪU ĐỂ TEST
+-- ====================================================================
+
+-- 1. Seed người dùng (Mật khẩu mặc định bên dưới là "123456" đã mã hóa BCrypt)
+INSERT INTO users (email, password, role, active, streak, coins, exp, level)
+VALUES (
+    'test@gmail.com', 
+    '$2a$10$wPxq/hC9KzXb4sVqJb6d2eC0bL/XlJ0.w8wOqJgC4yZ.OpxP6.Wc.', -- Mật khẩu: 123456
+    'ROLE_USER', 
+    TRUE, 
+    5, 
+    150, 
+    1200, 
+    5
+);
+
+-- 2. Seed 12 câu hỏi Placement Test (3 câu cho mỗi kỹ năng)
+-- VOCABULARY
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'VOCABULARY',
+    'A2',
+    'Choose the synonym of the word "generous":',
+    'Kind and willing to share/give',
+    'Selfish and greedy',
+    'Lazy and inactive',
+    'Active and noisy',
+    'A',
+    'Generous means showing readiness to give more of something, especially money, than is strictly necessary or expected.'
+);
+
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'VOCABULARY',
+    'B1',
+    'Which word describes a person who is very determined to do something and refuses to change their mind?',
+    'Stubborn',
+    'Flexible',
+    'Optimistic',
+    'Reliable',
+    'A',
+    'A stubborn person is determined not to change their opinion or attitude.'
+);
+
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'VOCABULARY',
+    'B2',
+    'What is the meaning of the idiom "a piece of cake"?',
+    'A delicious dessert served at a party',
+    'Something that is very easy to do',
+    'A difficult problem that needs solving',
+    'A special birthday celebration',
+    'B',
+    'The idiom "a piece of cake" means a task or activity that is very easy.'
+);
+
+-- GRAMMAR
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'GRAMMAR',
+    'A2',
+    'Neither the teacher nor the students ______ present at the meeting yesterday.',
+    'was',
+    'were',
+    'are',
+    'is',
+    'B',
+    'With "neither... nor...", the verb agrees with the closer subject, which is "students" (plural), and the tense is past ("yesterday"), so we use "were".'
+);
+
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'GRAMMAR',
+    'B1',
+    'By the time we arrived at the cinema yesterday, the movie ______.',
+    'already started',
+    'has already started',
+    'had already started',
+    'was starting',
+    'C',
+    'We use Past Perfect (had + V3) to express an action that happened before another past action (arrived).'
+);
+
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'GRAMMAR',
+    'B2',
+    'If she ______ harder last semester, she would have passed the exam.',
+    'studied',
+    'had studied',
+    'has studied',
+    'studies',
+    'B',
+    'This is a Conditional Type 3 sentence expressing a regret/hypothetical situation in the past. Structure: If + S + had + V3, S + would + have + V3.'
+);
+
+-- LISTENING
+INSERT INTO questions (type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'LISTENING',
+    'A2',
+    '[Audio Question] Listen to the audio. What is the speaker''s main occupation?',
+    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    'Teacher',
+    'Chef',
+    'Doctor',
+    'Photographer',
+    'B',
+    'The audio mentions preparing delicious recipes and working in a busy restaurant kitchen.'
+);
+
+INSERT INTO questions (type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'LISTENING',
+    'B1',
+    '[Audio Question] Listen to the audio. Why did the man cancel the morning meeting?',
+    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    'He was feeling ill',
+    'He had a flight delay',
+    'He forgot the time',
+    'He had a family emergency',
+    'B',
+    'The speaker explains he was stuck at the airport due to a delayed flight.'
+);
+
+INSERT INTO questions (type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'LISTENING',
+    'B2',
+    '[Audio Question] Listen to the audio. What will the weather be like tomorrow according to the forecast?',
+    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+    'Heavy rain and thunderstorm',
+    'Sunny and warm weather',
+    'Snow and strong wind',
+    'Cloudy skies with no precipitation',
+    'A',
+    'The weather forecast predicts a major storm with heavy rain and thunderstorms starting tomorrow morning.'
+);
+
+-- READING
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'READING',
+    'A2',
+    'Read the passage:\n"Technology is changing the way we work. More people are working from home, which reduces commuting time and increases flexibility. However, it also makes it harder to separate work from personal life."\n\nWhat is the main drawback of remote work mentioned in the text?',
+    'Higher commuting cost',
+    'Difficulty in separating work and personal life',
+    'Lack of technology tools',
+    'Lower productivity',
+    'B',
+    'The passage states that remote work "makes it harder to separate work from personal life."'
+);
+
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'READING',
+    'B1',
+    'Read the passage:\n"Organic farming avoids the use of synthetic chemical fertilizers. Instead, it relies on crop rotation and compost to maintain soil productivity. Proponents argue it is more sustainable in the long run."\n\nWhat does organic farming use instead of synthetic chemicals?',
+    'Heavy agricultural machinery',
+    'Crop rotation and compost',
+    'Genetically modified seeds',
+    'Imported soil from other regions',
+    'B',
+    'The text mentions that organic farming "relies on crop rotation and compost to maintain soil productivity" instead of synthetic chemical fertilizers.'
+);
+
+INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+VALUES (
+    'READING',
+    'B2',
+    'Read the passage:\n"The Great Barrier Reef is the world''s largest coral reef system, composed of over 2,900 individual reefs. However, global warming poses a severe threat to its biodiversity due to rising water temperatures causing coral bleaching."\n\nWhat is threatening the biodiversity of the Great Barrier Reef?',
+    'Overfishing by commercial boats',
+    'Global warming and rising temperatures',
+    'Excessive tourism activities',
+    'Industrial water pollution',
+    'B',
+    'The passage explicitly mentions that "global warming poses a severe threat to its biodiversity due to rising water temperatures causing coral bleaching."'
+);
