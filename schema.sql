@@ -1,5 +1,5 @@
 -- ====================================================================
--- ENGLISH ASCENSION - DATABASE INITIALIZATION SCRIPT
+-- ENGLISH ASCENSION - DATABASE INITIALIZATION SCRIPT (9-TABLE SCHEMA)
 -- ====================================================================
 -- Hướng dẫn chạy trên pgAdmin:
 -- 1. Mở pgAdmin và tạo một Database tên là: english_ascension
@@ -7,9 +7,12 @@
 -- 3. Copy toàn bộ nội dung file này vào Query Tool và nhấn nút "Execute" (F5)
 -- ====================================================================
 
--- 1. Xóa bảng cũ nếu tồn tại (để có thể chạy lại file này nhiều lần)
+-- 1. Xóa các bảng cũ nếu tồn tại
+DROP TABLE IF EXISTS user_progress CASCADE;
+DROP TABLE IF EXISTS user_documents CASCADE;
 DROP TABLE IF EXISTS quiz_questions CASCADE;
 DROP TABLE IF EXISTS flashcards CASCADE;
+DROP TABLE IF EXISTS study_contents CASCADE;
 DROP TABLE IF EXISTS learning_modules CASCADE;
 DROP TABLE IF EXISTS learning_roadmaps CASCADE;
 DROP TABLE IF EXISTS questions CASCADE;
@@ -45,23 +48,7 @@ CREATE TABLE player_characters (
     CONSTRAINT fk_user_character FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 4. Tạo bảng câu hỏi (questions)
-CREATE TABLE questions (
-    id BIGSERIAL PRIMARY KEY,
-    type VARCHAR(50) NOT NULL, -- VOCABULARY, GRAMMAR, LISTENING, READING
-    difficulty VARCHAR(50) NOT NULL, -- A1, A2, B1, B2, C1, C2
-    question_text TEXT NOT NULL,
-    audio_url VARCHAR(555),
-    image_url VARCHAR(555),
-    option_a VARCHAR(255) NOT NULL,
-    option_b VARCHAR(255) NOT NULL,
-    option_c VARCHAR(255) NOT NULL,
-    option_d VARCHAR(255) NOT NULL,
-    correct_option VARCHAR(10) NOT NULL, -- A, B, C, D
-    explanation TEXT
-);
-
--- 5. Tạo bảng lộ trình học (learning_roadmaps)
+-- 4. Tạo bảng lộ trình học (learning_roadmaps)
 CREATE TABLE learning_roadmaps (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT UNIQUE NOT NULL,
@@ -73,44 +60,89 @@ CREATE TABLE learning_roadmaps (
     CONSTRAINT fk_user_roadmap FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 6. Tạo bảng module học tập (learning_modules)
+-- 5. Tạo bảng module học tập (learning_modules)
 CREATE TABLE learning_modules (
     id BIGSERIAL PRIMARY KEY,
-    roadmap_id BIGINT NOT NULL,
+    roadmap_id BIGINT, -- Nullable to allow self-study vocab topics
     title VARCHAR(255) NOT NULL,
     description TEXT,
     order_index INT NOT NULL,
+    category VARCHAR(100), -- For vocab topics (e.g. '600 TỪ VỰNG TOEIC')
     status VARCHAR(50) NOT NULL DEFAULT 'LOCKED', -- LOCKED, IN_PROGRESS, COMPLETED
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_roadmap_module FOREIGN KEY (roadmap_id) REFERENCES learning_roadmaps(id) ON DELETE CASCADE
 );
 
--- 7. Tạo bảng từ vựng học tập (flashcards)
+-- 6. Tạo bảng tài liệu người dùng tải lên (user_documents)
+CREATE TABLE user_documents (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    extracted_text TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_document FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 7. Tạo bảng từ vựng / flashcards dùng chung (flashcards)
 CREATE TABLE flashcards (
     id BIGSERIAL PRIMARY KEY,
-    module_id BIGINT NOT NULL,
+    module_id BIGINT,
+    user_document_id BIGINT,
     word VARCHAR(255) NOT NULL,
     part_of_speech VARCHAR(50),
     phonetic VARCHAR(100),
     definition TEXT NOT NULL,
     example_sentence TEXT,
     example_translation TEXT,
-    CONSTRAINT fk_module_flashcard FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
+    CONSTRAINT fk_module_flashcard FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE,
+    CONSTRAINT fk_document_flashcard FOREIGN KEY (user_document_id) REFERENCES user_documents(id) ON DELETE CASCADE
 );
 
--- 8. Tạo bảng câu hỏi ôn tập (quiz_questions)
-CREATE TABLE quiz_questions (
+-- 8. Tạo bảng nội dung tự học chung (study_contents)
+CREATE TABLE study_contents (
     id BIGSERIAL PRIMARY KEY,
-    module_id BIGINT NOT NULL,
+    type VARCHAR(50) NOT NULL, -- GRAMMAR, LISTENING, READING, EXAM
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    body_text TEXT,
+    media_url TEXT,
+    description TEXT,
+    duration INT,
+    order_index INT,
+    questions_count INT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 9. Tạo bảng câu hỏi chung (questions)
+CREATE TABLE questions (
+    id BIGSERIAL PRIMARY KEY,
+    source_type VARCHAR(50) NOT NULL, -- PLACEMENT_TEST, ROADMAP_QUIZ, DOCUMENT_QUIZ, GRAMMAR, LISTENING, READING, TOEIC_EXAM
+    parent_id BIGINT, -- Links to learning_modules.id, study_contents.id, or user_documents.id
+    question_number INT,
+    type VARCHAR(50), -- MULTIPLE_CHOICE, FILL_IN_BLANK, WORD_MATCHING, VOCABULARY, GRAMMAR, etc.
+    difficulty VARCHAR(50), -- A1, A2, B1, B2, C1, C2
     question_text TEXT NOT NULL,
-    type VARCHAR(50) NOT NULL, -- MULTIPLE_CHOICE, FILL_IN_BLANK, WORD_MATCHING
+    audio_url VARCHAR(555),
+    image_url VARCHAR(555),
     option_a VARCHAR(255),
     option_b VARCHAR(255),
     option_c VARCHAR(255),
     option_d VARCHAR(255),
-    correct_answer VARCHAR(255) NOT NULL,
-    explanation TEXT,
-    CONSTRAINT fk_module_quiz FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
+    correct_option VARCHAR(255), -- A, B, C, D
+    correct_answer VARCHAR(255), -- fallback
+    explanation TEXT
+);
+
+-- 10. Tạo bảng lịch sử / tiến trình học tập (user_progress)
+CREATE TABLE user_progress (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    resource_type VARCHAR(50) NOT NULL, -- MODULE, FLASHCARD, GRAMMAR_LESSON, GRAMMAR_PRACTICE, LISTENING_QUESTION, LISTENING_SECTION, READING_ARTICLE, READING_QUESTION
+    resource_id BIGINT NOT NULL,
+    is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    completed_at TIMESTAMP,
+    score INT,
+    CONSTRAINT fk_user_progress FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- ====================================================================
@@ -132,8 +164,9 @@ VALUES (
 
 -- 2. Seed 12 câu hỏi Placement Test (3 câu cho mỗi kỹ năng)
 -- VOCABULARY
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'VOCABULARY',
     'A2',
     'Choose the synonym of the word "generous":',
@@ -142,11 +175,13 @@ VALUES (
     'Lazy and inactive',
     'Active and noisy',
     'A',
+    'A',
     'Generous means showing readiness to give more of something, especially money, than is strictly necessary or expected.'
 );
 
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'VOCABULARY',
     'B1',
     'Which word describes a person who is very determined to do something and refuses to change their mind?',
@@ -155,11 +190,13 @@ VALUES (
     'Optimistic',
     'Reliable',
     'A',
+    'A',
     'A stubborn person is determined not to change their opinion or attitude.'
 );
 
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'VOCABULARY',
     'B2',
     'What is the meaning of the idiom "a piece of cake"?',
@@ -168,12 +205,14 @@ VALUES (
     'A difficult problem that needs solving',
     'A special birthday celebration',
     'B',
+    'B',
     'The idiom "a piece of cake" means a task or activity that is very easy.'
 );
 
 -- GRAMMAR
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'GRAMMAR',
     'A2',
     'Neither the teacher nor the students ______ present at the meeting yesterday.',
@@ -182,11 +221,13 @@ VALUES (
     'are',
     'is',
     'B',
+    'B',
     'With "neither... nor...", the verb agrees with the closer subject, which is "students" (plural), and the tense is past ("yesterday"), so we use "were".'
 );
 
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'GRAMMAR',
     'B1',
     'By the time we arrived at the cinema yesterday, the movie ______.',
@@ -195,11 +236,13 @@ VALUES (
     'had already started',
     'was starting',
     'C',
+    'C',
     'We use Past Perfect (had + V3) to express an action that happened before another past action (arrived).'
 );
 
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'GRAMMAR',
     'B2',
     'If she ______ harder last semester, she would have passed the exam.',
@@ -208,12 +251,14 @@ VALUES (
     'has studied',
     'studies',
     'B',
+    'B',
     'This is a Conditional Type 3 sentence expressing a regret/hypothetical situation in the past. Structure: If + S + had + V3, S + would + have + V3.'
 );
 
 -- LISTENING
-INSERT INTO questions (type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'LISTENING',
     'A2',
     '[Audio Question] Listen to the audio. What is the speaker''s main occupation?',
@@ -223,11 +268,13 @@ VALUES (
     'Doctor',
     'Photographer',
     'B',
+    'B',
     'The audio mentions preparing delicious recipes and working in a busy restaurant kitchen.'
 );
 
-INSERT INTO questions (type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'LISTENING',
     'B1',
     '[Audio Question] Listen to the audio. Why did the man cancel the morning meeting?',
@@ -237,11 +284,13 @@ VALUES (
     'He forgot the time',
     'He had a family emergency',
     'B',
+    'B',
     'The speaker explains he was stuck at the airport due to a delayed flight.'
 );
 
-INSERT INTO questions (type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, audio_url, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'LISTENING',
     'B2',
     '[Audio Question] Listen to the audio. What will the weather be like tomorrow according to the forecast?',
@@ -251,25 +300,29 @@ VALUES (
     'Snow and strong wind',
     'Cloudy skies with no precipitation',
     'A',
+    'A',
     'The weather forecast predicts a major storm with heavy rain and thunderstorms starting tomorrow morning.'
 );
 
 -- READING
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'READING',
     'A2',
     'Read the passage:\n"Technology is changing the way we work. More people are working from home, which reduces commuting time and increases flexibility. However, it also makes it harder to separate work from personal life."\n\nWhat is the main drawback of remote work mentioned in the text?',
-    'Higher commuting cost',
+    'Commuting cost is higher',
     'Difficulty in separating work and personal life',
     'Lack of technology tools',
     'Lower productivity',
     'B',
+    'B',
     'The passage states that remote work "makes it harder to separate work from personal life."'
 );
 
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'READING',
     'B1',
     'Read the passage:\n"Organic farming avoids the use of synthetic chemical fertilizers. Instead, it relies on crop rotation and compost to maintain soil productivity. Proponents argue it is more sustainable in the long run."\n\nWhat does organic farming use instead of synthetic chemicals?',
@@ -278,11 +331,13 @@ VALUES (
     'Genetically modified seeds',
     'Imported soil from other regions',
     'B',
+    'B',
     'The text mentions that organic farming "relies on crop rotation and compost to maintain soil productivity" instead of synthetic chemical fertilizers.'
 );
 
-INSERT INTO questions (type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)
 VALUES (
+    'PLACEMENT_TEST',
     'READING',
     'B2',
     'Read the passage:\n"The Great Barrier Reef is the world''s largest coral reef system, composed of over 2,900 individual reefs. However, global warming poses a severe threat to its biodiversity due to rising water temperatures causing coral bleaching."\n\nWhat is threatening the biodiversity of the Great Barrier Reef?',
@@ -290,6 +345,7 @@ VALUES (
     'Global warming and rising temperatures',
     'Excessive tourism activities',
     'Industrial water pollution',
+    'B',
     'B',
     'The passage explicitly mentions that "global warming poses a severe threat to its biodiversity due to rising water temperatures causing coral bleaching."'
 );

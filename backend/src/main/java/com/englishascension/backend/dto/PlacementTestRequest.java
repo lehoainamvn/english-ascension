@@ -8,6 +8,7 @@ import java.util.List;
 @Setter
 public class PlacementTestRequest {
     private List<AnswerRequest> answers;
+    private String targetGoal;
 
     @Getter
     @Setter

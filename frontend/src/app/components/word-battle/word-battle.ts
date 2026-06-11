@@ -41,7 +41,8 @@ interface BattleQuestion {
             </span>
           </div>
           <a
-            routerLink="/world-map"
+            [routerLink]="['/dashboard']"
+            [queryParams]="{tab: 'suggested'}"
             class="bg-bg-input hover:bg-bg-card border border-border-main px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-text-muted hover:text-text-main"
           >
             &larr; Bản Đồ
@@ -64,7 +65,8 @@ interface BattleQuestion {
               Không thể tải học liệu từ vựng của chương học này. Hãy thử quay lại bản đồ học tập.
             </p>
             <a
-              routerLink="/world-map"
+              [routerLink]="['/dashboard']"
+              [queryParams]="{tab: 'suggested'}"
               class="bg-brand-primary hover:bg-brand-secondary text-white font-bold px-6 py-2 rounded-xl transition-all inline-block shadow-md"
             >
               Về Bản Đồ
@@ -332,7 +334,8 @@ interface BattleQuestion {
                       Thách Đấu Lại ↺
                     </button>
                     <a
-                      routerLink="/world-map"
+                      [routerLink]="['/dashboard']"
+                      [queryParams]="{tab: 'suggested'}"
                       class="bg-bg-input border border-border-main text-text-muted hover:text-text-main font-bold px-6 py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center cursor-pointer"
                     >
                       Rút Lui Về Bản Đồ
@@ -717,7 +720,10 @@ export class WordBattleComponent implements OnInit, OnDestroy {
   }
 
   saveBattleResult(): void {
-    this.router.navigate(['/world-map']);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(`progress_module_${this.moduleId}`, 'TEST');
+    }
+    this.router.navigate(['/dashboard'], { queryParams: { tab: 'suggested' } });
   }
 
   restartBattle(): void {

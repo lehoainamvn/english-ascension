@@ -22,7 +22,7 @@ public class LearningModule {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roadmap_id", nullable = false)
+    @JoinColumn(name = "roadmap_id", nullable = true)
     @JsonIgnore
     private LearningRoadmap roadmap;
 
@@ -34,6 +34,9 @@ public class LearningModule {
 
     @Column(name = "order_index", nullable = false)
     private Integer orderIndex;
+
+    @Column(length = 100)
+    private String category; // e.g. "600 TỪ VỰNG TOEIC" (optional, for vocab topics)
 
     @Builder.Default
     @Column(nullable = false, length = 50)

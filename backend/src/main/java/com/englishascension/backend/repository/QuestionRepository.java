@@ -10,10 +10,14 @@ import java.util.List;
 
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-    List<Question> findByType(QuestionType type);
+    List<Question> findByType(String type);
     List<Question> findByDifficulty(String difficulty);
-    List<Question> findByTypeAndDifficulty(QuestionType type, String difficulty);
+    List<Question> findByTypeAndDifficulty(String type, String difficulty);
 
     @Query(value = "SELECT * FROM questions ORDER BY RANDOM()", nativeQuery = true)
     List<Question> findAllRandom();
+
+    List<Question> findBySourceTypeAndParentId(String sourceType, Long parentId);
+    List<Question> findBySourceTypeAndParentIdOrderByQuestionNumberAsc(String sourceType, Long parentId);
 }
+
