@@ -1,1 +1,5 @@
-<router-outlet />
+@if (showNavbar()) {
+  <app-navbar></app-navbar>
+  <app-ai-chat-bubble></app-ai-chat-bubble>
+}
+<router-outlet></router-outlet>

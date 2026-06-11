@@ -1,8 +1,6 @@
 package com.englishascension.backend.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -18,16 +16,22 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private QuestionType type;
+    // For unified mapping
+    @Column(name = "source_type", length = 50)
+    private String sourceType; // PLACEMENT_TEST, ROADMAP_QUIZ, GRAMMAR, LISTENING, READING, TOEIC_EXAM
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column(name = "parent_id")
+    private Long parentId; // Links to learning_modules.id or study_contents.id
+
+    @Column(name = "question_number")
+    private Integer questionNumber; // Sequencing order index
+
+    @Column(name = "type", nullable = true, length = 50)
+    private String type; // VOCABULARY, GRAMMAR, LISTENING, READING, or MULTIPLE_CHOICE, FILL_IN_BLANK, WORD_MATCHING
+
+    @Column(nullable = true)
     private String difficulty; // e.g. A1, A2, B1, B2, C1, C2
 
-    @NotBlank
     @Column(name = "question_text", columnDefinition = "TEXT", nullable = false)
     private String questionText;
 
@@ -37,25 +41,23 @@ public class Question {
     @Column(name = "image_url", length = 555)
     private String imageUrl;
 
-    @NotBlank
-    @Column(name = "option_a", nullable = false)
+    @Column(name = "option_a")
     private String optionA;
 
-    @NotBlank
-    @Column(name = "option_b", nullable = false)
+    @Column(name = "option_b")
     private String optionB;
 
-    @NotBlank
-    @Column(name = "option_c", nullable = false)
+    @Column(name = "option_c")
     private String optionC;
 
-    @NotBlank
-    @Column(name = "option_d", nullable = false)
+    @Column(name = "option_d")
     private String optionD;
 
-    @NotBlank
-    @Column(name = "correct_option", length = 10, nullable = false)
+    @Column(name = "correct_option", length = 50)
     private String correctOption; // A, B, C, D
+
+    @Column(name = "correct_answer")
+    private String correctAnswer; // For non-multiple-choice or matching questions
 
     @Column(columnDefinition = "TEXT")
     private String explanation;

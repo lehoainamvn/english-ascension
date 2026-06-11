@@ -2,6 +2,7 @@ package com.englishascension.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +25,7 @@ public class LearningRoadmap {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", unique = true)
     @JsonIgnore
     private User user;
 
@@ -36,6 +37,20 @@ public class LearningRoadmap {
 
     @Column(name = "overall_evaluation", columnDefinition = "TEXT")
     private String overallEvaluation;
+
+    @JsonProperty("isPreset")
+    @Column(name = "is_preset", nullable = false)
+    @Builder.Default
+    private boolean isPreset = false;
+
+    @Column(name = "thumbnail_emoji", length = 50)
+    private String thumbnailEmoji;
+
+    @Column(name = "difficulty_label", length = 50)
+    private String difficultyLabel;
+
+    @Column(name = "modules_count")
+    private Integer modulesCount;
 
     @OneToMany(mappedBy = "roadmap", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default

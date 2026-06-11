@@ -20,9 +20,14 @@ public class Flashcard {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "module_id", nullable = false)
+    @JoinColumn(name = "module_id", nullable = true)
     @JsonIgnore
     private LearningModule module;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_document_id", nullable = true)
+    @JsonIgnore
+    private UserDocument userDocument;
 
     @Column(nullable = false)
     private String word;

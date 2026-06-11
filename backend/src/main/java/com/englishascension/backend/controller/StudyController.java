@@ -26,7 +26,7 @@ public class StudyController {
     private final UserRepository userRepository;
     private final LearningModuleRepository learningModuleRepository;
     private final FlashcardRepository flashcardRepository;
-    private final QuizQuestionRepository quizQuestionRepository;
+    private final QuestionRepository questionRepository;
     private final PlayerCharacterRepository characterRepository;
     private final GroqService groqService;
     private final ObjectMapper objectMapper;
@@ -35,13 +35,13 @@ public class StudyController {
             UserRepository userRepository,
             LearningModuleRepository learningModuleRepository,
             FlashcardRepository flashcardRepository,
-            QuizQuestionRepository quizQuestionRepository,
+            QuestionRepository questionRepository,
             PlayerCharacterRepository characterRepository,
             GroqService groqService) {
         this.userRepository = userRepository;
         this.learningModuleRepository = learningModuleRepository;
         this.flashcardRepository = flashcardRepository;
-        this.quizQuestionRepository = quizQuestionRepository;
+        this.questionRepository = questionRepository;
         this.characterRepository = characterRepository;
         this.groqService = groqService;
         this.objectMapper = new ObjectMapper();
@@ -56,10 +56,12 @@ public class StudyController {
 
         // Fetch from DB if already exists
         List<Flashcard> flashcards = flashcardRepository.findByModuleId(moduleId);
-        List<QuizQuestion> quizQuestions = quizQuestionRepository.findByModuleId(moduleId);
+        List<Question> quizQuestions = questionRepository.findBySourceTypeAndParentId("ROADMAP_QUIZ", moduleId);
 
         if (!flashcards.isEmpty() && !quizQuestions.isEmpty()) {
             Map<String, Object> response = new HashMap<>();
+            response.put("moduleTitle", module.getTitle());
+            response.put("moduleDescription", module.getDescription());
             response.put("flashcards", flashcards);
             response.put("quizQuestions", quizQuestions);
             return ResponseEntity.ok(response);
@@ -67,7 +69,7 @@ public class StudyController {
 
         // Generate deterministically locally based on module order index
         List<Flashcard> savedFlashcards = new ArrayList<>();
-        List<QuizQuestion> savedQuizzes = new ArrayList<>();
+        List<Question> savedQuizzes = new ArrayList<>();
 
         if (module.getOrderIndex() == 1) {
             // Module 1 items
@@ -98,19 +100,23 @@ public class StudyController {
                 {"What type of word is \"Vocabulary\"?", "MULTIPLE_CHOICE", "Verb", "Adjective", "Noun", "Adverb", "C", "Vocabulary là danh từ (Noun) chỉ từ vựng."},
                 {"Match the vocabulary words with their correct Vietnamese definitions:", "WORD_MATCHING", "Achievement|Consolidate|Preposition|Vocabulary|Fundamental", "thành tựu|củng cố|giới từ|từ vựng|cơ bản", "", "", "Achievement:thành tựu|Consolidate:củng cố|Preposition:giới từ|Vocabulary:từ vựng|Fundamental:cơ bản", "Ghép các từ vựng với nghĩa tiếng Việt tương ứng."}
             };
+            int qNum = 1;
             for (String[] row : qData) {
-                QuizQuestion qq = QuizQuestion.builder()
-                        .module(module)
-                        .questionText(row[0])
+                Question qq = Question.builder()
+                        .sourceType("ROADMAP_QUIZ")
+                        .parentId(module.getId())
+                        .questionNumber(qNum++)
                         .type(row[1])
+                        .questionText(row[0])
                         .optionA(row[2])
                         .optionB(row[3])
                         .optionC(row[4])
                         .optionD(row[5])
+                        .correctOption(row[6])
                         .correctAnswer(row[6])
                         .explanation(row[7])
                         .build();
-                savedQuizzes.add(quizQuestionRepository.save(qq));
+                savedQuizzes.add(questionRepository.save(qq));
             }
         } else if (module.getOrderIndex() == 2) {
             // Module 2 items
@@ -141,19 +147,23 @@ public class StudyController {
                 {"Choose the correct spelling:", "MULTIPLE_CHOICE", "Presentation", "Presentasion", "Prezentation", "Presentatione", "A", "Presentation (bài thuyết trình) viết đúng chính tả nhất."},
                 {"Match the business English words with their correct Vietnamese definitions:", "WORD_MATCHING", "Collaborate|Negotiation|Colleague|Presentation|Schedule", "hợp tác|đàm phán|đồng nghiệp|thuyết trình|lịch trình", "", "", "Collaborate:hợp tác|Negotiation:đàm phán|Colleague:đồng nghiệp|Presentation:thuyết trình|Schedule:lịch trình", "Ghép các từ tiếng Anh công sở với nghĩa tiếng Việt tương ứng."}
             };
+            int qNum = 1;
             for (String[] row : qData) {
-                QuizQuestion qq = QuizQuestion.builder()
-                        .module(module)
-                        .questionText(row[0])
+                Question qq = Question.builder()
+                        .sourceType("ROADMAP_QUIZ")
+                        .parentId(module.getId())
+                        .questionNumber(qNum++)
                         .type(row[1])
+                        .questionText(row[0])
                         .optionA(row[2])
                         .optionB(row[3])
                         .optionC(row[4])
                         .optionD(row[5])
+                        .correctOption(row[6])
                         .correctAnswer(row[6])
                         .explanation(row[7])
                         .build();
-                savedQuizzes.add(quizQuestionRepository.save(qq));
+                savedQuizzes.add(questionRepository.save(qq));
             }
         } else {
             // Module 3 or default items
@@ -184,23 +194,29 @@ public class StudyController {
                 {"What does \"comprehension\" mean?", "MULTIPLE_CHOICE", "The action of writing", "The ability to understand", "The speed of reading", "The act of speaking", "B", "Comprehension nghĩa là khả năng hiểu, sự lĩnh hội (ability to understand)."},
                 {"Match the academic vocabulary words with their correct Vietnamese definitions:", "WORD_MATCHING", "Comprehension|Academic|Analysis|Perspective|Terminology", "sự hiểu|học thuật|phân tích|quan điểm|thuật ngữ", "", "", "Comprehension:sự hiểu|Academic:học thuật|Analysis:phân tích|Perspective:quan điểm|Terminology:thuật ngữ", "Ghép các từ tiếng Anh học thuật với nghĩa tiếng Việt tương ứng."}
             };
+            int qNum = 1;
             for (String[] row : qData) {
-                QuizQuestion qq = QuizQuestion.builder()
-                        .module(module)
-                        .questionText(row[0])
+                Question qq = Question.builder()
+                        .sourceType("ROADMAP_QUIZ")
+                        .parentId(module.getId())
+                        .questionNumber(qNum++)
                         .type(row[1])
+                        .questionText(row[0])
                         .optionA(row[2])
                         .optionB(row[3])
                         .optionC(row[4])
                         .optionD(row[5])
+                        .correctOption(row[6])
                         .correctAnswer(row[6])
                         .explanation(row[7])
                         .build();
-                savedQuizzes.add(quizQuestionRepository.save(qq));
+                savedQuizzes.add(questionRepository.save(qq));
             }
         }
 
         Map<String, Object> response = new HashMap<>();
+        response.put("moduleTitle", module.getTitle());
+        response.put("moduleDescription", module.getDescription());
         response.put("flashcards", savedFlashcards);
         response.put("quizQuestions", savedQuizzes);
         return ResponseEntity.ok(response);
@@ -221,6 +237,14 @@ public class StudyController {
         Integer correctAnswers = (Integer) requestBody.get("correctAnswers");
         if (correctAnswers == null) {
             correctAnswers = 5; // default
+        }
+
+        // Enforce passing score of >= 70% (>= 7.0 points)
+        List<Question> quizQuestions = questionRepository.findBySourceTypeAndParentId("ROADMAP_QUIZ", moduleId);
+        int totalQuestions = quizQuestions.isEmpty() ? 5 : quizQuestions.size();
+        double pct = (double) correctAnswers / totalQuestions;
+        if (pct < 0.70) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Chưa đạt yêu cầu! Bạn cần đạt tối thiểu 7 điểm (trả lời đúng 70% số câu hỏi) để qua màn."));
         }
 
         // Calculate XP and Coin gains
@@ -378,5 +402,21 @@ public class StudyController {
         result.put("newTitle", newTitle);
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("email", user.getEmail());
+        profile.put("streak", user.getStreak());
+        profile.put("coins", user.getCoins());
+        profile.put("exp", user.getExp());
+        profile.put("level", user.getLevel());
+        
+        return ResponseEntity.ok(profile);
     }
 }

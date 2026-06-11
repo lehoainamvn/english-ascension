@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, of, catchError, map, forkJoin } from 'rxjs';
 
 const API_URL = 'http://localhost:8080/api/auth/';
 const TOKEN_KEY = 'auth-token';
@@ -15,6 +15,10 @@ export class AuthService {
   // Signal to check log-in state reactively
   readonly currentUser = signal<any>(this.getUserFromStorage());
 
+  // Signal caches for character and roadmap presence
+  readonly hasCharacterState = signal<boolean | null>(null);
+  readonly hasRoadmapState = signal<boolean | null>(null);
+
   register(email: string, password: string): Observable<any> {
     return this.http.post(API_URL + 'register', { email, password });
   }
@@ -26,6 +30,7 @@ export class AuthService {
           this.saveToken(response.token);
           this.saveUser(response);
           this.currentUser.set(response);
+          this.hasCharacterState.set(response.hasCharacter);
         }
       })
     );
@@ -37,6 +42,8 @@ export class AuthService {
       window.localStorage.removeItem(USER_KEY);
     }
     this.currentUser.set(null);
+    this.hasCharacterState.set(null);
+    this.hasRoadmapState.set(null);
   }
 
   saveToken(token: string): void {
@@ -80,5 +87,40 @@ export class AuthService {
       }
     }
     return null;
+  }
+
+  // Check onboarding status (character & roadmap presence)
+  checkOnboardingStatus(forceRefresh = false): Observable<{ hasCharacter: boolean; hasRoadmap: boolean }> {
+    if (!this.isLoggedIn()) {
+      return of({ hasCharacter: false, hasRoadmap: false });
+    }
+
+    if (
+      !forceRefresh &&
+      this.hasCharacterState() !== null &&
+      this.hasRoadmapState() !== null
+    ) {
+      return of({
+        hasCharacter: this.hasCharacterState()!,
+        hasRoadmap: this.hasRoadmapState()!
+      });
+    }
+
+    const charObs = this.http.get('http://localhost:8080/api/characters/me').pipe(
+      map(() => true),
+      catchError(() => of(false))
+    );
+
+    const roadmapObs = this.http.get('http://localhost:8080/api/placement-test/roadmap').pipe(
+      map(() => true),
+      catchError(() => of(false))
+    );
+
+    return forkJoin({ hasCharacter: charObs, hasRoadmap: roadmapObs }).pipe(
+      tap(status => {
+        this.hasCharacterState.set(status.hasCharacter);
+        this.hasRoadmapState.set(status.hasRoadmap);
+      })
+    );
   }
 }

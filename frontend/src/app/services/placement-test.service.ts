@@ -44,8 +44,8 @@ export class PlacementTestService {
     return this.http.get<Question[]>(`${this.baseUrl}/questions`);
   }
 
-  submitTest(answers: { questionId: number; selectedOption: string }[]): Observable<LearningRoadmap> {
-    return this.http.post<LearningRoadmap>(`${this.baseUrl}/submit`, { answers });
+  submitTest(answers: { questionId: number; selectedOption: string }[], targetGoal: string): Observable<LearningRoadmap> {
+    return this.http.post<LearningRoadmap>(`${this.baseUrl}/submit`, { answers, targetGoal });
   }
 
   getRoadmap(): Observable<LearningRoadmap> {

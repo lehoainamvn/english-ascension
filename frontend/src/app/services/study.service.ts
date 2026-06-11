@@ -25,6 +25,8 @@ export interface QuizQuestion {
 }
 
 export interface StudyContent {
+  moduleTitle?: string;
+  moduleDescription?: string;
   flashcards: Flashcard[];
   quizQuestions: QuizQuestion[];
 }
@@ -58,5 +60,9 @@ export class StudyService {
 
   completeBattle(moduleId: number): Observable<CompletionResult> {
     return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/battle-complete`, {});
+  }
+
+  getProfile(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/profile`);
   }
 }

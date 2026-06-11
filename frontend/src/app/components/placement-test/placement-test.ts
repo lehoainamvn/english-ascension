@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlacementTestService, Question } from '../../services/placement-test.service';
+import { AuthService } from '../../services/auth.service';
 
 interface UserAnswer {
   questionId: number;
@@ -52,6 +53,22 @@ interface UserAnswer {
                 <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
                 <span class="text-xs font-bold text-text-main">Reading</span>
               </div>
+            </div>
+
+            <!-- Target Goal Selection -->
+            <div class="max-w-sm mx-auto text-left space-y-1.5 pt-2">
+              <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider">Mục tiêu điểm số TOEIC của bạn:</label>
+              <select
+                [(ngModel)]="selectedGoal"
+                class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-3 text-xs text-text-main font-semibold focus:outline-none focus:ring-1 focus:ring-brand-primary cursor-pointer"
+              >
+                <option value="TOEIC 450">🎯 Mục tiêu: TOEIC 450+ (Cơ bản)</option>
+                <option value="TOEIC 550">🎯 Mục tiêu: TOEIC 550+ (Tốt nghiệp / Đi làm)</option>
+                <option value="TOEIC 650">🎯 Mục tiêu: TOEIC 650+ (Khá)</option>
+                <option value="TOEIC 750">🎯 Mục tiêu: TOEIC 750+ (Trung cao cấp)</option>
+                <option value="TOEIC 850">🎯 Mục tiêu: TOEIC 850+ (Cao cấp)</option>
+                <option value="TOEIC 990">🎯 Mục tiêu: TOEIC 990+ (Xuất sắc)</option>
+              </select>
             </div>
 
             <p class="text-text-muted text-xs leading-relaxed max-w-md mx-auto italic">
@@ -290,6 +307,74 @@ interface UserAnswer {
           </div>
         }
 
+        <!-- Results Screen -->
+        @if (testState() === 'results' && roadmapResult()) {
+          <div class="text-center py-6 space-y-6">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold uppercase tracking-wider animate-bounce">
+              <span>🎉</span> Chúc mừng bạn đã hoàn thành bài thi!
+            </div>
+            
+            <h2 class="text-3xl font-extrabold text-text-main tracking-tight">
+              KẾT QUẢ KIỂM TRA ĐẦU VÀO
+            </h2>
+
+            <!-- Score Summary Cards -->
+            <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+              <!-- CEFR Card -->
+              <div class="p-5 bg-gradient-to-br from-brand-primary/10 to-brand-secondary/5 border border-brand-primary/20 rounded-2xl relative overflow-hidden shadow-md">
+                <div class="absolute -top-3 -right-3 w-12 h-12 bg-brand-primary/5 rounded-full blur-xl"></div>
+                <h4 class="text-[10px] font-black text-brand-primary uppercase tracking-widest">Trình độ CEFR</h4>
+                <p class="text-4xl font-black text-text-main mt-1.5">{{ roadmapResult().cefrLevel }}</p>
+                <span class="text-xxs text-text-muted font-bold block mt-1">Lộ trình học tập đề xuất</span>
+              </div>
+              
+              <!-- TOEIC Card -->
+              <div class="p-5 bg-gradient-to-br from-brand-accent/10 to-brand-primary/5 border border-brand-accent/20 rounded-2xl relative overflow-hidden shadow-md">
+                <div class="absolute -top-3 -right-3 w-12 h-12 bg-brand-accent/5 rounded-full blur-xl"></div>
+                <h4 class="text-[10px] font-black text-brand-accent uppercase tracking-widest">TOEIC Ước Lượng</h4>
+                <p class="text-4xl font-black text-text-main mt-1.5">{{ roadmapResult().toeicEquivalent }}</p>
+                <span class="text-xxs text-text-muted font-bold block mt-1">Điểm số quy đổi</span>
+              </div>
+            </div>
+
+            <!-- AI Evaluation Box -->
+            <div class="bg-bg-input border border-border-main rounded-2xl p-5 text-left space-y-2 border-l-4 border-l-brand-primary">
+              <h4 class="text-xs font-black text-brand-primary uppercase tracking-wider">Đánh giá tổng quan từ AI Mentor</h4>
+              <p class="text-xs text-text-muted leading-relaxed font-medium">
+                {{ roadmapResult().overallEvaluation }}
+              </p>
+            </div>
+
+            <!-- Generated Modules list -->
+            <div class="text-left space-y-3">
+              <h4 class="text-xs font-black text-text-muted uppercase tracking-wider mb-2">Lộ trình học AI được thiết lập:</h4>
+              <div class="space-y-2.5">
+                @for (mod of roadmapResult().modules; track mod.id; let idx = $index) {
+                  <div class="p-3.5 bg-bg-card border border-border-main rounded-xl flex items-start gap-3 shadow-sm hover:border-brand-primary/20 transition-all">
+                    <span class="w-6 h-6 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-black flex items-center justify-center shrink-0">
+                      {{ idx + 1 }}
+                    </span>
+                    <div>
+                      <h5 class="text-xs font-black text-text-main leading-tight">{{ mod.title }}</h5>
+                      <p class="text-xxs text-text-muted leading-normal mt-0.5">{{ mod.description }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Action Button to navigate to World Map -->
+            <div class="pt-6 border-t border-border-main/50">
+              <button
+                (click)="goToWorldMap()"
+                class="w-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent hover:shadow-brand-primary/20 text-white font-extrabold py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer text-sm"
+              >
+                Bắt Đầu Hành Trình Luyện Tập ⚔️
+              </button>
+            </div>
+          </div>
+        }
+
       </div>
     </div>
   `,
@@ -297,14 +382,17 @@ interface UserAnswer {
 })
 export class PlacementTestComponent implements OnInit, OnDestroy {
   private readonly placementService = inject(PlacementTestService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  // States: 'welcome' | 'running' | 'evaluating' | 'error'
-  testState = signal<'welcome' | 'running' | 'evaluating' | 'error'>('welcome');
+  // States: 'welcome' | 'running' | 'evaluating' | 'error' | 'results'
+  testState = signal<'welcome' | 'running' | 'evaluating' | 'error' | 'results'>('welcome');
+  roadmapResult = signal<any>(null);
 
   questions: Question[] = [];
   currentQuestionIndex = 0;
   answers: UserAnswer[] = [];
+  selectedGoal = 'TOEIC 550';
 
   // Audio system
   audio = new Audio();
@@ -429,10 +517,13 @@ export class PlacementTestComponent implements OnInit, OnDestroy {
     this.stopAudio();
     this.testState.set('evaluating');
 
-    this.placementService.submitTest(this.answers).subscribe({
+    this.placementService.submitTest(this.answers, this.selectedGoal).subscribe({
       next: (roadmap) => {
-        // Successfully assessed, redirect to roadmap timeline view
-        this.router.navigate(['/roadmap']);
+        // Update cached onboarding state
+        this.authService.hasRoadmapState.set(true);
+        // Save result and show results screen
+        this.roadmapResult.set(roadmap);
+        this.testState.set('results');
       },
       error: (err) => {
         console.error('Error submitting test answers', err);
@@ -440,5 +531,9 @@ export class PlacementTestComponent implements OnInit, OnDestroy {
         this.testState.set('running');
       }
     });
+  }
+
+  goToWorldMap(): void {
+    this.router.navigate(['/dashboard'], { queryParams: { tab: 'suggested' } });
   }
 }
