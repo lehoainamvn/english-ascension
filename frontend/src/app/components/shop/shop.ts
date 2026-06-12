@@ -5,6 +5,7 @@ import { CharacterService, Character } from '../../services/character.service';
 import { StudyService } from '../../services/study.service';
 import { AuthService } from '../../services/auth.service';
 import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
+import { API_BASE_URL } from '../../api-config';
 
 interface ShopItem {
   id: string;
@@ -466,7 +467,7 @@ export class ShopComponent implements OnInit {
       return;
     }
 
-    this.http.post<any>('http://localhost:8080/api/shop/purchase', {
+    this.http.post<any>(`${API_BASE_URL}/api/shop/purchase`, {
       itemType: item.type,
       itemId: item.id,
       itemValue: item.value,

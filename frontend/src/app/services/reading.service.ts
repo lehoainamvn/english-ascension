@@ -62,12 +62,14 @@ export interface RewardResult {
   newTitle: string;
 }
 
+import { API_BASE_URL } from '../api-config';
+
 @Injectable({
   providedIn: 'root'
 })
 export class ReadingService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/reading';
+  private readonly baseUrl = `${API_BASE_URL}/api/reading`;
 
   getArticles(): Observable<ReadingArticle[]> {
     return this.http.get<ReadingArticle[]>(`${this.baseUrl}/articles`);

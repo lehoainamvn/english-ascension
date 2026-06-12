@@ -1,8 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, of, catchError, map, forkJoin } from 'rxjs';
+import { API_BASE_URL } from '../api-config';
 
-const API_URL = 'http://localhost:8080/api/auth/';
+const API_URL = `${API_BASE_URL}/api/auth/`;
 const TOKEN_KEY = 'auth-token';
 const USER_KEY = 'auth-user';
 
@@ -106,12 +107,12 @@ export class AuthService {
       });
     }
 
-    const charObs = this.http.get('http://localhost:8080/api/characters/me').pipe(
+    const charObs = this.http.get(`${API_BASE_URL}/api/characters/me`).pipe(
       map(() => true),
       catchError(() => of(false))
     );
 
-    const roadmapObs = this.http.get('http://localhost:8080/api/placement-test/roadmap').pipe(
+    const roadmapObs = this.http.get(`${API_BASE_URL}/api/placement-test/roadmap`).pipe(
       map(() => true),
       catchError(() => of(false))
     );

@@ -9,6 +9,7 @@ import { StudyService } from '../../services/study.service';
 import { PlacementTestService } from '../../services/placement-test.service';
 import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
 import { ToastService } from '../../services/toast.service';
+import { API_BASE_URL } from '../../api-config';
 
 @Component({
   selector: 'app-profile',
@@ -628,7 +629,7 @@ export class ProfileComponent implements OnInit {
 
   loadRealLeaderboard(): void {
     this.isLoadingRealLeaderboard.set(true);
-    this.http.get<any[]>('http://localhost:8080/api/community/leaderboard').subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/community/leaderboard`).subscribe({
       next: (data) => { this.realLeaderboard.set(data); this.isLoadingRealLeaderboard.set(false); },
       error: () => this.isLoadingRealLeaderboard.set(false)
     });
