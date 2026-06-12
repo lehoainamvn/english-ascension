@@ -33,12 +33,14 @@ export interface RewardResult {
   newTitle: string;
 }
 
+import { API_BASE_URL } from '../api-config';
+
 @Injectable({
   providedIn: 'root'
 })
 export class VocabularyService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/vocabulary';
+  private readonly baseUrl = `${API_BASE_URL}/api/vocabulary`;
 
   getTopics(): Observable<VocabTopic[]> {
     return this.http.get<VocabTopic[]>(`${this.baseUrl}/topics`);

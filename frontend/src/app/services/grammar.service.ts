@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../api-config';
 
 export interface GrammarLesson {
   id: number;
@@ -45,7 +46,7 @@ export interface RewardResult {
 })
 export class GrammarService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/grammar';
+  private readonly baseUrl = `${API_BASE_URL}/api/grammar`;
 
   getLessons(): Observable<GrammarLesson[]> {
     return this.http.get<GrammarLesson[]>(`${this.baseUrl}/lessons`);

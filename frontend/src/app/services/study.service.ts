@@ -43,12 +43,14 @@ export interface CompletionResult {
   nextModuleId?: number;
 }
 
+import { API_BASE_URL } from '../api-config';
+
 @Injectable({
   providedIn: 'root'
 })
 export class StudyService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/study';
+  private readonly baseUrl = `${API_BASE_URL}/api/study`;
 
   getModuleContent(moduleId: number): Observable<StudyContent> {
     return this.http.get<StudyContent>(`${this.baseUrl}/modules/${moduleId}/content`);

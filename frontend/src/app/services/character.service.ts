@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../api-config';
 
 export interface Character {
   id?: number;
@@ -19,7 +20,7 @@ export interface Character {
 })
 export class CharacterService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/characters';
+  private readonly baseUrl = `${API_BASE_URL}/api/characters`;
 
   saveCharacter(character: Character): Observable<any> {
     return this.http.post(this.baseUrl, character);

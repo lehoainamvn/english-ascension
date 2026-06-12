@@ -15,12 +15,14 @@ export interface UserWord {
   repetitions?: number;
 }
 
+import { API_BASE_URL } from '../api-config';
+
 @Injectable({
   providedIn: 'root'
 })
 export class UserWordService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/user-words';
+  private readonly baseUrl = `${API_BASE_URL}/api/user-words`;
 
   getUserWords(): Observable<UserWord[]> {
     return this.http.get<UserWord[]>(this.baseUrl);

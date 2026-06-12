@@ -33,12 +33,14 @@ export interface LearningRoadmap {
   modules: LearningModule[];
 }
 
+import { API_BASE_URL } from '../api-config';
+
 @Injectable({
   providedIn: 'root'
 })
 export class PlacementTestService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/placement-test';
+  private readonly baseUrl = `${API_BASE_URL}/api/placement-test`;
 
   getQuestions(): Observable<Question[]> {
     return this.http.get<Question[]>(`${this.baseUrl}/questions`);

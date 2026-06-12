@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { API_BASE_URL } from '../../api-config';
 
 @Component({
   selector: 'app-community',
@@ -215,7 +216,7 @@ export class CommunityComponent implements OnInit, OnDestroy {
 
   loadLeaderboard(): void {
     this.isLoadingLeaderboard.set(true);
-    this.http.get<any[]>('http://localhost:8080/api/community/leaderboard').subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/community/leaderboard`).subscribe({
       next: (data) => { this.leaderboard.set(data); this.isLoadingLeaderboard.set(false); },
       error: (err) => { console.error('Failed to load leaderboard', err); this.isLoadingLeaderboard.set(false); }
     });
@@ -223,7 +224,7 @@ export class CommunityComponent implements OnInit, OnDestroy {
 
   loadChatMessages(): void {
     this.isLoadingChat.set(true);
-    this.http.get<any[]>('http://localhost:8080/api/community/chat').subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/community/chat`).subscribe({
       next: (data) => {
         this.chatMessages.set(data);
         this.isLoadingChat.set(false);
@@ -234,7 +235,7 @@ export class CommunityComponent implements OnInit, OnDestroy {
   }
 
   silentRefreshChat(): void {
-    this.http.get<any[]>('http://localhost:8080/api/community/chat').subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/community/chat`).subscribe({
       next: (data) => {
         const prev = this.chatMessages();
         const hasNew = data.length > prev.length;
@@ -252,7 +253,7 @@ export class CommunityComponent implements OnInit, OnDestroy {
     const body = { content: this.newMessage.trim() };
     this.newMessage = '';
 
-    this.http.post<any>('http://localhost:8080/api/community/chat', body).subscribe({
+    this.http.post<any>(`${API_BASE_URL}/api/community/chat`, body).subscribe({
       next: (savedMessage) => {
         this.chatMessages.update(msgs => [...msgs, savedMessage]);
         this.scrollToBottom();

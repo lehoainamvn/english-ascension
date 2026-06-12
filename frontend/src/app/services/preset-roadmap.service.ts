@@ -37,10 +37,12 @@ export interface Enrollment {
   lastAccessedAt: string;
 }
 
+import { API_BASE_URL } from '../api-config';
+
 @Injectable({ providedIn: 'root' })
 export class PresetRoadmapService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/preset-roadmaps';
+  private readonly baseUrl = `${API_BASE_URL}/api/preset-roadmaps`;
 
   /** Lấy tất cả preset roadmaps */
   getAllPresets(): Observable<PresetRoadmap[]> {

@@ -24,13 +24,15 @@ export interface MentorChatResponse {
   reply: string;
 }
 
+import { API_BASE_URL } from '../api-config';
+
 @Injectable({
   providedIn: 'root'
 })
 export class StudyAiService {
   private readonly http = inject(HttpClient);
-  private readonly docBaseUrl = 'http://localhost:8080/api/documents';
-  private readonly mentorBaseUrl = 'http://localhost:8080/api/mentor';
+  private readonly docBaseUrl = `${API_BASE_URL}/api/documents`;
+  private readonly mentorBaseUrl = `${API_BASE_URL}/api/mentor`;
 
   // AI Document Learning APIs
   listDocuments(): Observable<UserDocListItem[]> {

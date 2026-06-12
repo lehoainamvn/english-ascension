@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../api-config';
 
 export interface ListeningTopic {
   id: number;
@@ -46,7 +47,7 @@ export interface RewardResult {
 })
 export class ListeningService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/listening';
+  private readonly baseUrl = `${API_BASE_URL}/api/listening`;
 
   getTopics(): Observable<ListeningTopic[]> {
     return this.http.get<ListeningTopic[]>(`${this.baseUrl}/topics`);

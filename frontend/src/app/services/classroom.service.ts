@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../api-config';
 
 export interface ClassRoomSummary {
   id: number;
@@ -65,7 +66,7 @@ export interface LeaderboardEntry {
 })
 export class ClassroomService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/classes';
+  private readonly baseUrl = `${API_BASE_URL}/api/classes`;
 
   getMyClasses(): Observable<ClassRoomSummary[]> {
     return this.http.get<ClassRoomSummary[]>(this.baseUrl);
