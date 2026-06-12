@@ -25,9 +25,9 @@ public class Flashcard {
     private LearningModule module;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_document_id", nullable = true)
+    @JoinColumn(name = "study_content_id", nullable = true)
     @JsonIgnore
-    private UserDocument userDocument;
+    private StudyContent studyContent;
 
     @Column(nullable = false)
     private String word;
@@ -46,4 +46,28 @@ public class Flashcard {
 
     @Column(name = "example_translation", columnDefinition = "TEXT")
     private String exampleTranslation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
+    @JsonIgnore
+    private User user;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
+    @Column(name = "saved_date", length = 50)
+    private String savedDate;
+
+    // Spaced repetition metrics
+    @Builder.Default
+    @Column(name = "e_factor")
+    private Double efactor = 2.5;
+
+    @Builder.Default
+    @Column(name = "repetition_interval")
+    private Integer interval = 1;
+
+    @Builder.Default
+    @Column(name = "repetitions")
+    private Integer repetitions = 0;
 }

@@ -21,12 +21,14 @@ interface ExamItem {
 
       <div class="max-w-4xl mx-auto relative z-10 space-y-6">
         <!-- Header -->
-        <div class="backdrop-blur-xl bg-bg-card border border-border-main rounded-2xl p-6 shadow-md">
+        <div class="backdrop-blur-xl bg-bg-card border border-border-main rounded-2xl p-5 shadow-md">
           <div class="flex items-center gap-3">
-            <span class="text-3xl">🏆</span>
+            <div class="w-10 h-10 bg-brand-accent/15 rounded-xl flex items-center justify-center border border-brand-accent/20 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-brand-accent"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
             <div>
-              <h2 class="text-xl md:text-2xl font-black text-text-main">Trung Tâm Đề Thi (Exam Hub)</h2>
-              <p class="text-xs text-text-muted mt-1">Luyện tập giải đề thi thử TOEIC, IELTS & CEFR để tự tin trước kỳ thi thật.</p>
+              <h1 class="text-xl md:text-2xl font-black text-text-main">Trung Tâm Đề Thi (Exam Hub)</h1>
+              <p class="text-xs text-text-muted mt-0.5">Luyện tập giải đề thi thử TOEIC, IELTS &amp; CEFR để tự tin trước kỳ thi thật.</p>
             </div>
           </div>
         </div>
@@ -46,11 +48,20 @@ interface ExamItem {
                   </div>
                   
                   <h3 class="text-base font-black text-text-main leading-tight">{{ exam.title }}</h3>
-                  <p class="text-xs text-text-muted">Bộ câu hỏi trắc nghiệm gồm {{ exam.questionsCount }} câu tổng hợp.</p>
+                  <div class="flex items-center gap-2 mt-1.5 text-[10px] text-text-muted font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {{ exam.duration }} phút
+                    <span class="w-1 h-1 rounded-full bg-text-muted/40"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                    {{ exam.questionsCount }} câu
+                  </div>
                 </div>
 
-                <div class="pt-6 border-t border-border-main/40 mt-6 flex justify-between items-center">
-                  <span class="text-[10px] text-text-muted">Hoàn thành để nhận +100 EXP</span>
+                <div class="pt-4 border-t border-border-main/40 mt-4 flex justify-between items-center">
+                  <span class="text-[10px] text-text-muted flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-500"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Hoàn thành để nhận +100 EXP
+                  </span>
                   <button
                     (click)="startExam(exam)"
                     class="bg-brand-primary hover:bg-brand-secondary text-white font-bold py-2 px-4 rounded-xl text-xs transition-all cursor-pointer"

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PresetRoadmapService, PresetRoadmap, PresetModule } from '../../services/preset-roadmap.service';
+import { ToastService } from '../../services/toast.service';
 
 export interface MapItem {
   type: 'HEADER' | 'NODE';
@@ -314,6 +315,7 @@ export class PresetRoadmapDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly presetService = inject(PresetRoadmapService);
+  private readonly toastService = inject(ToastService);
 
   roadmap = signal<PresetRoadmap | null>(null);
   enrolled = signal(false);
@@ -440,13 +442,27 @@ export class PresetRoadmapDetailComponent implements OnInit {
 
     if (this.enrolled()) {
       this.presetService.unenroll(rm.id).subscribe({
-        next: () => { this.enrolled.set(false); this.isEnrolling.set(false); },
-        error: () => this.isEnrolling.set(false)
+        next: () => {
+          this.enrolled.set(false);
+          this.isEnrolling.set(false);
+          this.toastService.success('Đã hủy đăng ký lộ trình học.');
+        },
+        error: () => {
+          this.isEnrolling.set(false);
+          this.toastService.error('Hủy đăng ký thất bại. Vui lòng thử lại.');
+        }
       });
     } else {
       this.presetService.enroll(rm.id).subscribe({
-        next: () => { this.enrolled.set(true); this.isEnrolling.set(false); },
-        error: () => this.isEnrolling.set(false)
+        next: (data) => {
+          this.enrolled.set(true);
+          this.isEnrolling.set(false);
+          this.toastService.success('Đã thêm lộ trình học thành công!');
+        },
+        error: () => {
+          this.isEnrolling.set(false);
+          this.toastService.error('Thêm lộ trình thất bại. Vui lòng thử lại.');
+        }
       });
     }
   }
@@ -478,11 +494,15 @@ export class PresetRoadmapDetailComponent implements OnInit {
 
     if (!this.enrolled() && this.roadmap()) {
       this.presetService.enroll(this.roadmap()!.id).subscribe({
-        next: () => {
+        next: (data) => {
           this.enrolled.set(true);
+          this.toastService.success('Đã thêm lộ trình học thành công!');
           navigateAction();
         },
-        error: navigateAction
+        error: () => {
+          this.toastService.error('Thêm lộ trình thất bại.');
+          navigateAction();
+        }
       });
     } else {
       navigateAction();

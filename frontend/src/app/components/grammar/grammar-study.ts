@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GrammarService, GrammarLesson, GrammarQuestion, RewardResult } from '../../services/grammar.service';
 import { UserWordService, UserWord } from '../../services/user-word.service';
+import { ToastService } from '../../services/toast.service';
 
 
 @Component({
@@ -508,6 +509,7 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly userWordService = inject(UserWordService);
+  private readonly toastService = inject(ToastService);
 
   lessonId = 0;
   savedWords = signal<UserWord[]>([]);
@@ -610,23 +612,19 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
         this.isSubmitting.set(false);
         this.lessonCompleted.set(true);
         
-        // Show inline rewards toast or alert
-        alert(`🎉 Học tốt lắm! Bạn đã nhận được +${res.xpGained} EXP & +${res.coinsGained} Coins. Hãy tiếp tục làm bài Luyện tập nhé!`);
+        this.toastService.success(`🎉 Học tốt lắm! Bạn đã nhận được +${res.xpGained} EXP & +${res.coinsGained} Coins. Hãy tiếp tục làm bài Luyện tập nhé!`);
         
-        // Refresh page stats & redirect to practice tab
         this.activeTab.set('practice');
         if (res.leveledUp) {
-          this.rewards.set(res);
-          this.showLevelUpModal.set(true);
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
         }
       },
       error: (err) => {
         console.error('Error completing lesson part', err);
         this.isSubmitting.set(false);
-        // Visual offline fallback
         this.lessonCompleted.set(true);
         this.activeTab.set('practice');
-        alert('🎉 Đã hoàn thành lý thuyết bài học! (Tiến trình của bạn đã được ghi nhận cục bộ).');
+        this.toastService.success('🎉 Đã hoàn thành lý thuyết bài học!');
       }
     });
   }
@@ -689,30 +687,17 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
     this.grammarService.completePractice(this.lessonId, finalScore).subscribe({
       next: (res) => {
         this.isSubmitting.set(false);
-        this.rewards.set(res);
-        this.studyState.set('rewards');
-        
+        this.toastService.success(`🎉 Hoàn thành luyện tập: +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
         if (res.leveledUp) {
-          this.showLevelUpModal.set(true);
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
         }
+        this.router.navigate(['/grammar-topics']);
       },
       error: (err) => {
         console.error('Error completing practice rewards', err);
         this.isSubmitting.set(false);
-        
-        // Mock fallback
-        const fallbackReward: RewardResult = {
-          xpGained: 30,
-          coinsGained: 10,
-          newXp: 50,
-          newLevel: 2,
-          newCoins: 100,
-          leveledUp: false,
-          previousLevel: 2,
-          newTitle: 'Novice'
-        };
-        this.rewards.set(fallbackReward);
-        this.studyState.set('rewards');
+        this.toastService.success('🎉 Đã hoàn thành luyện tập!');
+        this.router.navigate(['/grammar-topics']);
       }
     });
   }

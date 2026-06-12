@@ -13,6 +13,49 @@ import { Character } from '../../services/character.service';
           <stop offset="0%" stop-color="var(--brand-primary)" stop-opacity="0.3" />
           <stop offset="100%" stop-color="var(--brand-primary)" stop-opacity="0" />
         </radialGradient>
+
+        <!-- Bronze Gradient -->
+        <linearGradient id="bronzeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#b45309" />
+          <stop offset="50%" stop-color="#f59e0b" />
+          <stop offset="100%" stop-color="#78350f" />
+        </linearGradient>
+
+        <!-- Silver Gradient -->
+        <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#94a3b8" />
+          <stop offset="50%" stop-color="#f1f5f9" />
+          <stop offset="100%" stop-color="#475569" />
+        </linearGradient>
+
+        <!-- Gold Gradient -->
+        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#d97706" />
+          <stop offset="50%" stop-color="#fef08a" />
+          <stop offset="100%" stop-color="#a16207" />
+        </linearGradient>
+
+        <!-- Platinum Gradient -->
+        <linearGradient id="platGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0284c7" />
+          <stop offset="50%" stop-color="#e0f2fe" />
+          <stop offset="100%" stop-color="#075985" />
+        </linearGradient>
+
+        <!-- VIP/Amethyst Gradient -->
+        <linearGradient id="vipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#7c3aed" />
+          <stop offset="50%" stop-color="#f5d0fe" />
+          <stop offset="100%" stop-color="#4c1d95" />
+        </linearGradient>
+
+        <!-- Legend Gradient -->
+        <linearGradient id="legendGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e11d48" />
+          <stop offset="30%" stop-color="#facc15" />
+          <stop offset="70%" stop-color="#db2777" />
+          <stop offset="100%" stop-color="#7f1d1d" />
+        </linearGradient>
       </defs>
 
       <!-- Avatar circular glow behind the model -->
@@ -118,6 +161,51 @@ import { Character } from '../../services/character.service';
         <path d="M31 32 C 31 18, 69 18, 69 32 C 69 38, 65 42, 64 45 L 70 65 L 30 65 L 36 45 C 35 42, 31 38, 31 32 Z" fill="#374151" stroke="#1f2937" stroke-width="1.5" fill-opacity="0.95" />
         <path d="M33 55 Q 50 63 67 55 Q 60 67 50 67 Q 40 67 33 55 Z" fill="#10b981" />
       }
+
+      <!-- VIP Border/Frame based on level -->
+      @if (level >= 60) {
+        <!-- Legend Tier: Fiery Crown and Ornate Golden-Rose Frame -->
+        <circle cx="50" cy="50" r="41.5" fill="none" stroke="url(#legendGrad)" stroke-width="4" />
+        <!-- Crown/Spikes at top -->
+        <path d="M40 9 L 45 14 L 50 4 L 55 14 L 60 9 L 55 17 L 45 17 Z" fill="url(#legendGrad)" stroke="#db2777" stroke-width="0.5" />
+        <circle cx="50" cy="4" r="1.5" fill="#fef08a" />
+        <circle cx="40" cy="9" r="1" fill="#fef08a" />
+        <circle cx="60" cy="9" r="1" fill="#fef08a" />
+        <!-- Corner wings or accents -->
+        <path d="M8 50 Q 15 45 12 35 Q 18 42 12 55 Z" fill="url(#legendGrad)" />
+        <path d="M92 50 Q 85 45 88 35 Q 82 42 88 55 Z" fill="url(#legendGrad)" />
+      } @else if (level >= 40) {
+        <!-- VIP Tier: Deep Glowing Purple with Amethyst Gems -->
+        <circle cx="50" cy="50" r="41.5" fill="none" stroke="url(#vipGrad)" stroke-width="3.5" />
+        <polygon points="50,6 54,12 50,18 46,12" fill="#d946ef" stroke="#701a75" stroke-width="0.5" />
+        <circle cx="50" cy="12" r="1.5" fill="#fae8ff" />
+        <!-- Side studs -->
+        <circle cx="8" cy="50" r="3" fill="url(#vipGrad)" stroke="#701a75" stroke-width="0.5" />
+        <circle cx="92" cy="50" r="3" fill="url(#vipGrad)" stroke="#701a75" stroke-width="0.5" />
+      } @else if (level >= 20) {
+        <!-- Platinum Tier: Clean dual ring with cyan gems -->
+        <circle cx="50" cy="50" r="41.5" fill="none" stroke="url(#platGrad)" stroke-width="3" />
+        <circle cx="50" cy="50" r="43.5" fill="none" stroke="#0ea5e9" stroke-width="0.5" opacity="0.7" />
+        <!-- Crest at top -->
+        <polygon points="50,8 53,13 50,16 47,13" fill="#38bdf8" />
+        <circle cx="10" cy="50" r="2" fill="#38bdf8" />
+        <circle cx="90" cy="50" r="2" fill="#38bdf8" />
+      } @else if (level >= 10) {
+        <!-- Gold Tier: Golden Ring with crest -->
+        <circle cx="50" cy="50" r="41" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" />
+        <!-- Small Gold Diamond at top -->
+        <polygon points="50,9 52.5,13 50,17 47.5,13" fill="url(#goldGrad)" />
+      } @else if (level >= 5) {
+        <!-- Silver Tier: Clean Silver Ring with 4 studs -->
+        <circle cx="50" cy="50" r="41" fill="none" stroke="url(#silverGrad)" stroke-width="2" />
+        <circle cx="50" cy="9" r="1.5" fill="#f8fafc" />
+        <circle cx="50" cy="91" r="1.5" fill="#f8fafc" />
+        <circle cx="9" cy="50" r="1.5" fill="#f8fafc" />
+        <circle cx="91" cy="50" r="1.5" fill="#f8fafc" />
+      } @else {
+        <!-- Bronze Tier: Simple Bronze Ring -->
+        <circle cx="50" cy="50" r="41" fill="none" stroke="url(#bronzeGrad)" stroke-width="1.5" />
+      }
     </svg>
   `,
   styles: []
@@ -131,6 +219,10 @@ export class CharacterAvatarComponent {
 
   get character(): Character | null {
     return this._character;
+  }
+
+  get level(): number {
+    return this.character?.level || 1;
   }
 
   get gender(): string {

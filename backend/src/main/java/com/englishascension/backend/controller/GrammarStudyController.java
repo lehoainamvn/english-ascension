@@ -23,19 +23,16 @@ public class GrammarStudyController {
     private final StudyContentRepository lessonRepository;
     private final QuestionRepository questionRepository;
     private final UserProgressRepository progressRepository;
-    private final PlayerCharacterRepository characterRepository;
 
     public GrammarStudyController(
             UserRepository userRepository,
             StudyContentRepository lessonRepository,
             QuestionRepository questionRepository,
-            UserProgressRepository progressRepository,
-            PlayerCharacterRepository characterRepository) {
+            UserProgressRepository progressRepository) {
         this.userRepository = userRepository;
         this.lessonRepository = lessonRepository;
         this.questionRepository = questionRepository;
         this.progressRepository = progressRepository;
-        this.characterRepository = characterRepository;
     }
 
     @GetMapping("/lessons")
@@ -242,11 +239,9 @@ public class GrammarStudyController {
         user.setLevel(currentLevel);
         user.setCoins(currentCoins);
 
-        if (leveledUp && user.getPlayerCharacter() != null) {
-            PlayerCharacter character = user.getPlayerCharacter();
+        if (leveledUp) {
             String newTitle = calculateTitle(currentLevel);
-            character.setTitle(newTitle);
-            characterRepository.save(character);
+            user.setCharacterTitle(newTitle);
         }
 
         userRepository.save(user);
@@ -272,7 +267,7 @@ public class GrammarStudyController {
         result.put("newCoins", user.getCoins());
         result.put("leveledUp", xpGained > 0 && user.getExp() < xpGained);
         result.put("previousLevel", user.getLevel());
-        result.put("newTitle", user.getPlayerCharacter() != null ? user.getPlayerCharacter().getTitle() : "Novice");
+        result.put("newTitle", user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice");
         return result;
     }
 

@@ -1,9 +1,9 @@
 package com.englishascension.backend.controller;
 
 import com.englishascension.backend.model.User;
-import com.englishascension.backend.model.UserWord;
+import com.englishascension.backend.model.Flashcard;
 import com.englishascension.backend.repository.UserRepository;
-import com.englishascension.backend.repository.UserWordRepository;
+import com.englishascension.backend.repository.FlashcardRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,11 +21,11 @@ import java.util.Optional;
 public class UserWordController {
 
     private final UserRepository userRepository;
-    private final UserWordRepository userWordRepository;
+    private final FlashcardRepository flashcardRepository;
 
-    public UserWordController(UserRepository userRepository, UserWordRepository userWordRepository) {
+    public UserWordController(UserRepository userRepository, FlashcardRepository flashcardRepository) {
         this.userRepository = userRepository;
-        this.userWordRepository = userWordRepository;
+        this.flashcardRepository = flashcardRepository;
     }
 
     private User getAuthenticatedUser() {
@@ -35,9 +35,9 @@ public class UserWordController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserWord>> getAllUserWords() {
+    public ResponseEntity<List<Flashcard>> getAllUserWords() {
         User user = getAuthenticatedUser();
-        List<UserWord> words = userWordRepository.findByUserId(user.getId());
+        List<Flashcard> words = flashcardRepository.findByUserId(user.getId());
         return ResponseEntity.ok(words);
     }
 
@@ -54,8 +54,8 @@ public class UserWordController {
         String phonetic = body.getOrDefault("phonetic", "");
         String notes = body.getOrDefault("notes", "");
 
-        Optional<UserWord> existing = userWordRepository.findByUserIdAndWord(user.getId(), wordText.trim());
-        UserWord userWord;
+        Optional<Flashcard> existing = flashcardRepository.findByUserIdAndWord(user.getId(), wordText.trim());
+        Flashcard userWord;
 
         if (existing.isPresent()) {
             userWord = existing.get();
@@ -65,7 +65,7 @@ public class UserWordController {
             userWord.setNotes(notes);
         } else {
             String savedDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            userWord = UserWord.builder()
+            userWord = Flashcard.builder()
                     .user(user)
                     .word(wordText.trim())
                     .partOfSpeech(partOfSpeech)
@@ -79,15 +79,15 @@ public class UserWordController {
                     .build();
         }
 
-        UserWord saved = userWordRepository.save(userWord);
+        Flashcard saved = flashcardRepository.save(userWord);
         return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUserWord(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         User user = getAuthenticatedUser();
-        UserWord userWord = userWordRepository.findById(id).orElse(null);
-        if (userWord == null || !userWord.getUser().getId().equals(user.getId())) {
+        Flashcard userWord = flashcardRepository.findById(id).orElse(null);
+        if (userWord == null || userWord.getUser() == null || !userWord.getUser().getId().equals(user.getId())) {
             return ResponseEntity.notFound().build();
         }
 
@@ -110,31 +110,31 @@ public class UserWordController {
             userWord.setRepetitions(((Number) body.get("repetitions")).intValue());
         }
 
-        UserWord saved = userWordRepository.save(userWord);
+        Flashcard saved = flashcardRepository.save(userWord);
         return ResponseEntity.ok(saved);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUserWord(@PathVariable Long id) {
         User user = getAuthenticatedUser();
-        UserWord userWord = userWordRepository.findById(id).orElse(null);
-        if (userWord == null || !userWord.getUser().getId().equals(user.getId())) {
+        Flashcard userWord = flashcardRepository.findById(id).orElse(null);
+        if (userWord == null || userWord.getUser() == null || !userWord.getUser().getId().equals(user.getId())) {
             return ResponseEntity.notFound().build();
         }
 
-        userWordRepository.delete(userWord);
+        flashcardRepository.delete(userWord);
         return ResponseEntity.ok(Map.of("message", "Đã xóa từ vựng thành công."));
     }
 
     @DeleteMapping("/word/{wordText}")
     public ResponseEntity<?> deleteUserWordByText(@PathVariable String wordText) {
         User user = getAuthenticatedUser();
-        Optional<UserWord> userWord = userWordRepository.findByUserIdAndWord(user.getId(), wordText.trim());
+        Optional<Flashcard> userWord = flashcardRepository.findByUserIdAndWord(user.getId(), wordText.trim());
         if (userWord.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        userWordRepository.delete(userWord.get());
+        flashcardRepository.delete(userWord.get());
         return ResponseEntity.ok(Map.of("message", "Đã xóa từ vựng thành công."));
     }
 }

@@ -2,8 +2,9 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReadingService, ReadingArticleDetails, ReadingQuestion } from '../../services/reading.service';
+import { ReadingService, ReadingArticleDetails, ReadingQuestion, RewardResult } from '../../services/reading.service';
 import { UserWordService, UserWord } from '../../services/user-word.service';
+import { ToastService } from '../../services/toast.service';
 
 
 interface DictionaryEntry {
@@ -366,6 +367,7 @@ export class ReadingStudyComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly userWordService = inject(UserWordService);
+  private readonly toastService = inject(ToastService);
 
   savedWords = signal<UserWord[]>([]);
   lookupWordNotes = '';
@@ -514,11 +516,7 @@ export class ReadingStudyComponent implements OnInit {
       next: (res) => {
         question.isCorrect = res.isCorrect;
         
-        if (res.isCorrect) {
-          alert(`🎉 Chính xác! Bạn được cộng +${res.xpGained} EXP & +${res.coinsGained} Coins.`);
-        } else {
-          alert(`❌ Sai rồi! Đáp án đúng là: ${res.correctOption}`);
-        }
+        // Answer states are visual in the template now, no need for toast spam
       },
       error: (err) => {
         console.error('Error submitting answer', err);
@@ -534,7 +532,10 @@ export class ReadingStudyComponent implements OnInit {
       next: (res) => {
         this.isSubmitting.set(false);
         this.isCompleted.set(true);
-        alert(`🎉 Chúc mừng! Bạn đã hoàn thành bài đọc "${this.articleTitle()}" và nhận thêm +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        this.toastService.success(`🎉 Chúc mừng! Bạn đã hoàn thành bài đọc "${this.articleTitle()}" và nhận thêm +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        if (res.leveledUp) {
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
+        }
         
         // Update local list
         const updated = this.allArticles().map(a => {
@@ -544,10 +545,12 @@ export class ReadingStudyComponent implements OnInit {
           return a;
         });
         this.allArticles.set(updated);
+        this.router.navigate(['/reading']);
       },
       error: (err) => {
         console.error('Error completing article', err);
         this.isSubmitting.set(false);
+        this.router.navigate(['/reading']);
       }
     });
   }

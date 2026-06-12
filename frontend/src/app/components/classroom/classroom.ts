@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../services/toast.service';
 import {
   ClassroomService,
   ClassRoomSummary,
@@ -430,6 +431,20 @@ interface QuizFormQuestion {
                     @else { 📚 Cần ôn tập thêm! }
                   </h3>
                   <p class="text-sm text-text-muted">Đúng <strong class="text-text-main">{{ quizResult()?.score }}</strong> / {{ quizResult()?.totalQuestions }} câu</p>
+                  
+                  @if (quizResult()?.xpGained) {
+                    <div class="flex justify-center gap-6 text-xs font-black py-2 bg-bg-input/30 border border-border-main/20 rounded-xl max-w-xs mx-auto my-3">
+                      <span class="text-brand-primary flex items-center gap-1">⚡ +{{ quizResult()?.xpGained }} EXP</span>
+                      <span class="text-yellow-500 flex items-center gap-1">🪙 +{{ quizResult()?.coinsGained }} Xu</span>
+                    </div>
+                  }
+                  
+                  @if (quizResult()?.leveledUp) {
+                    <div class="text-xs font-black text-green-500 bg-green-500/10 border border-green-500/20 px-3 py-2 rounded-xl max-w-xs mx-auto my-2 animate-bounce">
+                      🎉 LÊN CẤP: Cấp {{ quizResult()?.newLevel }} ({{ quizResult()?.newTitle }})!
+                    </div>
+                  }
+
                   <button (click)="closeQuizTaking(); activeTab = 'leaderboard'; loadSelectedQuizLeaderboard()" class="px-5 py-2 bg-brand-primary hover:opacity-90 text-white text-xs font-bold rounded-xl cursor-pointer transition-all">
                     Xem Bảng Xếp Hạng
                   </button>
@@ -634,13 +649,6 @@ interface QuizFormQuestion {
         </div>
       }
 
-      <!-- Toast Notification -->
-      @if (toast()) {
-        <div class="fixed bottom-6 right-6 z-[100] bg-green-500 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl animate-slide-in-right flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 15.01 9 12.01"/></svg>
-          {{ toast() }}
-        </div>
-      }
     </div>
   `,
   styles: [`
@@ -653,6 +661,7 @@ interface QuizFormQuestion {
 })
 export class ClassroomComponent implements OnInit {
   private classroomService = inject(ClassroomService);
+  private toastService = inject(ToastService);
 
   classes = signal<ClassRoomSummary[]>([]);
   selectedClassId = signal<number | null>(null);
@@ -698,7 +707,7 @@ export class ClassroomComponent implements OnInit {
   quizSubmitted = signal(false);
   activeQuiz: ClassQuizDto | null = null;
   quizTakingAnswers: Record<number, string> = {};
-  quizResult = signal<{ score: number; totalQuestions: number; percentage: number } | null>(null);
+  quizResult = signal<any>(null);
 
   ngOnInit() {
     this.loadClasses();
@@ -994,7 +1003,6 @@ export class ClassroomComponent implements OnInit {
 
   // ========== Toast ==========
   private showToast(msg: string) {
-    this.toast.set(msg);
-    setTimeout(() => this.toast.set(null), 3000);
+    this.toastService.success(msg);
   }
 }

@@ -25,19 +25,16 @@ public class VocabularyStudyController {
     private final LearningModuleRepository topicRepository;
     private final FlashcardRepository wordRepository;
     private final UserProgressRepository progressRepository;
-    private final PlayerCharacterRepository characterRepository;
 
     public VocabularyStudyController(
             UserRepository userRepository,
             LearningModuleRepository topicRepository,
             FlashcardRepository wordRepository,
-            UserProgressRepository progressRepository,
-            PlayerCharacterRepository characterRepository) {
+            UserProgressRepository progressRepository) {
         this.userRepository = userRepository;
         this.topicRepository = topicRepository;
         this.wordRepository = wordRepository;
         this.progressRepository = progressRepository;
-        this.characterRepository = characterRepository;
     }
 
     @Getter
@@ -246,11 +243,9 @@ public class VocabularyStudyController {
         user.setLevel(currentLevel);
         user.setCoins(currentCoins);
 
-        if (leveledUp && user.getPlayerCharacter() != null) {
-            PlayerCharacter character = user.getPlayerCharacter();
+        if (leveledUp) {
             String newTitle = calculateTitle(currentLevel);
-            character.setTitle(newTitle);
-            characterRepository.save(character);
+            user.setCharacterTitle(newTitle);
         }
 
         userRepository.save(user);
@@ -276,7 +271,7 @@ public class VocabularyStudyController {
         result.put("newCoins", user.getCoins());
         result.put("leveledUp", xpGained > 0 && user.getExp() < xpGained);
         result.put("previousLevel", user.getLevel());
-        result.put("newTitle", user.getPlayerCharacter() != null ? user.getPlayerCharacter().getTitle() : "Novice");
+        result.put("newTitle", user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice");
         return result;
     }
 

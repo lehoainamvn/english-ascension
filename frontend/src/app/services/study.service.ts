@@ -58,6 +58,10 @@ export class StudyService {
     return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/complete`, { correctAnswers });
   }
 
+  completeStep(moduleId: number, step: string): Observable<CompletionResult> {
+    return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/complete-step`, { step });
+  }
+
   completeBattle(moduleId: number): Observable<CompletionResult> {
     return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/battle-complete`, {});
   }

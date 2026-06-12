@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ListeningService, ListeningSection, ListeningQuestion, RewardResult } from '../../services/listening.service';
 import { UserWordService, UserWord } from '../../services/user-word.service';
+import { ToastService } from '../../services/toast.service';
 
 
 interface WordToken {
@@ -581,6 +582,7 @@ export class ListeningStudyComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly userWordService = inject(UserWordService);
+  private readonly toastService = inject(ToastService);
 
   savedWords = signal<UserWord[]>([]);
   sentenceNotes = '';
@@ -1025,7 +1027,7 @@ export class ListeningStudyComponent implements OnInit, OnDestroy {
         this.sections.set(updated);
 
         // Alert rewards in toast fashion
-        alert(`✓ Hoàn thành Câu ${q.questionNumber}! Bạn được +${res.xpGained} EXP & +${res.coinsGained} Coins.`);
+        this.toastService.success(`✓ Hoàn thành Câu ${q.questionNumber}! Bạn được +${res.xpGained} EXP & +${res.coinsGained} Coins.`);
 
         // Verify if all questions in section are completed
         const currentSec = this.activeSection();
@@ -1052,10 +1054,15 @@ export class ListeningStudyComponent implements OnInit, OnDestroy {
         });
         this.sections.set(updated);
 
-        alert(`🎉 Tuyệt vời! Bạn đã hoàn thành toàn bộ "${this.activeSection()?.title}" và nhận thêm +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        this.toastService.success(`🎉 Tuyệt vời! Bạn đã hoàn thành toàn bộ "${this.activeSection()?.title}" và nhận thêm +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        if (res.leveledUp) {
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
+        }
+        this.router.navigate(['/listening']);
       },
       error: (err) => {
         console.error('Error completing section', err);
+        this.router.navigate(['/listening']);
       }
     });
   }

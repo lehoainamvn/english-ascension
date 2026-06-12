@@ -27,7 +27,7 @@ public class StudyController {
     private final LearningModuleRepository learningModuleRepository;
     private final FlashcardRepository flashcardRepository;
     private final QuestionRepository questionRepository;
-    private final PlayerCharacterRepository characterRepository;
+    private final UserProgressRepository progressRepository;
     private final GroqService groqService;
     private final ObjectMapper objectMapper;
 
@@ -36,13 +36,13 @@ public class StudyController {
             LearningModuleRepository learningModuleRepository,
             FlashcardRepository flashcardRepository,
             QuestionRepository questionRepository,
-            PlayerCharacterRepository characterRepository,
+            UserProgressRepository progressRepository,
             GroqService groqService) {
         this.userRepository = userRepository;
         this.learningModuleRepository = learningModuleRepository;
         this.flashcardRepository = flashcardRepository;
         this.questionRepository = questionRepository;
-        this.characterRepository = characterRepository;
+        this.progressRepository = progressRepository;
         this.groqService = groqService;
         this.objectMapper = new ObjectMapper();
     }
@@ -222,6 +222,63 @@ public class StudyController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/modules/{moduleId}/complete-step")
+    public ResponseEntity<?> completeStep(@PathVariable Long moduleId, @RequestBody Map<String, String> request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        // Mỗi bước học nhỏ lẻ (Ngữ pháp, Từ vựng, Nghe, Phát âm) đều được +30 EXP và +10 Xu
+        int xpGained = 30;
+        int coinsGained = 10;
+
+        // Process level up logic
+        int currentExp = user.getExp();
+        int currentLevel = user.getLevel();
+        int currentCoins = user.getCoins();
+
+        currentExp += xpGained;
+        currentCoins += coinsGained;
+
+        boolean leveledUp = false;
+        int previousLevel = user.getLevel();
+
+        while (true) {
+            int expNeeded = currentLevel * 100;
+            if (currentExp >= expNeeded) {
+                currentExp -= expNeeded;
+                currentLevel++;
+                leveledUp = true;
+            } else {
+                break;
+            }
+        }
+
+        user.setExp(currentExp);
+        user.setLevel(currentLevel);
+        user.setCoins(currentCoins);
+
+        String newTitle = user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice";
+        if (leveledUp) {
+            newTitle = calculateTitle(currentLevel);
+            user.setCharacterTitle(newTitle);
+        }
+
+        userRepository.save(user);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("xpGained", xpGained);
+        result.put("coinsGained", coinsGained);
+        result.put("newXp", currentExp);
+        result.put("newLevel", currentLevel);
+        result.put("newCoins", currentCoins);
+        result.put("leveledUp", leveledUp);
+        result.put("previousLevel", previousLevel);
+        result.put("newTitle", newTitle);
+
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/modules/{moduleId}/complete")
     public ResponseEntity<?> completeModule(@PathVariable Long moduleId, @RequestBody Map<String, Object> requestBody) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -247,14 +304,12 @@ public class StudyController {
             return ResponseEntity.badRequest().body(Map.of("message", "Chưa đạt yêu cầu! Bạn cần đạt tối thiểu 7 điểm (trả lời đúng 70% số câu hỏi) để qua màn."));
         }
 
-        // Calculate XP and Coin gains
-        int flashcardXp = 30;
-        int flashcardCoins = 5;
+        // Calculate XP and Coin gains (chỉ thưởng điểm test, vì lý thuyết/từ vựng đã thưởng riêng qua complete-step)
         int quizXp = correctAnswers * 10;
         int quizCoins = correctAnswers * 2;
 
-        int totalXpGained = flashcardXp + quizXp;
-        int totalCoinsGained = flashcardCoins + quizCoins;
+        int totalXpGained = quizXp;
+        int totalCoinsGained = quizCoins;
 
         // Process level up logic
         int currentExp = user.getExp();
@@ -282,14 +337,10 @@ public class StudyController {
         user.setLevel(currentLevel);
         user.setCoins(currentCoins);
 
-        String newTitle = user.getPlayerCharacter() != null ? user.getPlayerCharacter().getTitle() : "Novice";
+        String newTitle = user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice";
         if (leveledUp) {
-            PlayerCharacter character = user.getPlayerCharacter();
-            if (character != null) {
-                newTitle = calculateTitle(currentLevel);
-                character.setTitle(newTitle);
-                characterRepository.save(character);
-            }
+            newTitle = calculateTitle(currentLevel);
+            user.setCharacterTitle(newTitle);
         }
 
         userRepository.save(user);
@@ -379,14 +430,10 @@ public class StudyController {
         user.setLevel(currentLevel);
         user.setCoins(currentCoins);
 
-        String newTitle = user.getPlayerCharacter() != null ? user.getPlayerCharacter().getTitle() : "Novice";
+        String newTitle = user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice";
         if (leveledUp) {
-            PlayerCharacter character = user.getPlayerCharacter();
-            if (character != null) {
-                newTitle = calculateTitle(currentLevel);
-                character.setTitle(newTitle);
-                characterRepository.save(character);
-            }
+            newTitle = calculateTitle(currentLevel);
+            user.setCharacterTitle(newTitle);
         }
 
         userRepository.save(user);

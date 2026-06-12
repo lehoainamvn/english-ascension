@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -204,6 +205,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginComponent {
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   email = '';
@@ -221,6 +223,7 @@ export class LoginComponent {
     this.authService.login(this.email, this.password).subscribe({
       next: (res) => {
         this.isLoading.set(false);
+        this.toastService.success('Đăng nhập thành công! Chào mừng quay trở lại.');
         if (res && !res.hasCharacter) {
           this.router.navigate(['/character-customization']);
         } else {

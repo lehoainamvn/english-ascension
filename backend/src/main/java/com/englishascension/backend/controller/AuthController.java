@@ -52,7 +52,7 @@ public class AuthController {
                 .orElse("ROLE_USER");
 
         User user = userRepository.findById(userDetails.getId()).orElseThrow();
-        boolean hasCharacter = user.getPlayerCharacter() != null;
+        boolean hasCharacter = user.getCharacterName() != null;
 
         return ResponseEntity.ok(new AuthResponse(
                 jwt,

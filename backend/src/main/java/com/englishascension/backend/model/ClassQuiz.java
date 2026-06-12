@@ -38,13 +38,6 @@ public class ClassQuiz {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "classQuiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ClassQuizQuestion> questions = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "classQuiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ClassQuizAttempt> attempts = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

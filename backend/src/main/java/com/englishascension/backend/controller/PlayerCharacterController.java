@@ -2,9 +2,7 @@ package com.englishascension.backend.controller;
 
 import com.englishascension.backend.dto.CharacterRequest;
 import com.englishascension.backend.dto.MessageResponse;
-import com.englishascension.backend.model.PlayerCharacter;
 import com.englishascension.backend.model.User;
-import com.englishascension.backend.repository.PlayerCharacterRepository;
 import com.englishascension.backend.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +10,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/characters")
 public class PlayerCharacterController {
 
     private final UserRepository userRepository;
-    private final PlayerCharacterRepository characterRepository;
 
-    public PlayerCharacterController(UserRepository userRepository, PlayerCharacterRepository characterRepository) {
+    public PlayerCharacterController(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.characterRepository = characterRepository;
     }
 
     @PostMapping
@@ -31,28 +30,17 @@ public class PlayerCharacterController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        PlayerCharacter character = user.getPlayerCharacter();
-        if (character == null) {
-            character = PlayerCharacter.builder()
-                    .user(user)
-                    .name(characterRequest.getName())
-                    .gender(characterRequest.getGender())
-                    .hairStyle(characterRequest.getHairStyle())
-                    .hairColor(characterRequest.getHairColor())
-                    .faceStyle(characterRequest.getFaceStyle())
-                    .outfitStyle(characterRequest.getOutfitStyle())
-                    .build();
-            user.setPlayerCharacter(character);
-        } else {
-            character.setName(characterRequest.getName());
-            character.setGender(characterRequest.getGender());
-            character.setHairStyle(characterRequest.getHairStyle());
-            character.setHairColor(characterRequest.getHairColor());
-            character.setFaceStyle(characterRequest.getFaceStyle());
-            character.setOutfitStyle(characterRequest.getOutfitStyle());
+        user.setCharacterName(characterRequest.getName());
+        user.setCharacterGender(characterRequest.getGender());
+        user.setCharacterHairStyle(characterRequest.getHairStyle());
+        user.setCharacterHairColor(characterRequest.getHairColor());
+        user.setCharacterFaceStyle(characterRequest.getFaceStyle());
+        user.setCharacterOutfitStyle(characterRequest.getOutfitStyle());
+        if (user.getCharacterTitle() == null) {
+            user.setCharacterTitle("Novice");
         }
 
-        characterRepository.save(character);
+        userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("Character saved successfully!"));
     }
 
@@ -62,10 +50,20 @@ public class PlayerCharacterController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        PlayerCharacter character = user.getPlayerCharacter();
-        if (character == null) {
+        if (user.getCharacterName() == null) {
             return ResponseEntity.notFound().build();
         }
+
+        Map<String, Object> character = new HashMap<>();
+        character.put("id", user.getId());
+        character.put("name", user.getCharacterName());
+        character.put("gender", user.getCharacterGender());
+        character.put("hairStyle", user.getCharacterHairStyle());
+        character.put("hairColor", user.getCharacterHairColor());
+        character.put("faceStyle", user.getCharacterFaceStyle());
+        character.put("outfitStyle", user.getCharacterOutfitStyle());
+        character.put("title", user.getCharacterTitle());
+        character.put("level", user.getLevel());
 
         return ResponseEntity.ok(character);
     }

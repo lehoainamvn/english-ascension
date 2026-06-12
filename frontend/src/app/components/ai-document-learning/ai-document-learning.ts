@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { StudyAiService, UserDocListItem, UserDocDetails } from '../../services/study-ai.service';
 import { Flashcard, QuizQuestion } from '../../services/study.service';
 import { UserWordService, UserWord } from '../../services/user-word.service';
+import { ClassroomService, ClassRoomSummary, ClassQuizQuestionDto } from '../../services/classroom.service';
+import { ToastService } from '../../services/toast.service';
 
 
 @Component({
@@ -147,27 +149,37 @@ import { UserWordService, UserWord } from '../../services/user-word.service';
                   <span class="text-[9px] font-bold text-brand-primary uppercase tracking-widest bg-brand-primary/10 px-2.5 py-0.5 rounded-full">Chi tiết học liệu AI</span>
                   <h2 class="text-lg font-black text-text-main mt-1.5 truncate pr-4">{{ doc.fileName }}</h2>
                 </div>
-                <div class="flex border border-border-main rounded-xl p-1 bg-bg-input/30 shrink-0 text-xxs font-bold">
+                <div class="flex items-center gap-3 shrink-0">
                   <button
-                    (click)="activeTab = 'flashcards'"
-                    [class.bg-brand-primary]="activeTab === 'flashcards'"
-                    [class.text-bg-main]="activeTab === 'flashcards'"
-                    [class.text-text-muted]="activeTab !== 'flashcards'"
-                    class="px-3.5 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                    (click)="openSaveToClassModal(doc)"
+                    class="px-3.5 py-2 bg-brand-secondary/10 hover:bg-brand-secondary/20 border border-brand-secondary/30 text-brand-secondary hover:text-brand-secondary text-[10px] font-black rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                    title="Lưu bộ câu hỏi và từ vựng này vào lớp học của bạn"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
-                    Flashcards
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-graduation-cap"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/><path d="M21.5 12v6"/></svg>
+                    Lưu vào lớp
                   </button>
-                  <button
-                    (click)="activeTab = 'quizzes'"
-                    [class.bg-brand-primary]="activeTab === 'quizzes'"
-                    [class.text-bg-main]="activeTab === 'quizzes'"
-                    [class.text-text-muted]="activeTab !== 'quizzes'"
-                    class="px-3.5 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-checks"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
-                    Thử Thách Quiz
-                  </button>
+                  <div class="flex border border-border-main rounded-xl p-1 bg-bg-input/30 text-xxs font-bold">
+                    <button
+                      (click)="activeTab = 'flashcards'"
+                      [class.bg-brand-primary]="activeTab === 'flashcards'"
+                      [class.text-bg-main]="activeTab === 'flashcards'"
+                      [class.text-text-muted]="activeTab !== 'flashcards'"
+                      class="px-3.5 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+                      Flashcards
+                    </button>
+                    <button
+                      (click)="activeTab = 'quizzes'"
+                      [class.bg-brand-primary]="activeTab === 'quizzes'"
+                      [class.text-bg-main]="activeTab === 'quizzes'"
+                      [class.text-text-muted]="activeTab !== 'quizzes'"
+                      class="px-3.5 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-checks"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                      Thử Thách Quiz
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -652,6 +664,104 @@ import { UserWordService, UserWord } from '../../services/user-word.service';
           </div>
         </div>
       }
+
+      <!-- Save to Class Modal Dialog -->
+      @if (isSaveToClassModalOpen()) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div class="bg-bg-card border border-border-main rounded-2xl p-6 w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto m-4 text-left">
+            <h3 class="text-sm font-black text-text-main uppercase tracking-wider mb-4 border-b border-border-main/40 pb-2 flex justify-between items-center">
+              <span>Lưu bộ câu hỏi vào lớp học</span>
+              <button (click)="closeSaveToClassModal()" class="text-text-muted hover:text-text-main cursor-pointer p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+              </button>
+            </h3>
+
+            <div class="space-y-4 text-xs font-semibold">
+              <div>
+                <label class="block text-[10px] text-text-muted uppercase mb-1">Chọn lớp học *</label>
+                @if (myOwnedClasses().length === 0) {
+                  <div class="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-xxs font-semibold">
+                    Bạn chưa sở hữu lớp học nào. Hãy tạo một lớp học mới trước!
+                  </div>
+                } @else {
+                  <select
+                    [(ngModel)]="selectedClassIdForImport"
+                    class="w-full bg-bg-input border border-border-main rounded-xl p-2.5 focus:outline-none focus:border-brand-primary text-text-main font-semibold"
+                  >
+                    @for (cls of myOwnedClasses(); track cls.id) {
+                      <option [value]="cls.id">{{ cls.name }}</option>
+                    }
+                  </select>
+                }
+              </div>
+
+              <div>
+                <label class="block text-[10px] text-text-muted uppercase mb-1">Tiêu đề đề thi *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="saveToClassForm.title"
+                  placeholder="VD: Kiểm tra từ vựng Unit 1"
+                  class="w-full bg-bg-input border border-border-main rounded-xl p-2.5 focus:outline-none focus:border-brand-primary text-text-main font-semibold"
+                />
+              </div>
+
+              <div>
+                <label class="block text-[10px] text-text-muted uppercase mb-1">Mô tả đề thi</label>
+                <textarea
+                  [(ngModel)]="saveToClassForm.description"
+                  placeholder="Mô tả về bộ đề..."
+                  rows="2"
+                  class="w-full bg-bg-input border border-border-main rounded-xl p-2.5 focus:outline-none focus:border-brand-primary text-text-main font-semibold resize-none"
+                ></textarea>
+              </div>
+
+              <div class="space-y-2 pt-2 border-t border-border-main/40">
+                <label class="block text-[10px] text-text-muted uppercase mb-1">Nội dung muốn lưu</label>
+                
+                <label class="flex items-center gap-2.5 cursor-pointer text-text-main">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="saveToClassForm.importQuizzes"
+                    [disabled]="!(selectedDoc()?.quizQuestions && selectedDoc()!.quizQuestions.length > 0)"
+                    class="accent-brand-primary h-4 w-4"
+                  />
+                  <span>Nhập các câu hỏi Quiz có sẵn ({{ selectedDoc()?.quizQuestions?.length || 0 }} câu)</span>
+                </label>
+
+                <label class="flex items-center gap-2.5 cursor-pointer text-text-main">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="saveToClassForm.importFlashcards"
+                    [disabled]="!(selectedDoc()?.flashcards && selectedDoc()!.flashcards.length > 0)"
+                    class="accent-brand-primary h-4 w-4"
+                  />
+                  <span>Chuyển đổi Flashcards thành câu điền từ ({{ selectedDoc()?.flashcards?.length || 0 }} câu)</span>
+                </label>
+              </div>
+
+              @if (saveToClassError()) {
+                <p class="text-red-500 text-xxs font-bold mt-1">{{ saveToClassError() }}</p>
+              }
+
+              <div class="flex justify-end gap-3 pt-2">
+                <button
+                  (click)="closeSaveToClassModal()"
+                  class="px-4 py-2 border border-border-main rounded-xl hover:bg-bg-input text-text-muted transition-all cursor-pointer font-bold text-xxs"
+                >
+                  Hủy
+                </button>
+                <button
+                  (click)="confirmSaveToClass()"
+                  [disabled]="isSavingToClass() || myOwnedClasses().length === 0"
+                  class="px-4 py-2 bg-brand-primary text-white hover:bg-brand-secondary rounded-xl transition-all cursor-pointer font-bold text-xxs disabled:opacity-50 disabled:cursor-default"
+                >
+                  {{ isSavingToClass() ? 'Đang lưu...' : 'Xác nhận Lưu' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -682,6 +792,20 @@ import { UserWordService, UserWord } from '../../services/user-word.service';
 export class AiDocumentLearningComponent implements OnInit {
   private readonly studyAiService = inject(StudyAiService);
   private readonly userWordService = inject(UserWordService);
+  private readonly classroomService = inject(ClassroomService);
+  private readonly toastService = inject(ToastService);
+
+  isSaveToClassModalOpen = signal(false);
+  isSavingToClass = signal(false);
+  myOwnedClasses = signal<ClassRoomSummary[]>([]);
+  selectedClassIdForImport = signal<number | null>(null);
+  saveToClassForm = {
+    title: '',
+    description: '',
+    importQuizzes: true,
+    importFlashcards: true
+  };
+  saveToClassError = signal<string | null>(null);
 
   documents = signal<UserDocListItem[]>([]);
   selectedDocId = signal<number | null>(null);
@@ -760,6 +884,7 @@ export class AiDocumentLearningComponent implements OnInit {
           return d;
         });
         this.closeAddWordModal();
+        this.toastService.success('Đã thêm từ vựng mới vào tài liệu!');
         // Navigate to the newly added word
         if (doc.flashcards.length > 0) {
           this.currentCardIndex = doc.flashcards.length - 1;
@@ -770,6 +895,7 @@ export class AiDocumentLearningComponent implements OnInit {
       error: (err) => {
         console.error('Error adding flashcard', err);
         this.addWordError = err.error?.error || 'Có lỗi xảy ra khi thêm từ vựng.';
+        this.toastService.error(this.addWordError);
       }
     });
   }
@@ -790,6 +916,7 @@ export class AiDocumentLearningComponent implements OnInit {
               }
               return d;
             });
+            this.toastService.success('Đã xóa từ vựng khỏi tài liệu!');
             if (this.currentCardIndex >= doc.flashcards.length) {
               this.currentCardIndex = Math.max(0, doc.flashcards.length - 1);
             }
@@ -797,9 +924,126 @@ export class AiDocumentLearningComponent implements OnInit {
             this.updateCurrentNotes();
           }
         },
-        error: (err) => console.error('Error deleting flashcard', err)
+        error: (err) => {
+          console.error('Error deleting flashcard', err);
+          this.toastService.error('Có lỗi xảy ra khi xóa từ vựng khỏi tài liệu.');
+        }
       });
     }
+  }
+
+  openSaveToClassModal(doc: UserDocDetails): void {
+    this.saveToClassForm = {
+      title: doc.fileName.replace(/\.[^/.]+$/, "") + ' - Quiz & Từ vựng',
+      description: `Bộ câu hỏi ôn tập tự động trích xuất từ tài liệu "${doc.fileName}"`,
+      importQuizzes: doc.quizQuestions && doc.quizQuestions.length > 0,
+      importFlashcards: doc.flashcards && doc.flashcards.length > 0
+    };
+    this.saveToClassError.set(null);
+    this.selectedClassIdForImport.set(null);
+    this.isSavingToClass.set(false);
+    
+    // Load classrooms
+    this.classroomService.getMyClasses().subscribe({
+      next: (classes) => {
+        const owned = classes.filter(c => c.isOwner);
+        this.myOwnedClasses.set(owned);
+        if (owned.length > 0) {
+          this.selectedClassIdForImport.set(owned[0].id);
+        }
+        this.isSaveToClassModalOpen.set(true);
+      },
+      error: (err) => {
+        console.error('Error loading classes', err);
+        alert('Không thể tải danh sách lớp học của bạn.');
+      }
+    });
+  }
+
+  closeSaveToClassModal(): void {
+    this.isSaveToClassModalOpen.set(false);
+  }
+
+  confirmSaveToClass(): void {
+    const classId = this.selectedClassIdForImport();
+    if (!classId) {
+      this.saveToClassError.set('Vui lòng chọn lớp học để lưu.');
+      return;
+    }
+    if (!this.saveToClassForm.title.trim()) {
+      this.saveToClassError.set('Tiêu đề quiz không được để trống.');
+      return;
+    }
+    
+    const doc = this.selectedDoc();
+    if (!doc) return;
+
+    const questions: Partial<ClassQuizQuestionDto>[] = [];
+
+    // 1. Add existing quiz questions if checked
+    if (this.saveToClassForm.importQuizzes && doc.quizQuestions) {
+      doc.quizQuestions.forEach((q) => {
+        questions.push({
+          questionNumber: questions.length + 1,
+          type: q.type === 'MULTIPLE_CHOICE' ? 'MULTIPLE_CHOICE' : 'FILL_IN_BLANK',
+          questionText: q.questionText,
+          optionA: q.optionA || null,
+          optionB: q.optionB || null,
+          optionC: q.optionC || null,
+          optionD: q.optionD || null,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation || null
+        });
+      });
+    }
+
+    // 2. Add flashcards as FILL_IN_BLANK questions if checked
+    if (this.saveToClassForm.importFlashcards && doc.flashcards) {
+      doc.flashcards.forEach((card) => {
+        const blankedExample = card.exampleSentence.replace(new RegExp(card.word, 'gi'), '_____');
+        const questionText = `Điền từ tiếng Anh thích hợp có nghĩa là "${card.definition}" (${card.partOfSpeech}):\n${blankedExample}`;
+        
+        questions.push({
+          questionNumber: questions.length + 1,
+          type: 'FILL_IN_BLANK',
+          questionText: questionText,
+          optionA: null,
+          optionB: null,
+          optionC: null,
+          optionD: null,
+          correctAnswer: card.word.trim(),
+          explanation: `Từ đúng: "${card.word}" (${card.partOfSpeech}) - Phiên âm: ${card.phonetic}.\nDịch câu ví dụ: ${card.exampleTranslation}`
+        });
+      });
+    }
+
+    if (questions.length === 0) {
+      this.saveToClassError.set('Vui lòng chọn ít nhất một nội dung (Quiz hoặc Flashcard) để nhập.');
+      return;
+    }
+
+    this.isSavingToClass.set(true);
+    this.saveToClassError.set(null);
+
+    this.classroomService.createQuiz(
+      classId,
+      this.saveToClassForm.title,
+      this.saveToClassForm.description,
+      questions
+    ).subscribe({
+      next: (quiz) => {
+        this.isSavingToClass.set(false);
+        this.closeSaveToClassModal();
+        this.toastService.success(`Đã lưu thành công bộ câu hỏi vào lớp dưới dạng đề thi: "${quiz.title}"!`);
+      },
+      error: (err) => {
+        console.error('Error creating quiz from document', err);
+        const errMsg = err.error?.error || 'Có lỗi xảy ra khi lưu vào lớp học.';
+        this.saveToClassError.set(errMsg);
+        this.toastService.error(errMsg);
+        this.isSavingToClass.set(false);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -880,6 +1124,7 @@ export class AiDocumentLearningComponent implements OnInit {
     this.studyAiService.uploadDocument(file, this.flashcardCountToExtract).subscribe({
       next: (res) => {
         this.isAnalyzing.set(false);
+        this.toastService.success('Đã tải lên và phân tích tài liệu bằng AI thành công!');
         this.loadDocuments();
         // Automatically select the newly created document
         if (res.documentId) {
@@ -889,7 +1134,9 @@ export class AiDocumentLearningComponent implements OnInit {
       error: (err) => {
         this.isAnalyzing.set(false);
         console.error('Error uploading file', err);
-        this.uploadError.set(err.error?.error || 'Có lỗi xảy ra trong quá trình AI phân tích tài liệu.');
+        const errMsg = err.error?.error || 'Có lỗi xảy ra trong quá trình AI phân tích tài liệu.';
+        this.uploadError.set(errMsg);
+        this.toastService.error(errMsg);
       }
     });
   }
@@ -899,13 +1146,17 @@ export class AiDocumentLearningComponent implements OnInit {
     if (confirm('Bạn có chắc chắn muốn xóa tài liệu này và toàn bộ dữ liệu ôn tập liên quan không?')) {
       this.studyAiService.deleteDocument(docId).subscribe({
         next: () => {
+          this.toastService.success('Đã xóa tài liệu thành công!');
           this.loadDocuments();
           if (this.selectedDocId() === docId) {
             this.selectedDocId.set(null);
             this.selectedDoc.set(null);
           }
         },
-        error: (err) => console.error('Error deleting document', err)
+        error: (err) => {
+          console.error('Error deleting document', err);
+          this.toastService.error('Có lỗi xảy ra khi xóa tài liệu.');
+        }
       });
     }
   }
@@ -978,12 +1229,13 @@ export class AiDocumentLearningComponent implements OnInit {
           return d;
         });
         this.resetQuiz();
+        this.toastService.success('Đã tạo lại câu hỏi Quiz bằng AI thành công!');
         this.isRegeneratingQuiz.set(false);
       },
       error: (err) => {
         console.error('Error regenerating quiz', err);
         this.isRegeneratingQuiz.set(false);
-        alert(err.error?.error || 'Có lỗi khi tạo lại quiz.');
+        this.toastService.error(err.error?.error || 'Có lỗi khi tạo lại quiz.');
       }
     });
   }
@@ -1022,7 +1274,10 @@ export class AiDocumentLearningComponent implements OnInit {
           this.savedWords.set(this.savedWords().filter(w => w.id !== existing.id));
           this.currentWordNotes = '';
         },
-        error: (err: any) => console.error('Error deleting word', err)
+        error: (err: any) => {
+          console.error('Error deleting word', err);
+          this.toastService.error('Có lỗi xảy ra khi bỏ lưu từ vựng.');
+        }
       });
     } else {
       const payload = {
@@ -1037,7 +1292,10 @@ export class AiDocumentLearningComponent implements OnInit {
           this.savedWords.set([...this.savedWords(), saved]);
           this.currentWordNotes = '';
         },
-        error: (err: any) => console.error('Error saving word', err)
+        error: (err: any) => {
+          console.error('Error saving word', err);
+          this.toastService.error('Có lỗi xảy ra khi lưu từ vựng.');
+        }
       });
     }
   }

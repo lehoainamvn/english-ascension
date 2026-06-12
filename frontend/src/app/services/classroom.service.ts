@@ -26,12 +26,12 @@ export interface ClassQuizQuestionDto {
   questionNumber: number;
   type: 'MULTIPLE_CHOICE' | 'FILL_IN_BLANK';
   questionText: string;
-  optionA?: string;
-  optionB?: string;
-  optionC?: string;
-  optionD?: string;
+  optionA?: string | null;
+  optionB?: string | null;
+  optionC?: string | null;
+  optionD?: string | null;
   correctAnswer: string;
-  explanation?: string;
+  explanation?: string | null;
 }
 
 export interface ClassQuizDto {
@@ -103,7 +103,7 @@ export class ClassroomService {
     return this.http.delete(`${this.baseUrl}/${classId}/quizzes/${quizId}`);
   }
 
-  submitQuiz(classId: number, quizId: number, answers: Record<string, string>): Observable<{ score: number; totalQuestions: number; percentage: number }> {
+  submitQuiz(classId: number, quizId: number, answers: Record<string, string>): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/${classId}/quizzes/${quizId}/submit`, { answers });
   }
 

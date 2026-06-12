@@ -55,8 +55,27 @@ public class User {
     @Column(nullable = false)
     private int level = 1;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private PlayerCharacter playerCharacter;
+    @Column(name = "character_name")
+    private String characterName;
+
+    @Column(name = "character_gender")
+    private String characterGender;
+
+    @Column(name = "character_hair_style")
+    private String characterHairStyle;
+
+    @Column(name = "character_hair_color")
+    private String characterHairColor;
+
+    @Column(name = "character_face_style")
+    private String characterFaceStyle;
+
+    @Column(name = "character_outfit_style")
+    private String characterOutfitStyle;
+
+    @Builder.Default
+    @Column(name = "character_title")
+    private String characterTitle = "Novice";
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private LearningRoadmap learningRoadmap;

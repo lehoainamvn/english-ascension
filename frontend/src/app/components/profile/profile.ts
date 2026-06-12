@@ -2,11 +2,13 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { CharacterService, Character } from '../../services/character.service';
 import { StudyService } from '../../services/study.service';
 import { PlacementTestService } from '../../services/placement-test.service';
 import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-profile',
@@ -71,22 +73,27 @@ import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
                     <!-- Right: Info Summary -->
                     <div class="flex-1 text-center sm:text-left space-y-3">
                       <div>
-                        <span class="bg-brand-secondary/15 text-brand-secondary text-[9px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest border border-brand-secondary/20">
-                          ⚔️ {{ character()?.title || 'Novice' }} ⚔️
+                        <span class="bg-brand-secondary/15 text-brand-secondary text-[9px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest border border-brand-secondary/20 flex items-center gap-1 w-fit">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="m2 22 7.5-7.5"/><path d="M17.5 2.5 22 7l-1 1-4.5-4.5"/></svg>
+                          {{ character()?.title || 'Novice' }}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="m2 22 7.5-7.5"/><path d="M17.5 2.5 22 7l-1 1-4.5-4.5"/></svg>
                         </span>
                         <h2 class="text-xl font-black text-text-main mt-2 truncate">{{ character()?.name || 'Học viên chưa tạo tên' }}</h2>
                         <p class="text-xs text-text-muted mt-0.5">{{ userEmail }}</p>
                       </div>
 
                       <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
-                        <span class="bg-bg-input px-2.5 py-1 rounded-lg text-xxs font-bold text-text-main">
-                          Trình độ: {{ roadmap()?.cefrLevel || 'A1' }}
+                        <span class="bg-bg-input px-2.5 py-1 rounded-lg text-xxs font-bold text-text-main flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                          {{ roadmap()?.cefrLevel || 'A1' }}
                         </span>
-                        <span class="bg-bg-input px-2.5 py-1 rounded-lg text-xxs font-bold text-orange-500">
-                          🔥 Streak: {{ playerInfo()?.streak || 0 }} Ngày
+                        <span class="bg-bg-input px-2.5 py-1 rounded-lg text-xxs font-bold text-orange-500 flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                          Streak: {{ playerInfo()?.streak || 0 }} ngày
                         </span>
-                        <span class="bg-bg-input px-2.5 py-1 rounded-lg text-xxs font-bold text-yellow-500">
-                          🪙 Vàng: {{ playerInfo()?.coins || 0 }} xu
+                        <span class="bg-bg-input px-2.5 py-1 rounded-lg text-xxs font-bold text-yellow-500 flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="14.5" y1="12" y2="12"/></svg>
+                          Xu: {{ playerInfo()?.coins || 0 }}
                         </span>
                       </div>
 
@@ -94,7 +101,8 @@ import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
                         (click)="startEditing()"
                         class="bg-brand-primary/10 border border-brand-primary/20 text-brand-primary hover:bg-brand-primary hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 mx-auto sm:mx-0 shadow-sm"
                       >
-                        ✏️ Chỉnh sửa hồ sơ & diện mạo
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Chỉnh sửa hồ sơ & diện mạo
                       </button>
                     </div>
                   </div>
@@ -295,8 +303,9 @@ import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
               <!-- TIẾN ĐỘ HỌC TẬP (LEARNING PROGRESS SECTION)                          -->
               <!-- ==================================================================== -->
               <div class="backdrop-blur-xl bg-bg-card border border-border-main shadow-xl rounded-2xl p-6 relative overflow-hidden transition-all duration-300">
-                <h3 class="text-sm font-black text-text-main uppercase tracking-wider mb-4 border-b border-border-main/40 pb-2">
-                  📈 Lộ Trình & Tiến Độ Học Tập AI
+                <h3 class="text-sm font-black text-text-main uppercase tracking-wider mb-4 border-b border-border-main/40 pb-2 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-brand-primary"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  Lộ Trình & Tiến Độ Học Tập AI
                 </h3>
 
                 @if (roadmap()) {
@@ -330,47 +339,49 @@ import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
                       <p class="text-text-muted text-xs italic">"{{ roadmap()?.overallEvaluation }}"</p>
                     </div>
 
-                    <!-- Compact Modules progress list -->
+                    <!-- Compact Modules progress list with scroll -->
                     <div class="space-y-2">
                       <h4 class="text-xxs font-black text-text-muted uppercase tracking-wider mb-2.5">Danh sách chương học:</h4>
                       
-                      @for (mod of roadmap()?.modules; track mod.id) {
-                        <div
-                          class="flex items-center justify-between p-2.5 bg-bg-input/20 border border-border-main/30 rounded-xl text-xxs group hover:border-brand-primary/30 transition-colors"
-                        >
-                          <div class="flex items-center gap-2.5 min-w-0">
-                            <!-- Status Indicator Icon -->
-                            @if (mod.status === 'COMPLETED') {
-                              <span class="w-5 h-5 flex items-center justify-center rounded-full bg-green-500/20 text-green-500 font-bold">✓</span>
-                            } @else if (mod.status === 'IN_PROGRESS') {
-                              <span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-primary/20 text-brand-primary font-bold animate-pulse">▶</span>
-                            } @else {
-                              <span class="w-5 h-5 flex items-center justify-center rounded-full bg-bg-input text-text-muted font-semibold text-[8px]">🔒</span>
-                            }
-                            
-                            <div class="min-w-0">
-                              <p class="font-extrabold text-text-main truncate">Chương {{ mod.orderIndex }}: {{ mod.title }}</p>
-                              <p class="text-[9px] text-text-muted truncate mt-0.5">{{ mod.description }}</p>
-                            </div>
-                          </div>
-                          
-                          <span
-                            [class.text-green-500]="mod.status === 'COMPLETED'"
-                            [class.text-brand-primary]="mod.status === 'IN_PROGRESS'"
-                            [class.text-text-muted]="mod.status === 'LOCKED'"
-                            class="font-black text-[9px] uppercase tracking-wider shrink-0 bg-bg-input/40 px-2 py-0.5 rounded border border-border-main/40"
+                      <div class="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+                        @for (mod of roadmap()?.modules; track mod.id) {
+                          <div
+                            class="flex items-center justify-between p-2.5 bg-bg-input/20 border border-border-main/30 rounded-xl text-xxs group hover:border-brand-primary/30 transition-colors"
                           >
-                            {{ mod.status === 'COMPLETED' ? 'Đã xong' : mod.status === 'IN_PROGRESS' ? 'Đang học' : 'Khóa' }}
-                          </span>
-                        </div>
-                      }
+                            <div class="flex items-center gap-2.5 min-w-0">
+                              <!-- Status Indicator Icon -->
+                              @if (mod.status === 'COMPLETED') {
+                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-green-500/20 text-green-500 font-bold">✓</span>
+                              } @else if (mod.status === 'IN_PROGRESS') {
+                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-primary/20 text-brand-primary font-bold animate-pulse">▶</span>
+                              } @else {
+                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-bg-input text-text-muted font-semibold text-[8px]">🔒</span>
+                              }
+                              
+                              <div class="min-w-0">
+                                <p class="font-extrabold text-text-main truncate">Chương {{ mod.orderIndex }}: {{ mod.title }}</p>
+                                <p class="text-[9px] text-text-muted truncate mt-0.5">{{ mod.description }}</p>
+                              </div>
+                            </div>
+                            
+                            <span
+                              [class.text-green-500]="mod.status === 'COMPLETED'"
+                              [class.text-brand-primary]="mod.status === 'IN_PROGRESS'"
+                              [class.text-text-muted]="mod.status === 'LOCKED'"
+                              class="font-black text-[9px] uppercase tracking-wider shrink-0 bg-bg-input/40 px-2 py-0.5 rounded border border-border-main/40"
+                            >
+                              {{ mod.status === 'COMPLETED' ? 'Đã xong' : mod.status === 'IN_PROGRESS' ? 'Đang học' : 'Khóa' }}
+                            </span>
+                          </div>
+                        }
+                      </div>
                     </div>
                   </div>
                 } @else {
-                  <div class="text-center py-10 text-text-muted text-xxs space-y-2">
-                    <span class="text-3xl">📝</span>
+                  <div class="text-center py-10 text-text-muted text-xxs space-y-3 flex flex-col items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-30"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                     <p>Bạn chưa khởi tạo lộ trình học tập. Vui lòng hoàn thành bài đánh giá đầu vào.</p>
-                    <a routerLink="/placement-test" class="bg-brand-primary text-white font-bold px-4 py-2 rounded-xl mt-2 inline-block">Làm bài Placement Test</a>
+                    <a routerLink="/placement-test" class="bg-brand-primary text-white font-bold px-4 py-2 rounded-xl mt-2 inline-flex items-center gap-1.5">Làm bài Placement Test</a>
                   </div>
                 }
               </div>
@@ -383,12 +394,15 @@ import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
               <!-- Weekly activity heatmap -->
               <div class="backdrop-blur-xl bg-bg-card border border-border-main shadow-xl rounded-2xl p-4">
                 <div class="flex justify-between items-center border-b border-border-main/40 pb-2 mb-3">
-                  <h4 class="text-[10px] font-bold text-text-muted uppercase tracking-widest">Tần suất học tuần này 📅</h4>
+                  <h4 class="text-[10px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                    Hoạt động học tuần này
+                  </h4>
                   <span class="text-[9px] text-brand-primary font-bold">Lịch sử chuyên cần</span>
                 </div>
                 
                 <div class="grid grid-cols-7 gap-1.5 text-center text-[10px]">
-                  @for (day of mockWeeklyActivity; track day.name) {
+                  @for (day of weeklyActivity(); track day.name) {
                     <div class="flex flex-col items-center gap-1">
                       <span class="text-text-muted font-semibold text-[8px] uppercase">{{ day.name }}</span>
                       <div
@@ -401,53 +415,69 @@ import { CharacterAvatarComponent } from '../character-avatar/character-avatar';
                         [class.text-text-muted]="!day.active"
                         [title]="day.active ? 'Học viên chăm chỉ!' : 'Chưa học'"
                       >
-                        @if (day.active) { ✓ } @else { - }
+                        @if (day.active) {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        } @else {
+                          <span class="text-[9px]">-</span>
+                        }
                       </div>
                     </div>
                   }
                 </div>
               </div>
 
-              <!-- Leaderboard panel -->
+              <!-- Leaderboard panel (Real data) -->
               <div class="backdrop-blur-xl bg-bg-card border border-border-main shadow-xl rounded-2xl p-4 flex-1">
                 <div class="flex justify-between items-center border-b border-border-main/40 pb-2 mb-3">
-                  <h4 class="text-[10px] font-bold text-text-muted uppercase tracking-widest">Đua Top Anh Hùng 🏆</h4>
-                  <span class="text-[9px] bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-2 py-0.5 rounded font-extrabold uppercase">Silver League</span>
+                  <h4 class="text-[10px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-500"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    Bảng Xếp Hạng EXP
+                  </h4>
+                  <span class="text-[9px] bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-2 py-0.5 rounded font-extrabold uppercase">Top Anh Hùng</span>
                 </div>
                 
-                <div class="space-y-2">
-                  @for (user of mockLeaderboard; track user.rank) {
-                    <div
-                      class="flex items-center justify-between p-2 rounded-xl transition-colors border text-xxs"
-                      [class.bg-brand-primary/5]="user.isUser"
-                      [class.border-brand-primary/30]="user.isUser"
-                      [class.border-transparent]="!user.isUser"
-                    >
-                      <div class="flex items-center gap-2.5">
-                        <span
-                          class="w-5 h-5 flex items-center justify-center rounded-full font-black text-[9px]"
-                          [class.bg-yellow-500/20]="user.rank === 1"
-                          [class.text-yellow-500]="user.rank === 1"
-                          [class.bg-slate-400/20]="user.rank === 2"
-                          [class.text-slate-400]="user.rank === 2"
-                          [class.bg-amber-700/20]="user.rank === 3"
-                          [class.text-amber-700]="user.rank === 3"
-                          [class.text-text-muted]="user.rank > 3"
-                        >
-                          {{ user.rank }}
-                        </span>
-                        <span class="text-base shrink-0">{{ user.avatar }}</span>
-                        <span class="font-extrabold truncate max-w-[100px] text-text-main" [class.text-brand-primary]="user.isUser">
-                          {{ user.name }} {{ user.isUser ? '(Bạn)' : '' }}
-                        </span>
+                @if (isLoadingRealLeaderboard()) {
+                  <div class="flex justify-center py-6">
+                    <svg class="animate-spin h-5 w-5 text-brand-primary" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  </div>
+                } @else {
+                  <div class="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
+                    @for (entry of realLeaderboard().slice(0, 5); track entry.rank) {
+                      <div
+                        class="flex items-center justify-between p-2 rounded-xl transition-colors border text-xxs"
+                        [class.bg-brand-primary/5]="entry.email === userEmail"
+                        [class.border-brand-primary/30]="entry.email === userEmail"
+                        [class.border-transparent]="entry.email !== userEmail"
+                      >
+                        <div class="flex items-center gap-2">
+                          <span
+                            class="w-5 h-5 flex items-center justify-center rounded-full font-black text-[9px] shrink-0"
+                            [class.bg-yellow-500]="entry.rank === 1"
+                            [class.text-white]="entry.rank === 1"
+                            [class.bg-slate-400/30]="entry.rank === 2"
+                            [class.text-slate-400]="entry.rank === 2"
+                            [class.bg-amber-700/20]="entry.rank === 3"
+                            [class.text-amber-600]="entry.rank === 3"
+                            [class.bg-bg-input]="entry.rank > 3"
+                            [class.text-text-muted]="entry.rank > 3"
+                          >
+                            {{ entry.rank }}
+                          </span>
+                          <div class="min-w-0">
+                            <span class="font-extrabold truncate max-w-[110px] text-text-main block" [class.text-brand-primary]="entry.email === userEmail">
+                              {{ entry.name }} @if (entry.email === userEmail) { <span class="text-brand-primary text-[8px]">(Bạn)</span> }
+                            </span>
+                            <span class="text-[8px] text-text-muted">Lv.{{ entry.level }}</span>
+                          </div>
+                        </div>
+                        <span class="font-black text-[10px] text-text-main shrink-0">{{ entry.exp }} EXP</span>
                       </div>
-                      <div class="flex items-center gap-1.5">
-                        <span class="bg-bg-input px-2 py-0.5 rounded text-[8px] font-bold text-text-muted">Lv.{{ user.level }}</span>
-                        <span class="font-bold text-text-main">{{ user.exp }} EXP</span>
-                      </div>
-                    </div>
-                  }
-                </div>
+                    }
+                    @if (realLeaderboard().length === 0) {
+                      <div class="text-center py-6 text-text-muted text-[10px]">Chưa có dữ liệu xếp hạng</div>
+                    }
+                  </div>
+                }
               </div>
 
             </div>
@@ -464,7 +494,9 @@ export class ProfileComponent implements OnInit {
   private readonly characterService = inject(CharacterService);
   private readonly studyService = inject(StudyService);
   private readonly placementService = inject(PlacementTestService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
 
   // Form Fields
   name = '';
@@ -482,7 +514,9 @@ export class ProfileComponent implements OnInit {
   isSaving = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
-  isEditing = signal(false); // view mode by default
+  isEditing = signal(false);
+  realLeaderboard = signal<any[]>([]);
+  isLoadingRealLeaderboard = signal(true);
 
   // Option lists
   genders = [
@@ -520,27 +554,20 @@ export class ProfileComponent implements OnInit {
     { id: 'CASUAL', label: 'Thường dân', desc: 'Áo thun' }
   ];
 
-  // Mock structures
-  mockWeeklyActivity = [
-    { name: 'T2', active: true },
-    { name: 'T3', active: true },
+  // Mock structures — weekly activity, will be updated from profile streak
+  weeklyActivity = signal([
+    { name: 'T2', active: false },
+    { name: 'T3', active: false },
     { name: 'T4', active: false },
-    { name: 'T5', active: true },
+    { name: 'T5', active: false },
     { name: 'T6', active: false },
-    { name: 'T7', active: true },
+    { name: 'T7', active: false },
     { name: 'CN', active: false }
-  ];
-
-  mockLeaderboard = [
-    { rank: 1, name: 'Arthur Pendragon', avatar: '🧙‍♂️', level: 42, exp: 4200, isUser: false },
-    { rank: 2, name: 'Hermione Granger', avatar: '🧝‍♀️', level: 38, exp: 3850, isUser: false },
-    { rank: 3, name: 'Người Hùng', avatar: '🛡️', level: 1, exp: 0, isUser: true },
-    { rank: 4, name: 'Tony Stark', avatar: '🦾', level: 25, exp: 2560, isUser: false },
-    { rank: 5, name: 'Bob Ross', avatar: '🎨', level: 12, exp: 1200, isUser: false }
-  ];
+  ]);
 
   ngOnInit(): void {
     this.loadData();
+    this.loadRealLeaderboard();
   }
 
   loadData(): void {
@@ -551,7 +578,6 @@ export class ProfileComponent implements OnInit {
       next: (profile) => {
         this.playerInfo.set(profile);
         this.updateLeaderboardStats(profile);
-        this.setupWeeklyActivityToday(profile);
         this.checkLoadingState();
       },
       error: () => {
@@ -600,6 +626,14 @@ export class ProfileComponent implements OnInit {
     this.isLoading.set(false);
   }
 
+  loadRealLeaderboard(): void {
+    this.isLoadingRealLeaderboard.set(true);
+    this.http.get<any[]>('http://localhost:8080/api/community/leaderboard').subscribe({
+      next: (data) => { this.realLeaderboard.set(data); this.isLoadingRealLeaderboard.set(false); },
+      error: () => this.isLoadingRealLeaderboard.set(false)
+    });
+  }
+
   getCharacterPreviewObject(): Character {
     return {
       name: this.name,
@@ -636,6 +670,7 @@ export class ProfileComponent implements OnInit {
   onSave(): void {
     if (!this.name.trim()) {
       this.errorMessage.set('Vui lòng nhập tên nhân vật.');
+      this.toastService.error('Vui lòng nhập tên nhân vật.');
       return;
     }
 
@@ -661,6 +696,7 @@ export class ProfileComponent implements OnInit {
         this.updateLeaderboardUser(char);
         
         if (isNewCharacter) {
+          this.toastService.success('Khởi tạo nhân vật thành công!');
           this.successMessage.set('Khởi tạo nhân vật thành công! Đang chuyển hướng sang bài kiểm tra đầu vào...');
           this.isEditing.set(false);
           
@@ -669,6 +705,7 @@ export class ProfileComponent implements OnInit {
             this.router.navigate(['/placement-test']);
           }, 2000);
         } else {
+          this.toastService.success('Cập nhật hồ sơ thành công!');
           this.successMessage.set('Đã lưu diện mạo nhân vật thành công!');
           this.isEditing.set(false);
           
@@ -679,46 +716,40 @@ export class ProfileComponent implements OnInit {
       },
       error: (err) => {
         this.isSaving.set(false);
-        this.errorMessage.set(err.error?.message || 'Không thể lưu nhân vật. Vui lòng thử lại.');
+        const errMsg = err.error?.message || 'Không thể lưu nhân vật. Vui lòng thử lại.';
+        this.errorMessage.set(errMsg);
+        this.toastService.error(errMsg);
       }
     });
   }
 
   updateLeaderboardUser(char: Character | null): void {
-    if (char) {
-      const userRank = this.mockLeaderboard.find(u => u.isUser);
-      if (userRank) {
-        userRank.name = char.name;
-        userRank.avatar = char.gender === 'FEMALE' ? '👧' : '👦';
-      }
-    }
+    // No longer needed for mock; kept for potential future use
   }
 
   updateLeaderboardStats(profile: any): void {
     if (profile) {
-      const userRank = this.mockLeaderboard.find(u => u.isUser);
-      if (userRank) {
-        userRank.level = profile.level || 1;
-        userRank.exp = profile.exp || 0;
-      }
-      this.mockLeaderboard.sort((a, b) => b.exp - a.exp);
-      this.mockLeaderboard.forEach((user, index) => {
-        user.rank = index + 1;
-      });
+      this.setupWeeklyActivityFromStreak(profile);
     }
   }
 
-  setupWeeklyActivityToday(profile: any): void {
+  setupWeeklyActivityFromStreak(profile: any): void {
     if (typeof window !== 'undefined') {
-      const today = new Date().getDay();
+      const today = new Date().getDay(); // 0=Sun, 1=Mon,...
+      const streak = profile?.streak || 0;
       const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
       const currentDayName = dayNames[today];
-
-      this.mockWeeklyActivity = this.mockWeeklyActivity.map(day => {
-        if (day.name === currentDayName) {
-          return { ...day, active: true };
-        }
-        return day;
+      // Mark as active today and back-fill streak days
+      this.weeklyActivity.update(days => {
+        return days.map((day, idx) => {
+          // Mark today active; additionally mark previous `streak-1` days if streak > 1
+          if (day.name === currentDayName) return { ...day, active: true };
+          // Calculate how many days ago this slot represents
+          const dayOfWeekIndex = dayNames.indexOf(day.name);
+          let daysAgo = (today - dayOfWeekIndex + 7) % 7;
+          if (daysAgo === 0) daysAgo = 7;
+          return { ...day, active: streak > daysAgo };
+        });
       });
     }
   }
