@@ -1,0 +1,462 @@
+# ENGLISH ASCENSION
+
+### Learn • Level Up • Evolve
+
+## 1. Giới thiệu dự án
+
+English Ascension là nền tảng học tiếng Anh ứng dụng AI kết hợp RPG và Gamification.
+
+Thay vì chỉ học Flashcard như các ứng dụng thông thường, người dùng sẽ tạo nhân vật riêng, vượt qua các màn chơi, tăng cấp, tiến hóa nhân vật và chinh phục các mốc TOEIC thông qua quá trình học tập.
+
+Hệ thống AI sẽ đánh giá trình độ ban đầu, xây dựng lộ trình học cá nhân hóa, tạo bài tập từ tài liệu người dùng tải lên và liên tục điều chỉnh nội dung học dựa trên điểm mạnh, điểm yếu của từng người.
+
+Mục tiêu của dự án là biến việc học tiếng Anh thành một cuộc phiêu lưu giống game RPG.
+
+---
+
+# 2. Đối tượng sử dụng
+
+* Học sinh
+* Sinh viên
+* Người đi làm
+* Người luyện TOEIC
+* Người muốn học tiếng Anh giao tiếp
+
+---
+
+# 3. Luồng người dùng
+
+## Bước 1: Đăng ký
+
+Người dùng đăng ký bằng:
+
+* Email
+* Google
+
+---
+
+## Bước 2: Tạo nhân vật
+
+Người dùng thiết kế avatar:
+
+* Giới tính
+* Kiểu tóc
+* Màu tóc
+* Khuôn mặt
+* Trang phục
+* Phụ kiện
+
+Mỗi người có một nhân vật riêng.
+
+---
+
+## Bước 3: Placement Test
+
+Người dùng làm bài kiểm tra đầu vào.
+
+Bao gồm:
+
+* Vocabulary
+* Grammar
+* Reading
+* Listening
+
+AI phân tích:
+
+* CEFR Level
+* TOEIC dự đoán
+* Điểm mạnh
+* Điểm yếu
+
+Ví dụ:
+
+CEFR: A2
+
+Vocabulary: 70%
+
+Grammar: 40%
+
+Listening: 30%
+
+TOEIC dự đoán: 350
+
+---
+
+## Bước 4: AI tạo lộ trình học
+
+AI xây dựng roadmap cá nhân hóa.
+
+Ví dụ:
+
+Module 1: Basic Grammar
+
+Module 2: Daily Vocabulary
+
+Module 3: Listening Foundation
+
+Module 4: Workplace English
+
+Module 5: TOEIC Preparation
+
+---
+
+# 4. Hệ thống học tập
+
+## Flashcard
+
+Hiển thị:
+
+* Từ vựng
+* Phiên âm
+* Nghĩa
+* Ví dụ
+* Phát âm
+
+---
+
+## Quiz
+
+Các dạng:
+
+* Multiple Choice
+* Fill In Blank
+* Matching
+* Rearrange Sentence
+
+---
+
+## Listening
+
+* Nghe hội thoại
+* Chọn đáp án
+* Điền từ
+
+---
+
+## Writing
+
+AI chấm:
+
+* Grammar
+* Vocabulary
+* Fluency
+
+Đưa ra gợi ý sửa lỗi.
+
+---
+
+## Speaking (Tương lai)
+
+AI đánh giá:
+
+* Phát âm
+* Ngữ điệu
+* Độ trôi chảy
+
+---
+
+# 5. Học theo chủ đề
+
+Thay vì học từ rời rạc.
+
+Ví dụ:
+
+## Daily Conversation
+
+Hello
+
+Good Morning
+
+Thank You
+
+Excuse Me
+
+---
+
+## Travel
+
+Passport
+
+Airport
+
+Boarding Pass
+
+Luggage
+
+---
+
+## Office
+
+Meeting
+
+Deadline
+
+Project
+
+Client
+
+---
+
+## Technology
+
+Database
+
+Backend
+
+Frontend
+
+API
+
+---
+
+# 6. AI Document Learning
+
+Người dùng upload:
+
+* PDF
+* DOCX
+* TXT
+
+AI thực hiện:
+
+1. Trích xuất nội dung
+2. Phân tích từ vựng
+3. Phân tích ngữ pháp
+4. Tạo Flashcard
+5. Tạo Quiz
+6. Tạo Reading
+7. Theo dõi tiến độ
+
+Bất kỳ tài liệu tiếng Anh nào cũng có thể trở thành khóa học.
+
+---
+
+# 7. Hệ thống RPG
+
+## EXP
+
+Người dùng nhận EXP khi:
+
+* Học Flashcard
+* Làm Quiz
+* Listening
+* Writing
+* Hoàn thành Quest
+
+---
+
+## Level
+
+Level tăng theo EXP.
+
+---
+
+## Tiến hóa nhân vật
+
+Level 1 → Novice
+
+Level 20 → Student
+
+Level 40 → Scholar
+
+Level 60 → Master
+
+Level 80 → Grand Sage
+
+Level 100 → Language Legend
+
+Mỗi lần tiến hóa:
+
+* Thay đổi ngoại hình
+* Hiệu ứng mới
+* Danh hiệu mới
+
+---
+
+# 8. Hệ thống Rank TOEIC
+
+0 - 250 → Beginner
+
+250 - 450 → Explorer
+
+450 - 650 → Scholar
+
+650 - 850 → Master
+
+850+ → Legend
+
+AI liên tục cập nhật TOEIC dự đoán.
+
+---
+
+# 9. World Map
+
+World 1: Beginner Village
+
+World 2: Vocabulary Forest
+
+World 3: Grammar Castle
+
+World 4: Listening Mountain
+
+World 5: Business City
+
+World 6: TOEIC Kingdom
+
+Hoàn thành world trước mới mở world sau.
+
+---
+
+# 10. Hệ thống Game
+
+## Word Battle
+
+Đánh quái bằng tiếng Anh.
+
+Đúng:
+
+* Gây sát thương
+
+Sai:
+
+* Mất máu
+
+Boss cuối màn.
+
+---
+
+## Boss TOEIC
+
+Boss chuyên đề:
+
+* Grammar Dragon
+* Vocabulary Titan
+* Listening Beast
+
+Trả lời đúng để đánh bại Boss.
+
+---
+
+## Daily Quest
+
+Ví dụ:
+
+Học 20 từ
+
+Làm 2 Quiz
+
+Nghe 10 phút
+
+Nhận:
+
+* EXP
+* Coin
+* Item
+
+---
+
+## Evolution Challenge
+
+Muốn tiến hóa phải vượt thử thách:
+
+50 từ vựng
+
+20 câu grammar
+
+10 câu listening
+
+---
+
+## Vocabulary Runner (Tương lai)
+
+Nhân vật chạy và chọn đáp án đúng.
+
+---
+
+## PvP Quiz Battle (Tương lai)
+
+Người chơi đấu trực tuyến bằng câu hỏi tiếng Anh.
+
+---
+
+# 11. Cộng đồng
+
+## News Feed
+
+Người dùng đăng bài.
+
+Ví dụ:
+
+"Hôm nay đạt TOEIC 700"
+
+---
+
+## Thành tích
+
+30 Day Streak
+
+Level 50
+
+1000 Words Learned
+
+TOEIC 800+
+
+---
+
+## Tương tác
+
+* Like
+* Comment
+* Share
+
+---
+
+## Leaderboard
+
+Xếp hạng:
+
+* EXP
+* Level
+* TOEIC
+* Streak
+
+---
+
+# 12. AI Mentor
+
+Trợ lý AI cá nhân.
+
+Ví dụ:
+
+"Bạn đang yếu Listening."
+
+"Hôm nay nên học thêm 15 phút."
+
+"Bạn vừa đạt Rank Scholar."
+
+---
+
+# 13. Công nghệ
+
+Frontend:
+
+* Angular
+* TailwindCSS
+* PhaserJS
+
+Backend:
+
+* Spring Boot
+* Spring Security
+* JWT
+
+Database:
+
+* PostgreSQL
+
+AI:
+
+* OpenAI API
+* OCR
+* Speech To Text
+* Text To Speech
