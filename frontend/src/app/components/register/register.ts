@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -205,6 +206,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class RegisterComponent {
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   email = '';
@@ -225,6 +227,7 @@ export class RegisterComponent {
     this.authService.register(this.email, this.password).subscribe({
       next: () => {
         this.isLoading.set(false);
+        this.toastService.success('Đăng ký tài khoản thành công! Đang chuyển hướng...');
         this.successMessage.set('Đăng ký tài khoản thành công! Đang chuyển hướng sang trang đăng nhập...');
         setTimeout(() => {
           this.router.navigate(['/login']);

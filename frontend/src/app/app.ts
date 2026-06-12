@@ -1,20 +1,23 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth.service';
 import { NavbarComponent } from './components/navbar/navbar';
 import { AiChatBubbleComponent } from './components/ai-chat-bubble/ai-chat-bubble';
+import { ToastService } from './services/toast.service';
 import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, AiChatBubbleComponent],
+  imports: [RouterOutlet, NavbarComponent, AiChatBubbleComponent, CommonModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  public readonly toastService = inject(ToastService);
 
   protected readonly title = signal('frontend');
   currentUrl = signal('');

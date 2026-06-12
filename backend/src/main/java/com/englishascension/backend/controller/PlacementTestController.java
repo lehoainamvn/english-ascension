@@ -50,10 +50,8 @@ public class PlacementTestController {
 
     @GetMapping("/questions")
     public ResponseEntity<List<Question>> getPlacementTestQuestions() {
-        // Fetch all questions and randomize them
         List<Question> allQuestions = questionRepository.findAllRandom();
         
-        // Group by type to ensure equal distribution: 3 of each type
         List<Question> vocab = allQuestions.stream().filter(q -> "VOCABULARY".equals(q.getType())).limit(3).toList();
         List<Question> grammar = allQuestions.stream().filter(q -> "GRAMMAR".equals(q.getType())).limit(3).toList();
         List<Question> listening = allQuestions.stream().filter(q -> "LISTENING".equals(q.getType())).limit(3).toList();
@@ -65,7 +63,6 @@ public class PlacementTestController {
         testQuestions.addAll(listening);
         testQuestions.addAll(reading);
         
-        // Shuffle the selected test questions for randomness in delivery
         Collections.shuffle(testQuestions);
         
         return ResponseEntity.ok(testQuestions);
@@ -131,13 +128,11 @@ public class PlacementTestController {
             ));
         }
 
-        // Initialize dynamic fields
         String cefrLevel = "A1";
         String toeicEquivalent = "100 - 300";
         String overallEvaluation = "";
         List<String[]> moduleTemplates = new ArrayList<>();
 
-        // Try generating using Groq AI first
         boolean aiGenerated = false;
         String targetGoal = submitRequest.getTargetGoal();
         if (targetGoal != null && !targetGoal.trim().isEmpty()) {
@@ -224,7 +219,6 @@ public class PlacementTestController {
             }
         }
 
-        // Fallback to local heuristic rules if AI failed or targetGoal was empty
         if (!aiGenerated) {
             if (correctCount >= 10) {
                 cefrLevel = "B2";
@@ -236,7 +230,7 @@ public class PlacementTestController {
                     new String[]{"Chinh phục 760+ TOEIC: Phản xạ nghe hiểu Part 4", "Luyện nghe hiểu bài nói ngắn, tin nhắn thoại tốc độ cao."},
                     new String[]{"Chinh phục 790+ TOEIC: Câu giả định & Đảo ngữ", "Nâng cấp ngữ pháp chuyên nghiệp và cấu trúc câu đặc biệt."},
                     new String[]{"Chinh phục 820+ TOEIC: Đọc hiểu văn bản kép Part 7", "Kỹ năng liên kết thông tin giữa nhiều văn bản và thư từ."},
-                    new String[]{"Chinh phục 850+ TOEIC: Đề thi tổng hợp & Bẫy Part 5", "Nhận diện bẫy ngữ pháp thường gặp và tối ưu hóa thời gian."}
+                    new String[]{"Chinh phục 850+ TOEIC: Đề thi thực tế & Bẫy Part 5", "Nhận diện bẫy ngữ pháp thường gặp và tối ưu hóa thời gian."}
                 );
             } else if (correctCount >= 7) {
                 cefrLevel = "B1";
@@ -278,7 +272,6 @@ public class PlacementTestController {
         }
 
         try {
-            // Overwrite existing roadmap
             LearningRoadmap existingRoadmap = roadmapRepository.findByUserId(user.getId()).orElse(null);
             if (existingRoadmap != null) {
                 user.setLearningRoadmap(null);
@@ -311,11 +304,51 @@ public class PlacementTestController {
             LearningRoadmap savedRoadmap = roadmapRepository.save(newRoadmap);
             user.setLearningRoadmap(savedRoadmap);
 
+            int currentExp = user.getExp();
+            int currentLevel = user.getLevel();
+            int currentCoins = user.getCoins();
+
+            currentExp += 100;
+            currentCoins += 50;
+
+            boolean leveledUp = false;
+            while (true) {
+                int expNeeded = currentLevel * 100;
+                if (currentExp >= expNeeded) {
+                    currentExp -= expNeeded;
+                    currentLevel++;
+                    leveledUp = true;
+                } else {
+                    break;
+                }
+            }
+
+            user.setExp(currentExp);
+            user.setLevel(currentLevel);
+            user.setCoins(currentCoins);
+
+            if (leveledUp) {
+                String newTitle = calculateTitle(currentLevel);
+                user.setCharacterTitle(newTitle);
+            }
+            userRepository.save(user);
+
             return ResponseEntity.ok(savedRoadmap);
         } catch (Exception e) {
             log.error("Failed to save roadmap", e);
             return ResponseEntity.internalServerError().body("Error saving roadmap: " + e.getMessage());
         }
+    }
+
+    private String calculateTitle(int level) {
+        if (level >= 100) return "Language Legend";
+        if (level >= 80) return "Grand Sage";
+        if (level >= 60) return "Master";
+        if (level >= 40) return "Knight";
+        if (level >= 20) return "Scholar";
+        if (level >= 10) return "Student";
+        if (level >= 5) return "Adventurer";
+        return "Novice";
     }
 
     @GetMapping("/roadmap")

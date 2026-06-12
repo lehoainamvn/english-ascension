@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VocabularyService, VocabTopic, VocabWord, RewardResult } from '../../services/vocabulary.service';
 import { UserWordService, UserWord } from '../../services/user-word.service';
+import { ToastService } from '../../services/toast.service';
 
 
 interface MatchCard {
@@ -655,6 +656,7 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly userWordService = inject(UserWordService);
+  private readonly toastService = inject(ToastService);
 
   topicId = 0;
   savedWords = signal<UserWord[]>([]);
@@ -988,9 +990,6 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
         });
         this.words.set(updated);
 
-        // Alert rewards in a clean micro-toast fashion
-        alert(`✓ Đã học từ "${word.word}"! Bạn được +${res.xpGained} EXP & +${res.coinsGained} Coins.`);
-        
         // If all learned, complete the entire topic!
         if (this.unlearnedWords().length === 0) {
           this.completeTopicProgress();
@@ -1025,10 +1024,15 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
   completeTopicProgress() {
     this.vocabService.completeTopic(this.topicId).subscribe({
       next: (res) => {
-        alert(`🎉 Chúc mừng! Bạn đã hoàn thành toàn bộ chủ đề và nhận thêm +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        this.toastService.success(`🎉 Chúc mừng! Bạn đã hoàn thành toàn bộ chủ đề và nhận thêm +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        if (res.leveledUp) {
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
+        }
+        this.router.navigate(['/vocabulary']);
       },
       error: (err) => {
         console.error('Error completing topic progress', err);
+        this.router.navigate(['/vocabulary']);
       }
     });
   }
@@ -1165,10 +1169,16 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
     // Call completeTopic to award points (+15 Coins, +50 EXP)
     this.vocabService.completeTopic(this.topicId).subscribe({
       next: (res) => {
-        console.log('Game completed, reward sent successfully', res);
+        this.toastService.success(`🎉 Chúc mừng! Bạn đã chiến thắng game ghép thẻ và nhận thêm +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        if (res.leveledUp) {
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
+        }
+        this.router.navigate(['/vocabulary']);
       },
       error: (err) => {
         console.error('Error sending match game rewards', err);
+        this.toastService.success('🎉 Đã hoàn thành game ghép thẻ!');
+        this.router.navigate(['/vocabulary']);
       }
     });
   }

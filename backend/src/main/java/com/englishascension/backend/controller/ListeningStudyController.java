@@ -20,19 +20,16 @@ public class ListeningStudyController {
     private static final Logger log = LoggerFactory.getLogger(ListeningStudyController.class);
 
     private final UserRepository userRepository;
-    private final PlayerCharacterRepository characterRepository;
     private final StudyContentRepository topicRepository;
     private final QuestionRepository questionRepository;
     private final UserProgressRepository progressRepository;
 
     public ListeningStudyController(
             UserRepository userRepository,
-            PlayerCharacterRepository characterRepository,
             StudyContentRepository topicRepository,
             QuestionRepository questionRepository,
             UserProgressRepository progressRepository) {
         this.userRepository = userRepository;
-        this.characterRepository = characterRepository;
         this.topicRepository = topicRepository;
         this.questionRepository = questionRepository;
         this.progressRepository = progressRepository;
@@ -273,11 +270,9 @@ public class ListeningStudyController {
         user.setLevel(currentLevel);
         user.setCoins(currentCoins);
 
-        if (leveledUp && user.getPlayerCharacter() != null) {
-            PlayerCharacter character = user.getPlayerCharacter();
+        if (leveledUp) {
             String newTitle = calculateTitle(currentLevel);
-            character.setTitle(newTitle);
-            characterRepository.save(character);
+            user.setCharacterTitle(newTitle);
         }
 
         userRepository.save(user);
@@ -303,7 +298,7 @@ public class ListeningStudyController {
         result.put("newCoins", user.getCoins());
         result.put("leveledUp", xpGained > 0 && user.getExp() < xpGained);
         result.put("previousLevel", user.getLevel());
-        result.put("newTitle", user.getPlayerCharacter() != null ? user.getPlayerCharacter().getTitle() : "Novice");
+        result.put("newTitle", user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice");
         return result;
     }
 

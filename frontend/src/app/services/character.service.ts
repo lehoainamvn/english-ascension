@@ -11,6 +11,7 @@ export interface Character {
   faceStyle: string;
   outfitStyle: string;
   title?: string;
+  level?: number;
 }
 
 @Injectable({

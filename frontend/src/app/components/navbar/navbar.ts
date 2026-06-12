@@ -37,6 +37,48 @@ import { StudyService } from '../../services/study.service';
               Trang chủ
             </a>
             
+            <!-- Học tập Dropdown -->
+            <div class="relative">
+              <button
+                (click)="toggleLearningDropdown($event)"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-text-muted hover:text-text-main flex items-center gap-1.5 cursor-pointer focus:outline-none bg-transparent border-none"
+                [class.bg-bg-input]="isLearningDropdownOpen() || isLearningActive()"
+                [class.text-text-main]="isLearningDropdownOpen() || isLearningActive()"
+              >
+                Học tập
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down transition-transform duration-200 shrink-0" [class.rotate-180]="isLearningDropdownOpen()"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+
+              @if (isLearningDropdownOpen()) {
+                <div class="absolute left-0 mt-2 w-48 rounded-xl border border-border-main bg-bg-card backdrop-blur-xl shadow-xl z-50 p-1.5 space-y-0.5">
+                  <a
+                    routerLink="/document-learning"
+                    (click)="isLearningDropdownOpen.set(false)"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-main hover:bg-bg-input/60 transition-colors cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles text-brand-primary shrink-0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    Tài liệu học AI
+                  </a>
+                  <a
+                    routerLink="/my-vocabulary"
+                    (click)="isLearningDropdownOpen.set(false)"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-main hover:bg-bg-input/60 transition-colors cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Sổ tay từ vựng
+                  </a>
+                  <a
+                    routerLink="/classroom"
+                    (click)="isLearningDropdownOpen.set(false)"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-main hover:bg-bg-input/60 transition-colors cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users shrink-0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Lớp Học
+                  </a>
+                </div>
+              }
+            </div>
+
             <!-- Resource Library Dropdown -->
             <div class="relative">
               <button
@@ -82,45 +124,40 @@ import { StudyService } from '../../services/study.service';
                 </div>
               }
             </div>
-            <a
-              routerLink="/document-learning"
-              routerLinkActive="bg-bg-input text-text-main"
-              class="px-3 py-1.5 rounded-lg text-xs transition-all text-text-muted hover:text-text-main cursor-pointer"
-            >
-              Tài liệu học AI
-            </a>
-            <a
-              routerLink="/my-vocabulary"
-              routerLinkActive="bg-bg-input text-text-main"
-              class="px-3 py-1.5 rounded-lg text-xs transition-all text-text-muted hover:text-text-main cursor-pointer flex items-center gap-1.5"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Sổ tay từ vựng
-            </a>
 
-            <a
-              routerLink="/shop"
-              routerLinkActive="bg-bg-input text-text-main"
-              class="px-3 py-1.5 rounded-lg text-xs transition-all text-text-muted hover:text-text-main cursor-pointer"
-            >
-              Cửa hàng
-            </a>
+            <!-- Tiện ích Dropdown -->
+            <div class="relative">
+              <button
+                (click)="toggleUtilityDropdown($event)"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-text-muted hover:text-text-main flex items-center gap-1.5 cursor-pointer focus:outline-none bg-transparent border-none"
+                [class.bg-bg-input]="isUtilityDropdownOpen() || isUtilityActive()"
+                [class.text-text-main]="isUtilityDropdownOpen() || isUtilityActive()"
+              >
+                Tiện ích
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down transition-transform duration-200 shrink-0" [class.rotate-180]="isUtilityDropdownOpen()"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
 
-            <a
-              routerLink="/community"
-              routerLinkActive="bg-bg-input text-text-main"
-              class="px-3 py-1.5 rounded-lg text-xs transition-all text-text-muted hover:text-text-main cursor-pointer"
-            >
-              Cộng đồng
-            </a>
-            <a
-              routerLink="/classroom"
-              routerLinkActive="bg-bg-input text-text-main"
-              class="px-3 py-1.5 rounded-lg text-xs transition-all text-text-muted hover:text-text-main cursor-pointer flex items-center gap-1.5"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users shrink-0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Lớp Học
-            </a>
+              @if (isUtilityDropdownOpen()) {
+                <div class="absolute left-0 mt-2 w-44 rounded-xl border border-border-main bg-bg-card backdrop-blur-xl shadow-xl z-50 p-1.5 space-y-0.5">
+                  <a
+                    routerLink="/community"
+                    (click)="isUtilityDropdownOpen.set(false)"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-main hover:bg-bg-input/60 transition-colors cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square shrink-0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Cộng đồng
+                  </a>
+                  <a
+                    routerLink="/shop"
+                    (click)="isUtilityDropdownOpen.set(false)"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-main hover:bg-bg-input/60 transition-colors cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag shrink-0"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    Cửa hàng
+                  </a>
+                </div>
+              }
+            </div>
           </div>
 
           <!-- Right: Actions & Profile -->
@@ -158,6 +195,13 @@ import { StudyService } from '../../services/study.service';
                   <div class="px-3 py-2 text-[10px] text-text-muted border-b border-border-main/50 font-medium truncate">
                     Tài khoản: {{ userEmail }}
                   </div>
+                  <a
+                    routerLink="/profile"
+                    (click)="isDropdownOpen.set(false)"
+                    class="w-full text-left flex items-center px-3 py-2 rounded-lg text-xs font-semibold text-text-main hover:bg-bg-input/60 transition-colors cursor-pointer no-underline block"
+                  >
+                    Hồ sơ của tôi
+                  </a>
                   <button
                     (click)="openPasswordModal($event)"
                     class="w-full text-left flex items-center px-3 py-2 rounded-lg text-xs font-semibold text-text-main hover:bg-bg-input/60 transition-colors cursor-pointer bg-transparent border-none"
@@ -224,6 +268,48 @@ import { StudyService } from '../../services/study.service';
               Trang chủ
             </a>
             
+            <!-- Mobile Learning Dropdown -->
+            <div>
+              <button
+                (click)="isMobileLearningOpen.set(!isMobileLearningOpen())"
+                class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/40 transition-all cursor-pointer focus:outline-none bg-transparent border-none text-left"
+                [class.bg-bg-input]="isMobileLearningOpen() || isLearningActive()"
+                [class.text-text-main]="isMobileLearningOpen() || isLearningActive()"
+              >
+                <span>Học tập</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down transition-transform duration-200 shrink-0" [class.rotate-180]="isMobileLearningOpen()"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              
+              @if (isMobileLearningOpen()) {
+                <div class="mt-1 ml-4 pl-2.5 border-l border-border-main/50 space-y-0.5">
+                  <a
+                    routerLink="/document-learning"
+                    (click)="isMobileMenuOpen.set(false); isMobileLearningOpen.set(false)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/20 transition-all cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles text-brand-primary shrink-0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    Tài liệu học AI
+                  </a>
+                  <a
+                    routerLink="/my-vocabulary"
+                    (click)="isMobileMenuOpen.set(false); isMobileLearningOpen.set(false)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/20 transition-all cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Sổ tay từ vựng
+                  </a>
+                  <a
+                    routerLink="/classroom"
+                    (click)="isMobileMenuOpen.set(false); isMobileLearningOpen.set(false)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/20 transition-all cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users shrink-0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Lớp Học
+                  </a>
+                </div>
+              }
+            </div>
+            
             <!-- Mobile Resource Dropdown -->
             <div>
               <button
@@ -270,50 +356,50 @@ import { StudyService } from '../../services/study.service';
               }
             </div>
 
-            <a
-              routerLink="/document-learning"
-              (click)="isMobileMenuOpen.set(false)"
-              class="flex items-center px-3 py-2 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/40 transition-all cursor-pointer"
-            >
-              Tài liệu học AI
-            </a>
-
-            <a
-              routerLink="/my-vocabulary"
-              (click)="isMobileMenuOpen.set(false)"
-              class="flex items-center px-3 py-2 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/40 transition-all cursor-pointer gap-1.5"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Sổ tay từ vựng
-            </a>
-
-            <a
-              routerLink="/shop"
-              (click)="isMobileMenuOpen.set(false)"
-              class="flex items-center px-3 py-2 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/40 transition-all cursor-pointer"
-            >
-              Cửa hàng
-            </a>
-
-            <a
-              routerLink="/community"
-              (click)="isMobileMenuOpen.set(false)"
-              class="flex items-center px-3 py-2 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/40 transition-all cursor-pointer"
-            >
-              Cộng đồng
-            </a>
-            <a
-              routerLink="/classroom"
-              (click)="isMobileMenuOpen.set(false)"
-              class="flex items-center px-3 py-2 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/40 transition-all cursor-pointer gap-1.5"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users shrink-0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Lớp Học
-            </a>
+            <!-- Mobile Utility Dropdown -->
+            <div>
+              <button
+                (click)="isMobileUtilityOpen.set(!isMobileUtilityOpen())"
+                class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/40 transition-all cursor-pointer focus:outline-none bg-transparent border-none text-left"
+                [class.bg-bg-input]="isMobileUtilityOpen() || isUtilityActive()"
+                [class.text-text-main]="isMobileUtilityOpen() || isUtilityActive()"
+              >
+                <span>Tiện ích</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down transition-transform duration-200 shrink-0" [class.rotate-180]="isMobileUtilityOpen()"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              
+              @if (isMobileUtilityOpen()) {
+                <div class="mt-1 ml-4 pl-2.5 border-l border-border-main/50 space-y-0.5">
+                  <a
+                    routerLink="/community"
+                    (click)="isMobileMenuOpen.set(false); isMobileUtilityOpen.set(false)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/20 transition-all cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square shrink-0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Cộng đồng
+                  </a>
+                  <a
+                    routerLink="/shop"
+                    (click)="isMobileMenuOpen.set(false); isMobileUtilityOpen.set(false)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/20 transition-all cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag shrink-0"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    Cửa hàng
+                  </a>
+                </div>
+              }
+            </div>
           </div>
 
           <!-- Drawer Profile Actions at bottom -->
           <div class="pt-4 border-t border-border-main/50 space-y-2 mt-auto shrink-0 bg-bg-input/10 p-2 rounded-xl">
+            <a
+              routerLink="/profile"
+              (click)="isMobileMenuOpen.set(false)"
+              class="w-full text-center flex items-center justify-center bg-bg-input hover:bg-bg-card border border-border-main py-2 rounded-lg text-xs font-bold transition-all text-text-main cursor-pointer no-underline block"
+            >
+              Hồ sơ của tôi
+            </a>
             <button
               (click)="toggleTheme()"
               class="w-full bg-bg-input hover:bg-bg-card border border-border-main py-2 rounded-lg text-xs font-bold transition-all text-text-main cursor-pointer"
@@ -432,7 +518,11 @@ export class NavbarComponent implements OnInit {
   isChangePasswordModalOpen = signal(false);
   isChangingPassword = signal(false);
   isResourceDropdownOpen = signal(false);
+  isLearningDropdownOpen = signal(false);
+  isUtilityDropdownOpen = signal(false);
   isMobileResourceOpen = signal(false);
+  isMobileLearningOpen = signal(false);
+  isMobileUtilityOpen = signal(false);
 
   // Change Password Form
   oldPassword = '';
@@ -477,13 +567,33 @@ export class NavbarComponent implements OnInit {
   toggleDropdown(event: MouseEvent): void {
     event.stopPropagation();
     this.isResourceDropdownOpen.set(false);
+    this.isLearningDropdownOpen.set(false);
+    this.isUtilityDropdownOpen.set(false);
     this.isDropdownOpen.set(!this.isDropdownOpen());
   }
 
   toggleResourceDropdown(event: MouseEvent): void {
     event.stopPropagation();
     this.isDropdownOpen.set(false);
+    this.isLearningDropdownOpen.set(false);
+    this.isUtilityDropdownOpen.set(false);
     this.isResourceDropdownOpen.set(!this.isResourceDropdownOpen());
+  }
+
+  toggleLearningDropdown(event: MouseEvent): void {
+    event.stopPropagation();
+    this.isDropdownOpen.set(false);
+    this.isResourceDropdownOpen.set(false);
+    this.isUtilityDropdownOpen.set(false);
+    this.isLearningDropdownOpen.set(!this.isLearningDropdownOpen());
+  }
+
+  toggleUtilityDropdown(event: MouseEvent): void {
+    event.stopPropagation();
+    this.isDropdownOpen.set(false);
+    this.isResourceDropdownOpen.set(false);
+    this.isLearningDropdownOpen.set(false);
+    this.isUtilityDropdownOpen.set(!this.isUtilityDropdownOpen());
   }
 
   @HostListener('document:click', ['$event'])
@@ -491,6 +601,8 @@ export class NavbarComponent implements OnInit {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.isDropdownOpen.set(false);
       this.isResourceDropdownOpen.set(false);
+      this.isLearningDropdownOpen.set(false);
+      this.isUtilityDropdownOpen.set(false);
     }
   }
 
@@ -502,6 +614,21 @@ export class NavbarComponent implements OnInit {
            url.startsWith('/grammar-study') ||
            url.startsWith('/listening') ||
            url.startsWith('/reading');
+  }
+
+  isLearningActive(): boolean {
+    if (typeof window === 'undefined') return false;
+    const url = this.router.url;
+    return url.startsWith('/document-learning') ||
+           url.startsWith('/my-vocabulary') ||
+           url.startsWith('/classroom');
+  }
+
+  isUtilityActive(): boolean {
+    if (typeof window === 'undefined') return false;
+    const url = this.router.url;
+    return url.startsWith('/shop') ||
+           url.startsWith('/community');
   }
 
   isAiActive(): boolean {

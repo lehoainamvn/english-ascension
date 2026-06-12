@@ -19,20 +19,23 @@ public class ClassRoomService {
     private final ClassRoomRepository classRoomRepository;
     private final ClassMemberRepository classMemberRepository;
     private final ClassQuizRepository classQuizRepository;
-    private final ClassQuizQuestionRepository classQuizQuestionRepository;
-    private final ClassQuizAttemptRepository classQuizAttemptRepository;
+    private final QuestionRepository questionRepository;
+    private final UserProgressRepository userProgressRepository;
+    private final UserRepository userRepository;
 
     public ClassRoomService(
             ClassRoomRepository classRoomRepository,
             ClassMemberRepository classMemberRepository,
             ClassQuizRepository classQuizRepository,
-            ClassQuizQuestionRepository classQuizQuestionRepository,
-            ClassQuizAttemptRepository classQuizAttemptRepository) {
+            QuestionRepository questionRepository,
+            UserProgressRepository userProgressRepository,
+            UserRepository userRepository) {
         this.classRoomRepository = classRoomRepository;
         this.classMemberRepository = classMemberRepository;
         this.classQuizRepository = classQuizRepository;
-        this.classQuizQuestionRepository = classQuizQuestionRepository;
-        this.classQuizAttemptRepository = classQuizAttemptRepository;
+        this.questionRepository = questionRepository;
+        this.userProgressRepository = userProgressRepository;
+        this.userRepository = userRepository;
     }
 
     /** Tạo class mới, người tạo tự động là OWNER */
@@ -140,7 +143,8 @@ public class ClassRoomService {
         quiz = classQuizRepository.save(quiz);
 
         // Replace all questions
-        classQuizQuestionRepository.deleteByClassQuiz(quiz);
+        List<Question> oldQuestions = questionRepository.findBySourceTypeAndParentId("CLASS_QUIZ", quiz.getId());
+        questionRepository.deleteAll(oldQuestions);
         saveQuestions(quiz, questions);
         return buildQuizDto(quiz, owner);
     }
@@ -150,6 +154,11 @@ public class ClassRoomService {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertOwner(classRoom, owner);
         ClassQuiz quiz = findQuizOrThrow(quizId, classRoom);
+        
+        // Delete related questions first
+        List<Question> questions = questionRepository.findBySourceTypeAndParentId("CLASS_QUIZ", quizId);
+        questionRepository.deleteAll(questions);
+        
         classQuizRepository.delete(quiz);
     }
 
@@ -160,9 +169,9 @@ public class ClassRoomService {
         assertMember(classRoom, user);
         ClassQuiz quiz = findQuizOrThrow(quizId, classRoom);
 
-        List<ClassQuizQuestion> questions = classQuizQuestionRepository.findByClassQuizOrderByQuestionNumber(quiz);
+        List<Question> questions = questionRepository.findBySourceTypeAndParentIdOrderByQuestionNumberAsc("CLASS_QUIZ", quiz.getId());
         int correct = 0;
-        for (ClassQuizQuestion q : questions) {
+        for (Question q : questions) {
             String userAnswer = answers.get(q.getId());
             if (userAnswer != null) {
                 if ("MULTIPLE_CHOICE".equals(q.getType())) {
@@ -182,30 +191,90 @@ public class ClassRoomService {
         }
 
         // Save or update attempt (allow re-attempt, keep best score)
-        Optional<ClassQuizAttempt> existingAttempt = classQuizAttemptRepository.findByClassQuizAndUser(quiz, user);
-        ClassQuizAttempt attempt;
+        Optional<UserProgress> existingAttempt = userProgressRepository.findByResourceTypeAndResourceIdAndUser("CLASS_QUIZ", quiz.getId(), user);
+        UserProgress attempt;
         if (existingAttempt.isPresent()) {
             attempt = existingAttempt.get();
             // Update if new score is higher
             if (correct >= attempt.getScore()) {
                 attempt.setScore(correct);
                 attempt.setTotalQuestions(questions.size());
+                attempt.setCompletedAt(java.time.LocalDateTime.now());
             }
         } else {
-            attempt = ClassQuizAttempt.builder()
-                    .classQuiz(quiz)
+            attempt = UserProgress.builder()
+                    .resourceType("CLASS_QUIZ")
+                    .resourceId(quiz.getId())
                     .user(user)
+                    .completed(true)
+                    .completedAt(java.time.LocalDateTime.now())
                     .score(correct)
                     .totalQuestions(questions.size())
                     .build();
         }
-        classQuizAttemptRepository.save(attempt);
+        userProgressRepository.save(attempt);
+
+        // Thưởng điểm EXP và Xu cho Quiz lớp học: 20 EXP và 5 Xu cho mỗi câu trả lời đúng
+        int xpGained = correct * 20;
+        int coinsGained = correct * 5;
+
+        int currentExp = user.getExp();
+        int currentLevel = user.getLevel();
+        int currentCoins = user.getCoins();
+
+        currentExp += xpGained;
+        currentCoins += coinsGained;
+
+        boolean leveledUp = false;
+        int previousLevel = user.getLevel();
+        while (true) {
+            int expNeeded = currentLevel * 100;
+            if (currentExp >= expNeeded) {
+                currentExp -= expNeeded;
+                currentLevel++;
+                leveledUp = true;
+            } else {
+                break;
+            }
+        }
+
+        user.setExp(currentExp);
+        user.setLevel(currentLevel);
+        user.setCoins(currentCoins);
+
+        String newTitle = user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice";
+        if (leveledUp) {
+            newTitle = calculateTitle(currentLevel);
+            user.setCharacterTitle(newTitle);
+        }
+        userRepository.save(user);
 
         Map<String, Object> result = new HashMap<>();
         result.put("score", correct);
         result.put("totalQuestions", questions.size());
         result.put("percentage", questions.isEmpty() ? 0 : Math.round((correct * 100.0) / questions.size()));
+        
+        result.put("xpGained", xpGained);
+        result.put("coinsGained", coinsGained);
+        result.put("newXp", currentExp);
+        result.put("newLevel", currentLevel);
+        result.put("newCoins", currentCoins);
+        result.put("leveledUp", leveledUp);
+        result.put("previousLevel", previousLevel);
+        result.put("newTitle", newTitle);
+
         return result;
+    }
+
+    private String calculateTitle(int level) {
+        if (level >= 100) return "Language Legend";
+        if (level >= 80) return "Grand Sage";
+        if (level >= 60) return "Master";
+        if (level >= 40) return "Knight";
+        if (level >= 20) return "Scholar";
+        if (level >= 10) return "Student";
+        if (level >= 5) return "Adventurer";
+        return "Novice";
     }
 
     /** Bảng xếp hạng quiz */
@@ -214,17 +283,17 @@ public class ClassRoomService {
         assertMember(classRoom, user);
         ClassQuiz quiz = findQuizOrThrow(quizId, classRoom);
 
-        List<ClassQuizAttempt> attempts = classQuizAttemptRepository.findByClassQuizOrderByScoreDescCompletedAtAsc(quiz);
+        List<UserProgress> attempts = userProgressRepository.findByResourceTypeAndResourceIdOrderByScoreDescCompletedAtAsc("CLASS_QUIZ", quiz.getId());
         List<Map<String, Object>> leaderboard = new ArrayList<>();
         int rank = 1;
-        for (ClassQuizAttempt a : attempts) {
+        for (UserProgress a : attempts) {
             Map<String, Object> entry = new HashMap<>();
             entry.put("rank", rank++);
             entry.put("userId", a.getUser().getId());
             entry.put("email", a.getUser().getEmail());
             entry.put("score", a.getScore());
             entry.put("totalQuestions", a.getTotalQuestions());
-            entry.put("percentage", a.getTotalQuestions() == 0 ? 0 : Math.round((a.getScore() * 100.0) / a.getTotalQuestions()));
+            entry.put("percentage", a.getTotalQuestions() == null || a.getTotalQuestions() == 0 ? 0 : Math.round((a.getScore() * 100.0) / a.getTotalQuestions()));
             entry.put("completedAt", a.getCompletedAt());
             leaderboard.add(entry);
         }
@@ -264,11 +333,12 @@ public class ClassRoomService {
     @SuppressWarnings("unchecked")
     private void saveQuestions(ClassQuiz quiz, List<Map<String, Object>> questionDtos) {
         if (questionDtos == null) return;
-        List<ClassQuizQuestion> questions = new ArrayList<>();
+        List<Question> questions = new ArrayList<>();
         int num = 1;
         for (Map<String, Object> dto : questionDtos) {
-            ClassQuizQuestion q = ClassQuizQuestion.builder()
-                    .classQuiz(quiz)
+            Question q = Question.builder()
+                    .sourceType("CLASS_QUIZ")
+                    .parentId(quiz.getId())
                     .questionNumber(num++)
                     .type(String.valueOf(dto.getOrDefault("type", "MULTIPLE_CHOICE")))
                     .questionText(String.valueOf(dto.get("questionText")))
@@ -277,11 +347,12 @@ public class ClassRoomService {
                     .optionC(dto.containsKey("optionC") ? String.valueOf(dto.get("optionC")) : null)
                     .optionD(dto.containsKey("optionD") ? String.valueOf(dto.get("optionD")) : null)
                     .correctAnswer(dto.containsKey("correctAnswer") ? String.valueOf(dto.get("correctAnswer")) : null)
+                    .correctOption(dto.containsKey("correctAnswer") ? String.valueOf(dto.get("correctAnswer")) : null) // Set both for compatibility
                     .explanation(dto.containsKey("explanation") ? String.valueOf(dto.get("explanation")) : null)
                     .build();
             questions.add(q);
         }
-        classQuizQuestionRepository.saveAll(questions);
+        questionRepository.saveAll(questions);
     }
 
     private String generateUniqueCode() {
@@ -298,7 +369,7 @@ public class ClassRoomService {
         return code;
     }
 
-    private String getOptionText(ClassQuizQuestion q, String option) {
+    private String getOptionText(Question q, String option) {
         if (option == null) return "";
         return switch (option.toUpperCase()) {
             case "A" -> q.getOptionA() != null ? q.getOptionA() : "";
@@ -349,7 +420,7 @@ public class ClassRoomService {
     }
 
     private Map<String, Object> buildQuizDto(ClassQuiz quiz, User currentUser) {
-        List<ClassQuizQuestion> questions = classQuizQuestionRepository.findByClassQuizOrderByQuestionNumber(quiz);
+        List<Question> questions = questionRepository.findBySourceTypeAndParentIdOrderByQuestionNumberAsc("CLASS_QUIZ", quiz.getId());
         Map<String, Object> dto = new HashMap<>();
         dto.put("id", quiz.getId());
         dto.put("title", quiz.getTitle());

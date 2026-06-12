@@ -122,7 +122,7 @@ import { WorldMapComponent } from '../world-map/world-map';
                       </div>
                       <p class="text-[10px] text-text-muted mt-1 line-clamp-2">{{ enrollment.roadmap.overallEvaluation }}</p>
                       <div class="flex items-center gap-3 mt-2 text-[10px] text-text-muted font-bold">
-                        <span>{{ enrollment.roadmap.modules?.length || enrollment.roadmap.modulesCount }} bài học</span>
+                        <span>{{ enrollment.roadmap.modules.length || enrollment.roadmap.modulesCount }} bài học</span>
                         <span class="text-green-500">Đang học</span>
                         <span class="ml-auto text-brand-primary font-black">Tiếp tục →</span>
                       </div>
@@ -185,7 +185,7 @@ import { WorldMapComponent } from '../world-map/world-map';
                         <!-- Bottom stats -->
                         <div class="space-y-2 border-t border-border-main/40 pt-3 mt-3">
                           <div class="flex justify-between items-center text-[10px] text-text-muted font-bold">
-                            <span>{{ rm.modulesCount || rm.modules?.length || 0 }} Bộ thẻ</span>
+                            <span>{{ rm.modulesCount || rm.modules.length || 0 }} Bộ thẻ</span>
                           </div>
                           <div class="flex justify-between items-center text-[10px]">
                             <span class="text-text-muted font-bold">TOEIC {{ rm.toeicEquivalent }}</span>

@@ -4,6 +4,7 @@ import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StudyService, Flashcard, QuizQuestion, CompletionResult } from '../../services/study.service';
 import { UserWordService, UserWord } from '../../services/user-word.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-study',
@@ -1026,6 +1027,7 @@ export class StudyComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private readonly userWordService = inject(UserWordService);
+  private readonly toastService = inject(ToastService);
 
   moduleId = 0;
   
@@ -1130,7 +1132,19 @@ export class StudyComponent implements OnInit, OnDestroy {
 
   completeSkillAndGoBack(): void {
     this.updateLocalProgress(this.nextProgressParam);
-    this.goBack();
+    this.studyService.completeStep(this.moduleId, this.activeTab().toUpperCase()).subscribe({
+      next: (res) => {
+        this.toastService.success(`✓ Hoàn thành: +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        if (res.leveledUp) {
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
+        }
+        this.goBack();
+      },
+      error: (err) => {
+        console.error('Error completing step', err);
+        this.goBack();
+      }
+    });
   }
 
   goBack(): void {
@@ -1581,36 +1595,23 @@ export class StudyComponent implements OnInit, OnDestroy {
     this.studyService.completeModule(this.moduleId, this.correctQuizAnswersCount).subscribe({
       next: (res) => {
         this.isSubmittingReward.set(false);
-        this.rewards.set(res);
-        this.studyState.set('rewards');
+        this.toastService.success(`🏆 Hoàn thành bài test: +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        if (res.leveledUp) {
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
+        }
         if (typeof window !== 'undefined' && window.localStorage) {
           localStorage.removeItem(`progress_module_${this.moduleId}`);
         }
-        
-        if (res.leveledUp) {
-          this.showLevelUpModal.set(true);
-        }
+        this.goBack();
       },
       error: (err) => {
         console.error('Error claiming module rewards', err);
-        // Fallback for visual mock experience if backend save fails
         this.isSubmittingReward.set(false);
-        const mockRewards = {
-          xpGained: this.correctQuizAnswersCount * 20,
-          coinsGained: this.correctQuizAnswersCount * 5,
-          previousLevel: 3,
-          newLevel: 4,
-          newXp: 45,
-          newCoins: 120,
-          leveledUp: true,
-          newTitle: 'Grammar Ranger'
-        };
-        this.rewards.set(mockRewards);
-        this.studyState.set('rewards');
+        this.toastService.success('🏆 Đã hoàn thành bài test!');
         if (typeof window !== 'undefined' && window.localStorage) {
           localStorage.removeItem(`progress_module_${this.moduleId}`);
         }
-        this.showLevelUpModal.set(true);
+        this.goBack();
       }
     });
   }

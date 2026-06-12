@@ -2,6 +2,7 @@ import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserWordService, UserWord } from '../../services/user-word.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-my-vocabulary',
@@ -469,6 +470,7 @@ import { UserWordService, UserWord } from '../../services/user-word.service';
 })
 export class MyVocabularyComponent implements OnInit {
   private readonly userWordService = inject(UserWordService);
+  private readonly toastService = inject(ToastService);
 
   searchQuery = '';
   activeSubTab = signal<'list' | 'review'>('list');
@@ -557,7 +559,7 @@ export class MyVocabularyComponent implements OnInit {
 
   saveNewWord(): void {
     if (!this.newWord.word.trim() || !this.newWord.meaning.trim()) {
-      alert('Vui lòng điền đầy đủ từ vựng và nghĩa tiếng Việt.');
+      this.toastService.warning('Vui lòng điền đầy đủ từ vựng và nghĩa tiếng Việt.');
       return;
     }
     this.isAddingWord.set(true);
@@ -572,13 +574,14 @@ export class MyVocabularyComponent implements OnInit {
         this.words.set([saved, ...this.words()]);
         this.isAddingWord.set(false);
         this.showAddModal.set(false);
+        this.toastService.success('Đã lưu từ vựng vào sổ tay!');
         // Reset form
         this.newWord = { word: '', pos: 'noun', meaning: '', phonetic: '', notes: '' };
       },
       error: (err) => {
         console.error('Error saving word', err);
         this.isAddingWord.set(false);
-        alert('Có lỗi xảy ra khi lưu từ vựng.');
+        this.toastService.error('Có lỗi xảy ra khi lưu từ vựng.');
       }
     });
   }
@@ -594,10 +597,11 @@ export class MyVocabularyComponent implements OnInit {
         this.words.set(this.words().map(w => w.id === updated.id ? updated : w));
         this.editingWordId.set(null);
         this.editingNotesText = '';
+        this.toastService.success('Đã lưu ghi chú thành công!');
       },
       error: (err) => {
         console.error('Error updating notes', err);
-        alert('Có lỗi xảy ra khi lưu ghi chú.');
+        this.toastService.error('Có lỗi xảy ra khi lưu ghi chú.');
       }
     });
   }
@@ -627,13 +631,14 @@ export class MyVocabularyComponent implements OnInit {
       this.userWordService.deleteUserWord(id).subscribe({
         next: () => {
           this.words.set(this.words().filter(w => w.id !== id));
+          this.toastService.success('Đã xóa từ vựng khỏi sổ tay!');
           if (this.currentCardIndex() >= this.words().length && this.currentCardIndex() > 0) {
             this.currentCardIndex.set(this.words().length - 1);
           }
         },
         error: (err) => {
           console.error('Error deleting word', err);
-          alert('Có lỗi xảy ra khi xóa từ vựng.');
+          this.toastService.error('Có lỗi xảy ra khi xóa từ vựng.');
         }
       });
     }

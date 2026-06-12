@@ -61,10 +61,24 @@ backend/replay_pid*
 backend/.factorypath
 backend/.springBeans
 
+# Environment & Secrets
+# ------------------------------------------
+.env
+.env.local
+.env.*.local
+credentials/
+secrets/
+.env.production
+
+# Vercel & Build
+# ------------------------------------------
+.vercel/
+.next/
+out/
+
 # Gemini Antigravity AI Assistant Directories
 # ------------------------------------------
 .gemini/
-.env*
 *.local
 credentials*
 secrets*

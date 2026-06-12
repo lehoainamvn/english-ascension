@@ -1,7 +1,7 @@
 package com.englishascension.backend.controller;
 
 import com.englishascension.backend.model.User;
-import com.englishascension.backend.model.UserDocument;
+import com.englishascension.backend.model.StudyContent;
 import com.englishascension.backend.model.Flashcard;
 import com.englishascension.backend.repository.UserRepository;
 import com.englishascension.backend.service.UserDocumentService;
@@ -47,12 +47,12 @@ public class UserDocumentController {
             User currentUser = getCurrentUser();
             log.info("User {} uploading document: {}, flashcardCount: {}", currentUser.getEmail(), file.getOriginalFilename(), flashcardCount);
             
-            UserDocument doc = userDocumentService.uploadAndProcess(file, currentUser, flashcardCount);
+            StudyContent doc = userDocumentService.uploadAndProcess(file, currentUser, flashcardCount);
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Tải lên và phân tích tài liệu thành công!");
             response.put("documentId", doc.getId());
-            response.put("fileName", doc.getFileName());
+            response.put("fileName", doc.getTitle());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Lỗi khi xử lý tải lên tài liệu", e);
@@ -66,13 +66,12 @@ public class UserDocumentController {
     public ResponseEntity<?> listDocuments() {
         try {
             User currentUser = getCurrentUser();
-            List<UserDocument> docs = userDocumentService.getMyDocuments(currentUser);
+            List<StudyContent> docs = userDocumentService.getMyDocuments(currentUser);
             
-            // Map to simplified DTO response to avoid sending large extracted texts in lists
             List<Map<String, Object>> response = docs.stream().map(doc -> {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", doc.getId());
-                map.put("fileName", doc.getFileName());
+                map.put("fileName", doc.getTitle());
                 map.put("createdAt", doc.getCreatedAt());
                 map.put("flashcardCount", doc.getFlashcards().size());
                 map.put("quizCount", doc.getQuizQuestions().size());
@@ -91,12 +90,12 @@ public class UserDocumentController {
     public ResponseEntity<?> getDocumentDetails(@PathVariable Long id) {
         try {
             User currentUser = getCurrentUser();
-            UserDocument doc = userDocumentService.getDocumentById(id, currentUser);
+            StudyContent doc = userDocumentService.getDocumentById(id, currentUser);
             
             Map<String, Object> response = new HashMap<>();
             response.put("id", doc.getId());
-            response.put("fileName", doc.getFileName());
-            response.put("extractedText", doc.getExtractedText());
+            response.put("fileName", doc.getTitle());
+            response.put("extractedText", doc.getBodyText());
             response.put("createdAt", doc.getCreatedAt());
             response.put("flashcards", doc.getFlashcards());
             response.put("quizQuestions", doc.getQuizQuestions());

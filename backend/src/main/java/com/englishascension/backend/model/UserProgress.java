@@ -40,4 +40,10 @@ public class UserProgress {
 
     @Column(name = "score")
     private Integer score; // Optional score (for quizzes, exams, etc.)
+
+    @Column(name = "total_questions")
+    private Integer totalQuestions;
+
+    @Column(name = "answers_json", columnDefinition = "TEXT")
+    private String answersJson;
 }

@@ -1,10 +1,13 @@
 package com.englishascension.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "study_contents")
@@ -49,6 +52,19 @@ public class StudyContent {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
+    @JsonIgnore
+    private User user;
+
+    @OneToMany(mappedBy = "studyContent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Flashcard> flashcards = new ArrayList<>();
+
+    @Transient
+    @Builder.Default
+    private List<Question> quizQuestions = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

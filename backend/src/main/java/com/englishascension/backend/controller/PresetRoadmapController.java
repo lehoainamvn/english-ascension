@@ -2,10 +2,10 @@ package com.englishascension.backend.controller;
 
 import com.englishascension.backend.model.LearningRoadmap;
 import com.englishascension.backend.model.User;
-import com.englishascension.backend.model.UserRoadmapEnrollment;
+import com.englishascension.backend.model.UserProgress;
 import com.englishascension.backend.repository.LearningRoadmapRepository;
 import com.englishascension.backend.repository.UserRepository;
-import com.englishascension.backend.repository.UserRoadmapEnrollmentRepository;
+import com.englishascension.backend.repository.UserProgressRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -23,15 +24,15 @@ import java.util.Optional;
 public class PresetRoadmapController {
 
     private final LearningRoadmapRepository roadmapRepository;
-    private final UserRoadmapEnrollmentRepository enrollmentRepository;
+    private final UserProgressRepository progressRepository;
     private final UserRepository userRepository;
 
     public PresetRoadmapController(
             LearningRoadmapRepository roadmapRepository,
-            UserRoadmapEnrollmentRepository enrollmentRepository,
+            UserProgressRepository progressRepository,
             UserRepository userRepository) {
         this.roadmapRepository = roadmapRepository;
-        this.enrollmentRepository = enrollmentRepository;
+        this.progressRepository = progressRepository;
         this.userRepository = userRepository;
     }
 
@@ -50,12 +51,11 @@ public class PresetRoadmapController {
             return ResponseEntity.notFound().build();
         }
 
-        // Kiểm tra xem user đã enroll chưa (nếu đã đăng nhập)
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepository.findByEmail(email).orElse(null);
             if (user != null) {
-                boolean enrolled = enrollmentRepository.existsByUserIdAndRoadmapId(user.getId(), id);
+                boolean enrolled = progressRepository.findByUserIdAndResourceTypeAndResourceId(user.getId(), "ROADMAP", id).isPresent();
                 Map<String, Object> result = new HashMap<>();
                 result.put("roadmap", roadmap.get());
                 result.put("enrolled", enrolled);
@@ -81,25 +81,88 @@ public class PresetRoadmapController {
             return ResponseEntity.notFound().build();
         }
 
-        // Nếu đã enroll rồi thì update last_accessed_at
-        Optional<UserRoadmapEnrollment> existing =
-                enrollmentRepository.findByUserIdAndRoadmapId(user.getId(), id);
+        Optional<UserProgress> existing =
+                progressRepository.findByUserIdAndResourceTypeAndResourceId(user.getId(), "ROADMAP", id);
 
+        UserProgress enrollment;
         if (existing.isPresent()) {
-            UserRoadmapEnrollment enrollment = existing.get();
-            enrollment.setLastAccessedAt(LocalDateTime.now());
-            enrollmentRepository.save(enrollment);
-            return ResponseEntity.ok(Map.of("message", "Already enrolled", "enrollment", enrollment));
+            enrollment = existing.get();
+            enrollment.setCompletedAt(LocalDateTime.now());
+            progressRepository.save(enrollment);
+        } else {
+            enrollment = UserProgress.builder()
+                    .user(user)
+                    .resourceType("ROADMAP")
+                    .resourceId(roadmap.getId())
+                    .completed(false)
+                    .completedAt(LocalDateTime.now())
+                    .build();
+            progressRepository.save(enrollment);
         }
 
-        UserRoadmapEnrollment enrollment = UserRoadmapEnrollment.builder()
-                .userId(user.getId())
-                .roadmap(roadmap)
-                .status("IN_PROGRESS")
-                .build();
-        enrollmentRepository.save(enrollment);
+        int xpGained = 0;
+        int coinsGained = 0;
 
-        return ResponseEntity.ok(Map.of("message", "Enrolled successfully", "enrollment", enrollment));
+        int currentExp = user.getExp();
+        int currentLevel = user.getLevel();
+        int currentCoins = user.getCoins();
+
+        currentExp += xpGained;
+        currentCoins += coinsGained;
+
+        boolean leveledUp = false;
+        while (true) {
+            int expNeeded = currentLevel * 100;
+            if (currentExp >= expNeeded) {
+                currentExp -= expNeeded;
+                currentLevel++;
+                leveledUp = true;
+            } else {
+                break;
+            }
+        }
+
+        user.setExp(currentExp);
+        user.setLevel(currentLevel);
+        user.setCoins(currentCoins);
+
+        if (leveledUp) {
+            String newTitle = calculateTitle(currentLevel);
+            user.setCharacterTitle(newTitle);
+        }
+        userRepository.save(user);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("message", "Enrolled successfully");
+        
+        Map<String, Object> enrollmentDto = new HashMap<>();
+        enrollmentDto.put("id", enrollment.getId());
+        enrollmentDto.put("userId", user.getId());
+        enrollmentDto.put("roadmap", roadmap);
+        enrollmentDto.put("status", enrollment.isCompleted() ? "COMPLETED" : "IN_PROGRESS");
+        enrollmentDto.put("enrolledAt", enrollment.getCompletedAt() != null ? enrollment.getCompletedAt().toString() : LocalDateTime.now().toString());
+        enrollmentDto.put("lastAccessedAt", enrollment.getCompletedAt() != null ? enrollment.getCompletedAt().toString() : LocalDateTime.now().toString());
+        
+        res.put("enrollment", enrollmentDto);
+        res.put("xpGained", xpGained);
+        res.put("coinsGained", coinsGained);
+        res.put("newXp", currentExp);
+        res.put("newLevel", currentLevel);
+        res.put("newCoins", currentCoins);
+        res.put("leveledUp", leveledUp);
+        res.put("newTitle", user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice");
+        return ResponseEntity.ok(res);
+    }
+
+    private String calculateTitle(int level) {
+        if (level >= 100) return "Language Legend";
+        if (level >= 80) return "Grand Sage";
+        if (level >= 60) return "Master";
+        if (level >= 40) return "Knight";
+        if (level >= 20) return "Scholar";
+        if (level >= 10) return "Student";
+        if (level >= 5) return "Adventurer";
+        return "Novice";
     }
 
     /** GET /api/preset-roadmaps/my-enrollments - Lộ trình đang học của user */
@@ -109,10 +172,22 @@ public class PresetRoadmapController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        List<UserRoadmapEnrollment> enrollments =
-                enrollmentRepository.findByUserIdOrderByLastAccessedAtDesc(user.getId());
+        List<UserProgress> progresses =
+                progressRepository.findByUserIdAndResourceType(user.getId(), "ROADMAP");
 
-        return ResponseEntity.ok(enrollments);
+        List<Map<String, Object>> enrollmentDtos = progresses.stream().map(p -> {
+            LearningRoadmap rm = roadmapRepository.findById(p.getResourceId()).orElse(null);
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", p.getId());
+            map.put("userId", user.getId());
+            map.put("roadmap", rm);
+            map.put("status", p.isCompleted() ? "COMPLETED" : "IN_PROGRESS");
+            map.put("enrolledAt", p.getCompletedAt() != null ? p.getCompletedAt().toString() : LocalDateTime.now().toString());
+            map.put("lastAccessedAt", p.getCompletedAt() != null ? p.getCompletedAt().toString() : LocalDateTime.now().toString());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(enrollmentDtos);
     }
 
     /** DELETE /api/preset-roadmaps/{id}/unenroll - Hủy đăng ký học */
@@ -122,14 +197,14 @@ public class PresetRoadmapController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Optional<UserRoadmapEnrollment> enrollment =
-                enrollmentRepository.findByUserIdAndRoadmapId(user.getId(), id);
+        Optional<UserProgress> enrollment =
+                progressRepository.findByUserIdAndResourceTypeAndResourceId(user.getId(), "ROADMAP", id);
 
         if (enrollment.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        enrollmentRepository.delete(enrollment.get());
+        progressRepository.delete(enrollment.get());
         return ResponseEntity.ok(Map.of("message", "Unenrolled successfully"));
     }
 }

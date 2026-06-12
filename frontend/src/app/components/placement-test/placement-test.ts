@@ -313,6 +313,11 @@ interface UserAnswer {
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold uppercase tracking-wider animate-bounce">
               <span>🎉</span> Chúc mừng bạn đã hoàn thành bài thi!
             </div>
+
+            <div class="flex justify-center gap-4 text-xs font-bold my-1">
+              <span class="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-3 py-1.5 rounded-full">⚡ +100 EXP</span>
+              <span class="bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 px-3 py-1.5 rounded-full">🪙 +50 Xu</span>
+            </div>
             
             <h2 class="text-3xl font-extrabold text-text-main tracking-tight">
               KẾT QUẢ KIỂM TRA ĐẦU VÀO
