@@ -4,7 +4,7 @@
 
 -- 1. Seed người dùng (Mật khẩu mặc định bên dưới là "123456" đã mã hóa BCrypt)
 -- Sử dụng INSERT INTO ON CONFLICT hoặc chỉ đơn giản là INSERT INTO (nếu chạy trên DB sạch)
-INSERT INTO users (email, password, role, active, streak, coins, exp, level)
+INSERT INTO users (email, password, role, active, streak, coins, exp, level, created_at, updated_at)
 VALUES (
     'test@gmail.com', 
     '$2a$10$wPxq/hC9KzXb4sVqJb6d2eC0bL/XlJ0.w8wOqJgC4yZ.OpxP6.Wc.', -- Mật khẩu: 123456
@@ -13,7 +13,9 @@ VALUES (
     5, 
     150, 
     1200, 
-    5
+    5,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ) ON CONFLICT (email) DO NOTHING;
 
 -- 2. Seed 12 câu hỏi Placement Test (3 câu cho mỗi kỹ năng)
