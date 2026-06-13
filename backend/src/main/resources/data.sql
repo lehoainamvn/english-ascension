@@ -210,6 +210,8 @@ VALUES (
 -- 3. Clear Existing Preset Roadmaps & Modules (For clean re-seed)
 -- ====================================================================
 DELETE FROM user_progress WHERE resource_type = 'ROADMAP' AND (resource_id IN (100, 101, 102, 103) OR resource_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
+DELETE FROM user_progress WHERE resource_type = 'MODULE' AND resource_id IN (SELECT id FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
+DELETE FROM flashcards WHERE module_id IN (SELECT id FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
 DELETE FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE);
 DELETE FROM learning_roadmaps WHERE id IN (100, 101, 102, 103) OR is_preset = TRUE;
 
