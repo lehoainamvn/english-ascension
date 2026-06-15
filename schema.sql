@@ -1,5 +1,5 @@
 -- ====================================================================
--- ENGLISH ASCENSION - DATABASE INITIALIZATION SCRIPT (9-TABLE SCHEMA)
+-- ENGLISH ASCENSION - DATABASE INITIALIZATION SCRIPT (12-TABLE SCHEMA)
 -- ====================================================================
 -- Hướng dẫn chạy trên pgAdmin:
 -- 1. Mở pgAdmin và tạo một Database tên là: english_ascension
@@ -7,19 +7,20 @@
 -- 3. Copy toàn bộ nội dung file này vào Query Tool và nhấn nút "Execute" (F5)
 -- ====================================================================
 
--- 1. Xóa các bảng cũ nếu tồn tại
+-- 1. Xóa các bảng cũ nếu tồn tại (theo thứ tự phụ thuộc ngoại khóa)
+DROP TABLE IF EXISTS chat_messages CASCADE;
+DROP TABLE IF EXISTS class_quizzes CASCADE;
+DROP TABLE IF EXISTS class_members CASCADE;
+DROP TABLE IF EXISTS classrooms CASCADE;
 DROP TABLE IF EXISTS user_progress CASCADE;
-DROP TABLE IF EXISTS user_documents CASCADE;
-DROP TABLE IF EXISTS quiz_questions CASCADE;
 DROP TABLE IF EXISTS flashcards CASCADE;
 DROP TABLE IF EXISTS study_contents CASCADE;
 DROP TABLE IF EXISTS learning_modules CASCADE;
 DROP TABLE IF EXISTS learning_roadmaps CASCADE;
 DROP TABLE IF EXISTS questions CASCADE;
-DROP TABLE IF EXISTS player_characters CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
--- 2. Tạo bảng người dùng (users)
+-- 2. Tạo bảng người dùng (users) - Tích hợp thuộc tính nhân vật trực tiếp
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -30,37 +31,34 @@ CREATE TABLE users (
     coins INT NOT NULL DEFAULT 0,
     exp INT NOT NULL DEFAULT 0,
     level INT NOT NULL DEFAULT 1,
+    character_name VARCHAR(255),
+    character_gender VARCHAR(50),
+    character_hair_style VARCHAR(100),
+    character_hair_color VARCHAR(100),
+    character_face_style VARCHAR(100),
+    character_outfit_style VARCHAR(100),
+    character_title VARCHAR(100) DEFAULT 'Novice',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Tạo bảng nhân vật (player_characters)
-CREATE TABLE player_characters (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    gender VARCHAR(50) NOT NULL,
-    hair_style VARCHAR(100),
-    hair_color VARCHAR(100),
-    face_style VARCHAR(100),
-    outfit_style VARCHAR(100),
-    title VARCHAR(100) NOT NULL DEFAULT 'Novice',
-    CONSTRAINT fk_user_character FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- 4. Tạo bảng lộ trình học (learning_roadmaps)
+-- 3. Tạo bảng lộ trình học (learning_roadmaps)
 CREATE TABLE learning_roadmaps (
     id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT UNIQUE NOT NULL,
+    user_id BIGINT UNIQUE,
     cefr_level VARCHAR(50) NOT NULL,
     toeic_equivalent VARCHAR(100),
     overall_evaluation TEXT,
+    is_preset BOOLEAN NOT NULL DEFAULT FALSE,
+    thumbnail_emoji VARCHAR(50),
+    difficulty_label VARCHAR(50),
+    modules_count INT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_roadmap FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 5. Tạo bảng module học tập (learning_modules)
+-- 4. Tạo bảng module học tập (learning_modules)
 CREATE TABLE learning_modules (
     id BIGSERIAL PRIMARY KEY,
     roadmap_id BIGINT, -- Nullable to allow self-study vocab topics
@@ -73,35 +71,10 @@ CREATE TABLE learning_modules (
     CONSTRAINT fk_roadmap_module FOREIGN KEY (roadmap_id) REFERENCES learning_roadmaps(id) ON DELETE CASCADE
 );
 
--- 6. Tạo bảng tài liệu người dùng tải lên (user_documents)
-CREATE TABLE user_documents (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
-    extracted_text TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_user_document FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- 7. Tạo bảng từ vựng / flashcards dùng chung (flashcards)
-CREATE TABLE flashcards (
-    id BIGSERIAL PRIMARY KEY,
-    module_id BIGINT,
-    user_document_id BIGINT,
-    word VARCHAR(255) NOT NULL,
-    part_of_speech VARCHAR(50),
-    phonetic VARCHAR(100),
-    definition TEXT NOT NULL,
-    example_sentence TEXT,
-    example_translation TEXT,
-    CONSTRAINT fk_module_flashcard FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE,
-    CONSTRAINT fk_document_flashcard FOREIGN KEY (user_document_id) REFERENCES user_documents(id) ON DELETE CASCADE
-);
-
--- 8. Tạo bảng nội dung tự học chung (study_contents)
+-- 5. Tạo bảng nội dung học tập/tài liệu tự học (study_contents)
 CREATE TABLE study_contents (
     id BIGSERIAL PRIMARY KEY,
-    type VARCHAR(50) NOT NULL, -- GRAMMAR, LISTENING, READING, EXAM
+    type VARCHAR(50) NOT NULL, -- GRAMMAR, LISTENING, READING, EXAM, DOCUMENT
     title VARCHAR(255) NOT NULL,
     category VARCHAR(100) NOT NULL,
     body_text TEXT,
@@ -110,14 +83,16 @@ CREATE TABLE study_contents (
     duration INT,
     order_index INT,
     questions_count INT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    user_id BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_study_content_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- 9. Tạo bảng câu hỏi chung (questions)
+-- 6. Tạo bảng câu hỏi (questions)
 CREATE TABLE questions (
     id BIGSERIAL PRIMARY KEY,
     source_type VARCHAR(50) NOT NULL, -- PLACEMENT_TEST, ROADMAP_QUIZ, DOCUMENT_QUIZ, GRAMMAR, LISTENING, READING, TOEIC_EXAM
-    parent_id BIGINT, -- Links to learning_modules.id, study_contents.id, or user_documents.id
+    parent_id BIGINT, -- Links to learning_modules.id or study_contents.id
     question_number INT,
     type VARCHAR(50), -- MULTIPLE_CHOICE, FILL_IN_BLANK, WORD_MATCHING, VOCABULARY, GRAMMAR, etc.
     difficulty VARCHAR(50), -- A1, A2, B1, B2, C1, C2
@@ -133,17 +108,89 @@ CREATE TABLE questions (
     explanation TEXT
 );
 
--- 10. Tạo bảng lịch sử / tiến trình học tập (user_progress)
+-- 7. Tạo bảng từ vựng / flashcards (flashcards)
+CREATE TABLE flashcards (
+    id BIGSERIAL PRIMARY KEY,
+    module_id BIGINT,
+    study_content_id BIGINT,
+    user_id BIGINT,
+    word VARCHAR(255) NOT NULL,
+    part_of_speech VARCHAR(50),
+    phonetic VARCHAR(100),
+    definition TEXT NOT NULL,
+    example_sentence TEXT,
+    example_translation TEXT,
+    notes TEXT,
+    saved_date VARCHAR(50),
+    e_factor DOUBLE PRECISION DEFAULT 2.5,
+    repetition_interval INT DEFAULT 1,
+    repetitions INT DEFAULT 0,
+    CONSTRAINT fk_module_flashcard FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE,
+    CONSTRAINT fk_study_content_flashcard FOREIGN KEY (study_content_id) REFERENCES study_contents(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_flashcard FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 8. Tạo bảng lịch sử / tiến trình học tập (user_progress)
 CREATE TABLE user_progress (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    resource_type VARCHAR(50) NOT NULL, -- MODULE, FLASHCARD, GRAMMAR_LESSON, GRAMMAR_PRACTICE, LISTENING_QUESTION, LISTENING_SECTION, READING_ARTICLE, READING_QUESTION
+    resource_type VARCHAR(50) NOT NULL, -- MODULE, STUDY_CONTENT, QUESTION
     resource_id BIGINT NOT NULL,
     is_completed BOOLEAN NOT NULL DEFAULT FALSE,
     completed_at TIMESTAMP,
     score INT,
+    total_questions INT,
+    answers_json TEXT,
     CONSTRAINT fk_user_progress FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- 9. Tạo bảng lớp học (classrooms)
+CREATE TABLE classrooms (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    description TEXT,
+    invite_code VARCHAR(10) UNIQUE NOT NULL,
+    created_by BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_classroom_creator FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 10. Tạo bảng thành viên lớp học (class_members)
+CREATE TABLE class_members (
+    id BIGSERIAL PRIMARY KEY,
+    classroom_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'MEMBER', -- OWNER, MEMBER
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_member_classroom FOREIGN KEY (classroom_id) REFERENCES classrooms(id) ON DELETE CASCADE,
+    CONSTRAINT fk_member_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT uq_classroom_user UNIQUE (classroom_id, user_id)
+);
+
+-- 11. Tạo bảng bài tập lớp học (class_quizzes)
+CREATE TABLE class_quizzes (
+    id BIGSERIAL PRIMARY KEY,
+    classroom_id BIGINT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    created_by BIGINT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_quiz_classroom FOREIGN KEY (classroom_id) REFERENCES classrooms(id) ON DELETE CASCADE,
+    CONSTRAINT fk_quiz_creator FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 12. Tạo bảng tin nhắn trao đổi (chat_messages)
+CREATE TABLE chat_messages (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    content VARCHAR(1000) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_chat_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 
 -- ====================================================================
 -- DỮ LIỆU MẪU ĐỂ TEST

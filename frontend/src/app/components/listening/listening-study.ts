@@ -46,9 +46,10 @@ interface DiffWord {
             </div>
             <a
               routerLink="/listening"
-              class="p-1.5 bg-bg-input hover:bg-bg-card border border-border-main rounded-lg text-[10px] font-bold text-text-muted transition-all"
+              class="btn-back"
             >
-              &larr; Đề nghe
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Đề nghe
             </a>
           </div>
 

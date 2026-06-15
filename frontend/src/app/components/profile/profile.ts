@@ -36,9 +36,10 @@ import { API_BASE_URL } from '../../api-config';
           @if (character()) {
             <a
               routerLink="/dashboard"
-              class="bg-bg-card border border-border-main hover:bg-bg-input px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-text-muted hover:text-text-main"
+              class="btn-back"
             >
-              &larr; Về trang chủ
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Về trang chủ
             </a>
           }
         </div>
@@ -98,13 +99,22 @@ import { API_BASE_URL } from '../../api-config';
                         </span>
                       </div>
 
-                      <button
-                        (click)="startEditing()"
-                        class="bg-brand-primary/10 border border-brand-primary/20 text-brand-primary hover:bg-brand-primary hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 mx-auto sm:mx-0 shadow-sm"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        Chỉnh sửa hồ sơ & diện mạo
-                      </button>
+                      <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+                        <button
+                          (click)="startEditing()"
+                          class="bg-brand-primary/10 border border-brand-primary/20 text-brand-primary hover:bg-brand-primary hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 mx-auto sm:mx-0 shadow-sm"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          Chỉnh sửa hồ sơ & diện mạo
+                        </button>
+                        <button
+                          (click)="openChangePasswordModal()"
+                          class="bg-bg-input border border-border-main text-text-muted hover:text-text-main hover:bg-bg-card px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 mx-auto sm:mx-0 shadow-sm"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"/><circle cx="16.5" cy="7.5" r=".5"/></svg>
+                          Đổi mật khẩu
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -127,19 +137,22 @@ import { API_BASE_URL } from '../../api-config';
                   <!-- EDIT MODE                                  -->
                   <!-- ========================================== -->
                   <div class="space-y-4">
-                    <h3 class="text-sm font-black text-text-main uppercase tracking-wider mb-4 border-b border-border-main/40 pb-2">
-                      ✏️ Cập Nhật Diện Mạo Nhân Vật
+                    <h3 class="text-sm font-black text-text-main uppercase tracking-wider mb-4 border-b border-border-main/40 pb-2 flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog text-brand-primary"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><circle cx="19" cy="8" r="1"/><circle cx="20" cy="12" r="1"/><circle cx="17" cy="14" r="1"/><path d="M16 11h.01"/><path d="M18 10h.01"/></svg>
+                      Cập Nhật Diện Mạo Nhân Vật
                     </h3>
 
                     <!-- Messages -->
                     @if (errorMessage()) {
-                      <div class="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-xl mb-4">
-                        <span>⚠️ {{ errorMessage() }}</span>
+                      <div class="mb-4 bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                        <span>{{ errorMessage() }}</span>
                       </div>
                     }
                     @if (successMessage()) {
-                      <div class="bg-green-500/10 border border-green-500/20 text-green-500 text-xs p-3 rounded-xl mb-4">
-                        <span>✓ {{ successMessage() }}</span>
+                      <div class="mb-4 bg-emerald-500/10 border border-border-main border-l-4 border-l-emerald-500 text-emerald-600 dark:text-emerald-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-500 shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 15.01 9 12.01"/></svg>
+                        <span>{{ successMessage() }}</span>
                       </div>
                     }
 
@@ -282,7 +295,10 @@ import { API_BASE_URL } from '../../api-config';
                         @if (isSaving()) {
                           <span>Đang lưu...</span>
                         } @else {
-                          <span>Lưu thay đổi 💾</span>
+                          <span class="flex items-center justify-center gap-1.5">
+                            Lưu thay đổi
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                          </span>
                         }
                       </button>
                       @if (character()) {
@@ -486,6 +502,86 @@ import { API_BASE_URL } from '../../api-config';
           </div>
         }
 
+        <!-- Change Password Modal -->
+        @if (isChangePasswordModalOpen()) {
+          <div 
+            (click)="closeChangePasswordModal()"
+            class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity duration-300"
+          >
+            <div 
+              (click)="$event.stopPropagation()"
+              class="w-full max-w-sm bg-bg-card border border-border-main rounded-2xl p-5 shadow-2xl flex flex-col gap-4 text-left relative z-50 animate-fade-in text-xxs font-bold"
+            >
+              <div class="flex justify-between items-center border-b border-border-main/40 pb-3">
+                <h3 class="text-xs font-black text-text-main uppercase tracking-wider flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock text-brand-primary"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Đổi Mật Khẩu
+                </h3>
+                <button
+                  (click)="closeChangePasswordModal()"
+                  class="w-7 h-7 rounded-lg hover:bg-bg-input/60 border border-transparent hover:border-border-main flex items-center justify-center text-text-muted hover:text-text-main cursor-pointer transition-all"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <!-- Fields -->
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1">Mật khẩu hiện tại</label>
+                  <input
+                    type="password"
+                    [(ngModel)]="oldPassword"
+                    placeholder="Nhập mật khẩu cũ..."
+                    class="w-full bg-bg-input border border-border-main rounded-xl px-3 py-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-brand-primary font-semibold"
+                  />
+                </div>
+                <div>
+                  <label class="block text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1">Mật khẩu mới</label>
+                  <input
+                    type="password"
+                    [(ngModel)]="newPassword"
+                    placeholder="Nhập mật khẩu mới..."
+                    class="w-full bg-bg-input border border-border-main rounded-xl px-3 py-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-brand-primary font-semibold"
+                  />
+                </div>
+                <div>
+                  <label class="block text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1">Xác nhận mật khẩu mới</label>
+                  <input
+                    type="password"
+                    [(ngModel)]="confirmPassword"
+                    placeholder="Nhập lại mật khẩu mới..."
+                    class="w-full bg-bg-input border border-border-main rounded-xl px-3 py-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-brand-primary font-semibold"
+                  />
+                </div>
+              </div>
+
+              @if (changePasswordError()) {
+                <div class="bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-[10px] p-2.5 rounded-xl flex items-center gap-2 font-bold animate-fade-in">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                  <span>{{ changePasswordError() }}</span>
+                </div>
+              }
+
+              <!-- Actions -->
+              <div class="flex gap-2.5 pt-2 border-t border-border-main/40 font-bold text-xs">
+                <button
+                  (click)="onChangePasswordSubmit()"
+                  [disabled]="isChangingPassword() || !oldPassword || !newPassword || !confirmPassword"
+                  class="flex-1 bg-brand-primary hover:bg-brand-secondary text-white py-2.5 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 active:scale-98"
+                >
+                  @if (isChangingPassword()) {
+                    Đang xử lý...
+                  } @else {
+                    Lưu mật khẩu
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 15.01 9 12.01"/></svg>
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
       </div>
     </div>
   `,
@@ -519,10 +615,18 @@ export class ProfileComponent implements OnInit {
   realLeaderboard = signal<any[]>([]);
   isLoadingRealLeaderboard = signal(true);
 
+  // Change Password State
+  isChangePasswordModalOpen = signal(false);
+  isChangingPassword = signal(false);
+  changePasswordError = signal('');
+  oldPassword = '';
+  newPassword = '';
+  confirmPassword = '';
+
   // Option lists
   genders = [
-    { id: 'MALE', label: 'Nam ♂️' },
-    { id: 'FEMALE', label: 'Nữ ♀️' }
+    { id: 'MALE', label: 'Nam' },
+    { id: 'FEMALE', label: 'Nữ' }
   ];
 
   hairStyles = [
@@ -542,10 +646,10 @@ export class ProfileComponent implements OnInit {
   ];
 
   faceStyles = [
-    { id: 'SMILEY', label: 'Vui vẻ 😊' },
-    { id: 'SERIOUS', label: 'Nghiêm túc 😐' },
-    { id: 'COOL', label: 'Ngầu 😎' },
-    { id: 'EXCITED', label: 'Hào hứng 🤩' }
+    { id: 'SMILEY', label: 'Vui vẻ' },
+    { id: 'SERIOUS', label: 'Nghiêm túc' },
+    { id: 'COOL', label: 'Ngầu' },
+    { id: 'EXCITED', label: 'Hào hứng' }
   ];
 
   outfits = [
@@ -767,6 +871,45 @@ export class ProfileComponent implements OnInit {
     if (!rm || !rm.modules || rm.modules.length === 0) return 0;
     const completed = this.getCompletedModulesCount();
     return Math.round((completed / rm.modules.length) * 100);
+  }
+
+  openChangePasswordModal(): void {
+    this.oldPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.changePasswordError.set('');
+    this.isChangePasswordModalOpen.set(true);
+  }
+
+  closeChangePasswordModal(): void {
+    this.isChangePasswordModalOpen.set(false);
+  }
+
+  onChangePasswordSubmit(): void {
+    if (this.newPassword !== this.confirmPassword) {
+      this.changePasswordError.set('Mật khẩu mới không trùng khớp!');
+      return;
+    }
+    if (this.newPassword.length < 6) {
+      this.changePasswordError.set('Mật khẩu mới phải có ít nhất 6 ký tự!');
+      return;
+    }
+
+    this.isChangingPassword.set(true);
+    this.changePasswordError.set('');
+
+    this.authService.changePassword(this.oldPassword, this.newPassword).subscribe({
+      next: () => {
+        this.isChangingPassword.set(false);
+        this.isChangePasswordModalOpen.set(false);
+        this.toastService.success('Đổi mật khẩu thành công!');
+      },
+      error: (err) => {
+        this.isChangingPassword.set(false);
+        const errMsg = err.error?.message || 'Không thể đổi mật khẩu. Vui lòng thử lại.';
+        this.changePasswordError.set(errMsg);
+      }
+    });
   }
 
   get userEmail(): string {

@@ -34,9 +34,10 @@ import { VocabularyService, VocabTopic } from '../../services/vocabulary.service
             [class.text-white]="activeTab() === 'CEFR'"
             [class.shadow-md]="activeTab() === 'CEFR'"
             [class.text-text-muted]="activeTab() !== 'CEFR'"
-            class="flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer text-center"
+            class="flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
-            🎯 Từ Vựng CEFR
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target shrink-0"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Từ Vựng CEFR
           </button>
           <button
             (click)="selectPrimaryTab('TOEIC')"
@@ -44,9 +45,10 @@ import { VocabularyService, VocabTopic } from '../../services/vocabulary.service
             [class.text-white]="activeTab() === 'TOEIC'"
             [class.shadow-md]="activeTab() === 'TOEIC'"
             [class.text-text-muted]="activeTab() !== 'TOEIC'"
-            class="flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer text-center"
+            class="flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
-            💼 Luyện Thi TOEIC
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase shrink-0"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
+            Luyện Thi TOEIC
           </button>
         </div>
 
@@ -123,9 +125,9 @@ import { VocabularyService, VocabTopic } from '../../services/vocabulary.service
 
           <!-- Empty state -->
           @if (filteredTopics().length === 0) {
-            <div class="text-center py-16 bg-bg-card border border-border-main rounded-2xl">
-              <span class="text-3xl">📭</span>
-              <p class="text-xs text-text-muted font-bold mt-4">Không tìm thấy chủ đề nào trong danh mục này.</p>
+            <div class="text-center py-16 bg-bg-card border border-border-main rounded-2xl flex flex-col items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-inbox text-text-muted mb-4"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+              <p class="text-xs text-text-muted font-bold">Không tìm thấy chủ đề nào trong danh mục này.</p>
             </div>
           }
         }

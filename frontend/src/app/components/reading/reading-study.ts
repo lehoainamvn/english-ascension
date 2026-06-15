@@ -159,9 +159,10 @@ interface DictionaryEntry {
           <div class="pt-4 border-t border-border-main/40 mt-4 shrink-0">
             <a 
               routerLink="/reading" 
-              class="text-xxs text-text-muted hover:text-text-main font-bold flex items-center gap-1"
+              class="btn-back"
             >
-              &larr; Về danh sách bài đọc
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Danh sách bài đọc
             </a>
           </div>
 

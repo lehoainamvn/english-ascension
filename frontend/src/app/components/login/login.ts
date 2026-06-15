@@ -32,21 +32,21 @@ import { ToastService } from '../../services/toast.service';
             </p>
           </div>
 
-          <!-- Illustrated Stacked Cards Emojis (similar to screenshot's books/headphone style) -->
+          <!-- Illustrated Stacked Cards SVGs -->
           <div class="my-6 flex justify-center items-center relative h-28 md:h-40 shrink-0 select-none">
             <div class="absolute w-24 h-32 md:w-28 md:h-38 bg-emerald-500 rounded-2xl rotate-[15deg] translate-x-12 translate-y-2 border border-white/20 shadow-md"></div>
             <div class="absolute w-24 h-32 md:w-28 md:h-38 bg-yellow-500 dark:bg-yellow-600 rounded-2xl rotate-[-5deg] translate-x-2 border border-white/20 shadow-md"></div>
             <div class="absolute w-24 h-32 md:w-28 md:h-38 bg-pink-500 rounded-2xl rotate-[-20deg] -translate-x-10 border border-white/20 shadow-md flex items-center justify-center">
-              <span class="text-3xl">🎯</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white select-none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
             </div>
-            <!-- Headphones emoji over them -->
-            <div class="absolute text-7xl md:text-8xl filter drop-shadow-lg select-none">
-              🎧
+            <!-- Headphones SVG over them -->
+            <div class="absolute filter drop-shadow-xl select-none text-white/95">
+              <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-16 h-16 md:w-20 md:h-20"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
             </div>
           </div>
 
           <div class="flex items-center gap-2 relative z-10">
-            <span class="text-xl">🎓</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-white select-none shrink-0"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 18.8v-4L2 13"/><path d="M12 22v-6.1"/></svg>
             <span class="text-xs font-black tracking-wider text-white uppercase">ENGLISH ASCENSION</span>
           </div>
         </div>
@@ -81,8 +81,8 @@ import { ToastService } from '../../services/toast.service';
 
           <!-- Alert Message -->
           @if (errorMessage()) {
-            <div class="mb-5 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-200 text-xs p-3 rounded-xl flex items-center gap-2">
-              <span class="shrink-0 text-sm">⚠️</span>
+            <div class="mb-5 bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
               <span>{{ errorMessage() }}</span>
             </div>
           }

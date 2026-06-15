@@ -32,9 +32,10 @@ import { ToastService } from '../../services/toast.service';
           </div>
           <a
             routerLink="/grammar-topics"
-            class="bg-bg-input hover:bg-bg-card border border-border-main px-3 py-1.5 rounded-lg text-xxs font-bold transition-all text-text-muted hover:text-text-main"
+            class="btn-back"
           >
-            &larr; Danh sách chủ đề
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Danh sách chủ đề
           </a>
         </div>
 
@@ -55,8 +56,9 @@ import { ToastService } from '../../services/toast.service';
             </p>
             <a
               routerLink="/grammar-topics"
-              class="bg-brand-primary hover:bg-brand-secondary text-white font-bold px-5 py-2.5 rounded-xl transition-all inline-block shadow-md text-xs"
+              class="btn-back mt-2"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
               Về Danh Sách
             </a>
           </div>

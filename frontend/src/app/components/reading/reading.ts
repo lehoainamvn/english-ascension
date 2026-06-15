@@ -19,8 +19,14 @@ import { ReadingService, ReadingArticle } from '../../services/reading.service';
         <!-- Header -->
         <div class="text-center space-y-2 max-w-2xl mx-auto">
           <div class="flex items-center justify-center gap-2 select-none shrink-0 font-bold text-xs">
-            <span class="bg-brand-primary text-white px-3 py-1 rounded-xl shadow-sm">📖 Học</span>
-            <span class="bg-bg-input text-text-muted border border-border-main px-3 py-1 rounded-xl">📊 Tiến độ</span>
+            <span class="bg-brand-primary text-white px-3 py-1 rounded-xl shadow-sm flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Học
+            </span>
+            <span class="bg-bg-input text-text-muted border border-border-main px-3 py-1 rounded-xl flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart shrink-0"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+              Tiến độ
+            </span>
           </div>
           <h1 class="text-2xl md:text-4xl font-black tracking-tight text-text-main mt-4">
             Luyện đọc <span class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent">TOEIC Part 7 song ngữ</span>
@@ -31,14 +37,14 @@ import { ReadingService, ReadingArticle } from '../../services/reading.service';
         </div>
 
         <!-- Search Bar -->
-        <div class="max-w-md mx-auto relative">
+        <div class="max-w-md mx-auto relative flex items-center">
           <input
             type="text"
             [(ngModel)]="searchQuery"
             placeholder="Tìm kiếm bài đọc..."
-            class="w-full bg-bg-card border border-border-main rounded-2xl px-10 py-3 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary shadow-sm"
+            class="w-full bg-bg-card border border-border-main rounded-2xl pl-10 pr-4 py-3 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary shadow-sm"
           />
-          <span class="absolute left-4 top-3.5 text-text-muted text-xs">🔍</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search text-text-muted absolute left-4 top-3.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         </div>
 
         <!-- Categories / Tabs -->
@@ -114,7 +120,8 @@ import { ReadingService, ReadingArticle } from '../../services/reading.service';
                     {{ topic.title }}
                   </h2>
                   <p class="text-[11px] text-text-muted flex items-center gap-1 font-bold">
-                    <span>📄</span> {{ topic.questionsCount }} câu hỏi
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                    <span>{{ topic.questionsCount }} câu hỏi</span>
                   </p>
                 </div>
 
