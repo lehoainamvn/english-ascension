@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -46,12 +46,12 @@ import { ToastService } from '../../services/toast.service';
           </div>
 
           <div class="flex items-center gap-2 relative z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-white select-none shrink-0"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 18.8v-4L2 13"/><path d="M12 22v-6.1"/></svg>
+            <img src="logo.png" class="w-5 h-5 object-contain rounded" alt="Logo" />
             <span class="text-xs font-black tracking-wider text-white uppercase">ENGLISH ASCENSION</span>
           </div>
         </div>
 
-        <!-- Right Side: Login Form (58% width) -->
+        <!-- Right Side: Forms (58% width) -->
         <div class="w-full md:w-[58%] p-6 md:p-10 flex flex-col justify-center bg-white dark:bg-bg-input relative transition-colors duration-300">
           
           <!-- Close button (goes to /intro) -->
@@ -63,147 +63,268 @@ import { ToastService } from '../../services/toast.service';
             <span>✕</span>
           </a>
 
-          <!-- Form Tabs -->
-          <div class="flex gap-6 border-b border-border-main/50 pb-3.5 mb-6 text-sm font-bold justify-start">
-            <a
-              routerLink="/register"
-              class="text-text-muted hover:text-text-main transition-colors cursor-pointer"
-            >
-              Đăng ký
-            </a>
-            <a
-              routerLink="/login"
-              class="text-text-main border-b-2 border-brand-accent pb-3.5 -mb-4 transition-colors cursor-pointer"
-            >
-              Đăng nhập
-            </a>
-          </div>
-
-          <!-- Alert Message -->
-          @if (errorMessage()) {
-            <div class="mb-5 bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-              <span>{{ errorMessage() }}</span>
-            </div>
-          }
-
-          <!-- Social Logins (Google, Facebook, Apple) -->
-          <div class="space-y-2.5">
-            <!-- Google -->
-            <button
-              type="button"
-              class="w-full flex items-center justify-center gap-3 bg-slate-50 dark:bg-bg-main hover:bg-slate-100 dark:hover:bg-bg-card border border-border-main text-text-main font-bold py-2.5 px-4 rounded-full text-xs transition-colors cursor-pointer shadow-sm"
-            >
-              <!-- Google icon SVG -->
-              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M12 5.04c1.62 0 3.08.56 4.22 1.66l3.15-3.15C17.45 1.84 14.94 1 12 1 7.35 1 3.39 3.67 1.48 7.56l3.75 2.91C6.12 7.02 8.84 5.04 12 5.04z" />
-                <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.28 1.48-1.11 2.73-2.36 3.57l3.66 2.84c2.14-1.97 3.37-4.87 3.37-8.56z" />
-                <path fill="#FBBC05" d="M5.23 14.43c-.24-.73-.38-1.5-.38-2.3s.14-1.57.38-2.3L1.48 6.92C.54 8.75 0 10.81 0 13s.54 4.25 1.48 6.08l3.75-2.65z" />
-                <path fill="#34A853" d="M12 23c3.24 0 5.97-1.08 7.96-2.91l-3.66-2.84c-1.01.68-2.31 1.09-4.3 1.09-3.16 0-5.88-1.98-6.84-4.96l-3.75 2.91C3.39 20.33 7.35 23 12 23z" />
-              </svg>
-              Đăng nhập bằng Google
-            </button>
-
-            <!-- Facebook -->
-            <button
-              type="button"
-              class="w-full flex items-center justify-center gap-3 bg-slate-50 dark:bg-bg-main hover:bg-slate-100 dark:hover:bg-bg-card border border-border-main text-text-main font-bold py-2.5 px-4 rounded-full text-xs transition-colors cursor-pointer shadow-sm"
-            >
-              <!-- Facebook icon SVG -->
-              <svg class="w-4 h-4 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z" />
-              </svg>
-              Đăng nhập bằng Facebook
-            </button>
-
-            <!-- Apple -->
-            <button
-              type="button"
-              class="w-full flex items-center justify-center gap-3 bg-slate-50 dark:bg-bg-main hover:bg-slate-100 dark:hover:bg-bg-card border border-border-main text-text-main font-bold py-2.5 px-4 rounded-full text-xs transition-colors cursor-pointer shadow-sm"
-            >
-              <!-- Apple icon SVG -->
-              <svg class="w-4.5 h-4.5 text-text-main shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.57 2.95-1.39z" />
-              </svg>
-              Đăng nhập bằng Apple
-            </button>
-          </div>
-
-          <!-- Divider -->
-          <div class="relative flex py-5 items-center">
-            <div class="flex-grow border-t border-border-main/50"></div>
-            <span class="flex-shrink mx-4 text-[10px] text-text-muted font-bold uppercase tracking-wider">hoặc email</span>
-            <div class="flex-grow border-t border-border-main/50"></div>
-          </div>
-
-          <!-- Login Form -->
-          <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="space-y-4">
-            <!-- Email -->
-            <div>
-              <label for="email" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Email</label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                [(ngModel)]="email"
-                required
-                email
-                #emailInput="ngModel"
-                placeholder="name@example.com"
-                class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-2.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
-              />
-              @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {
-                <p class="text-[10px] text-red-500 mt-1">Vui lòng nhập email hợp lệ.</p>
-              }
-            </div>
-
-            <!-- Password -->
-            <div>
-              <label for="password" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Mật khẩu</label>
-              <input
-                id="password"
-                type="password"
-                name="password"
-                [(ngModel)]="password"
-                required
-                #passwordInput="ngModel"
-                placeholder="••••••••"
-                class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-2.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
-              />
-              @if (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)) {
-                <p class="text-[10px] text-red-500 mt-1">Mật khẩu không được để trống.</p>
-              }
-            </div>
-
-            <!-- Submit Button -->
-            <div class="pt-3">
-              <button
-                type="submit"
-                [disabled]="loginForm.invalid || isLoading()"
-                class="w-full relative overflow-hidden group bg-gradient-to-r from-brand-primary to-brand-secondary text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-xs"
+          @if (viewMode === 'login') {
+            <!-- Form Tabs -->
+            <div class="flex gap-6 border-b border-border-main/50 pb-3.5 mb-6 text-sm font-bold justify-start">
+              <a
+                routerLink="/register"
+                class="text-text-muted hover:text-text-main transition-colors cursor-pointer"
               >
-                <div class="relative flex items-center justify-center gap-2">
-                  @if (isLoading()) {
-                    <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Đang xử lý...</span>
-                  } @else {
-                    <span>Đăng Nhập</span>
+                Đăng ký
+              </a>
+              <a
+                routerLink="/login"
+                class="text-text-main border-b-2 border-brand-accent pb-3.5 -mb-4 transition-colors cursor-pointer"
+              >
+                Đăng nhập
+              </a>
+            </div>
+
+            <!-- Alert Message -->
+            @if (errorMessage()) {
+              <div class="mb-5 bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                <span>{{ errorMessage() }}</span>
+              </div>
+            }
+
+            <!-- Social Logins (Google only) -->
+            <div class="space-y-2.5">
+              <!-- Google Login Button Container -->
+              <div id="googleBtn" class="w-full flex justify-center py-1 select-none"></div>
+            </div>
+
+            <!-- Divider -->
+            <div class="relative flex py-5 items-center">
+              <div class="flex-grow border-t border-border-main/50"></div>
+              <span class="flex-shrink mx-4 text-[10px] text-text-muted font-bold uppercase tracking-wider">hoặc email</span>
+              <div class="flex-grow border-t border-border-main/50"></div>
+            </div>
+
+            <!-- Login Form -->
+            <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="space-y-4">
+              <!-- Email -->
+              <div>
+                <label for="email" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  [(ngModel)]="email"
+                  required
+                  email
+                  #emailInput="ngModel"
+                  placeholder="name@example.com"
+                  class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-2.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
+                />
+                @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {
+                  <p class="text-[10px] text-red-500 mt-1">Vui lòng nhập email hợp lệ.</p>
+                }
+              </div>
+
+              <!-- Password -->
+              <div>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label for="password" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider">Mật khẩu</label>
+                  <a (click)="viewMode = 'forgot'; forgotError.set('')" class="text-[10px] font-bold text-brand-primary hover:text-brand-secondary cursor-pointer transition-colors no-underline">Quên mật khẩu?</a>
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  [(ngModel)]="password"
+                  required
+                  #passwordInput="ngModel"
+                  placeholder="••••••••"
+                  class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-2.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
+                />
+                @if (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)) {
+                  <p class="text-[10px] text-red-500 mt-1">Mật khẩu không được để trống.</p>
+                }
+              </div>
+
+              <!-- Submit Button -->
+              <div class="pt-3">
+                <button
+                  type="submit"
+                  [disabled]="loginForm.invalid || isLoading()"
+                  class="w-full relative overflow-hidden group bg-gradient-to-r from-brand-primary to-brand-secondary text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-xs border-none"
+                >
+                  <div class="relative flex items-center justify-center gap-2">
+                    @if (isLoading()) {
+                      <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Đang xử lý...</span>
+                    } @else {
+                      <span>Đăng Nhập</span>
+                    }
+                  </div>
+                </button>
+              </div>
+            </form>
+          } @else if (viewMode === 'forgot') {
+            <!-- FORGOT PASSWORD VIEW -->
+            <div class="space-y-5">
+              <div>
+                <h2 class="text-xl font-black text-text-main">Khôi phục mật khẩu</h2>
+                <p class="text-xxs text-text-muted mt-1 leading-relaxed">Nhập địa chỉ email của bạn. Chúng tôi sẽ gửi mã xác nhận OTP gồm 6 chữ số để đặt lại mật khẩu mới.</p>
+              </div>
+
+              <!-- Alert Message -->
+              @if (forgotError()) {
+                <div class="bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                  <span>{{ forgotError() }}</span>
+                </div>
+              }
+
+              <form (ngSubmit)="onForgotPasswordSubmit()" #forgotForm="ngForm" class="space-y-4">
+                <div>
+                  <label for="forgotEmail" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Email liên kết</label>
+                  <input
+                    id="forgotEmail"
+                    type="email"
+                    name="forgotEmail"
+                    [(ngModel)]="forgotEmail"
+                    required
+                    email
+                    #forgotEmailInput="ngModel"
+                    placeholder="name@example.com"
+                    class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-2.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
+                  />
+                  @if (forgotEmailInput.invalid && (forgotEmailInput.dirty || forgotEmailInput.touched)) {
+                    <p class="text-[10px] text-red-500 mt-1">Vui lòng nhập email hợp lệ.</p>
                   }
                 </div>
-              </button>
-            </div>
-          </form>
 
+                <div class="flex flex-col gap-2.5 pt-2 font-bold text-xs">
+                  <button
+                    type="submit"
+                    [disabled]="forgotForm.invalid || isSendingOtp()"
+                    class="w-full bg-brand-primary hover:bg-brand-secondary text-white py-3 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 border-none"
+                  >
+                    @if (isSendingOtp()) {
+                      Đang gửi mã...
+                    } @else {
+                      Gửi mã xác nhận (OTP)
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    (click)="viewMode = 'login'; errorMessage.set('')"
+                    class="w-full bg-bg-input border border-border-main text-text-muted py-3 rounded-xl hover:bg-bg-card transition-all cursor-pointer"
+                  >
+                    Quay lại đăng nhập
+                  </button>
+                </div>
+              </form>
+            </div>
+          } @else if (viewMode === 'reset') {
+            <!-- RESET PASSWORD VIEW -->
+            <div class="space-y-5">
+              <div>
+                <h2 class="text-xl font-black text-text-main">Đặt lại mật khẩu</h2>
+                <p class="text-xxs text-text-muted mt-1 leading-relaxed">Mã xác nhận đã được gửi đến: <span class="font-bold text-text-main">{{ forgotEmail }}</span>. Vui lòng nhập mã và điền mật khẩu mới của bạn.</p>
+              </div>
+
+              <!-- Alert Message -->
+              @if (resetError()) {
+                <div class="bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                  <span>{{ resetError() }}</span>
+                </div>
+              }
+
+              <form (ngSubmit)="onResetPasswordSubmit()" #resetForm="ngForm" class="space-y-4">
+                <!-- OTP Code -->
+                <div>
+                  <label for="resetOtp" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Mã OTP (6 chữ số)</label>
+                  <input
+                    id="resetOtp"
+                    type="text"
+                    name="resetOtp"
+                    [(ngModel)]="resetOtp"
+                    required
+                    maxlength="6"
+                    minlength="6"
+                    #resetOtpInput="ngModel"
+                    placeholder="Nhập 6 số..."
+                    class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-2.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all font-mono tracking-widest text-center"
+                  />
+                  @if (resetOtpInput.invalid && (resetOtpInput.dirty || resetOtpInput.touched)) {
+                    <p class="text-[10px] text-red-500 mt-1">Mã xác nhận phải đủ 6 ký tự.</p>
+                  }
+                </div>
+
+                <!-- New Password -->
+                <div>
+                  <label for="resetNewPassword" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Mật khẩu mới</label>
+                  <input
+                    id="resetNewPassword"
+                    type="password"
+                    name="resetNewPassword"
+                    [(ngModel)]="resetNewPassword"
+                    required
+                    minlength="6"
+                    #resetNewPasswordInput="ngModel"
+                    placeholder="Tối thiểu 6 ký tự"
+                    class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-2.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
+                  />
+                  @if (resetNewPasswordInput.invalid && (resetNewPasswordInput.dirty || resetNewPasswordInput.touched)) {
+                    <p class="text-[10px] text-red-500 mt-1">Mật khẩu mới tối thiểu phải có 6 ký tự.</p>
+                  }
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                  <label for="resetConfirmPassword" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Xác nhận mật khẩu mới</label>
+                  <input
+                    id="resetConfirmPassword"
+                    type="password"
+                    name="resetConfirmPassword"
+                    [(ngModel)]="resetConfirmPassword"
+                    required
+                    #resetConfirmPasswordInput="ngModel"
+                    placeholder="••••••••"
+                    class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-2.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
+                  />
+                  @if (resetConfirmPasswordInput.touched && resetNewPassword !== resetConfirmPassword) {
+                    <p class="text-[10px] text-red-500 mt-1">Mật khẩu xác nhận không khớp.</p>
+                  }
+                </div>
+
+                <div class="flex flex-col gap-2.5 pt-2 font-bold text-xs">
+                  <button
+                    type="submit"
+                    [disabled]="resetForm.invalid || resetNewPassword !== resetConfirmPassword || isResettingPassword()"
+                    class="w-full bg-brand-primary hover:bg-brand-secondary text-white py-3 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 border-none"
+                  >
+                    @if (isResettingPassword()) {
+                      Đang đặt lại...
+                    } @else {
+                      Đặt lại mật khẩu
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    (click)="viewMode = 'forgot'; resetError.set('')"
+                    class="w-full bg-bg-input border border-border-main text-text-muted py-3 rounded-xl hover:bg-bg-card transition-all cursor-pointer"
+                  >
+                    Quay lại nhập email
+                  </button>
+                </div>
+              </form>
+            </div>
+          }
         </div>
 
       </div>
     </div>
   `
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
@@ -213,6 +334,81 @@ export class LoginComponent {
   
   isLoading = signal(false);
   errorMessage = signal('');
+
+  // Forgot / Reset Password properties
+  viewMode: 'login' | 'forgot' | 'reset' = 'login';
+  forgotEmail = '';
+  resetOtp = '';
+  resetNewPassword = '';
+  resetConfirmPassword = '';
+
+  isSendingOtp = signal(false);
+  isResettingPassword = signal(false);
+  forgotError = signal('');
+  resetError = signal('');
+
+  ngOnInit(): void {
+    this.checkAndInitGoogle();
+  }
+
+  private checkAndInitGoogle(): void {
+    if (typeof window === 'undefined') return;
+
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      // @ts-ignore
+      const googleDefined = typeof google !== 'undefined' && google.accounts && google.accounts.id;
+      const elementExists = document.getElementById('googleBtn') !== null;
+
+      if (googleDefined && elementExists) {
+        clearInterval(interval);
+        this.initGoogleSignIn();
+      } else if (attempts > 30) { // Stop after 15 seconds
+        clearInterval(interval);
+        console.warn('Google Sign-In API or button container not found after 15 seconds.');
+      }
+    }, 500);
+  }
+
+  private initGoogleSignIn(): void {
+    try {
+      // @ts-ignore
+      google.accounts.id.initialize({
+        client_id: '685073393507-kd768suv87jepg4b37bmlaf4j7lf7bav.apps.googleusercontent.com',
+        callback: this.handleGoogleCredentialResponse.bind(this)
+      });
+      // @ts-ignore
+      google.accounts.id.renderButton(
+        document.getElementById('googleBtn'),
+        { theme: 'outline', size: 'large', width: '280px', shape: 'pill' }
+      );
+    } catch (e) {
+      console.error('Error rendering Google Sign-In button', e);
+    }
+  }
+
+  handleGoogleCredentialResponse(response: any): void {
+    if (response && response.credential) {
+      this.isLoading.set(true);
+      this.errorMessage.set('');
+      this.authService.googleLogin(response.credential).subscribe({
+        next: (res) => {
+          this.isLoading.set(false);
+          this.toastService.success('Đăng nhập thành công! Chào mừng quay trở lại.');
+          if (res && !res.hasCharacter) {
+            this.router.navigate(['/character-customization']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(err.error?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
+        }
+      });
+    }
+  }
 
   onSubmit(): void {
     if (!this.email || !this.password) return;
@@ -237,6 +433,56 @@ export class LoginComponent {
         } else {
           this.errorMessage.set(err.error?.message || 'Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại sau.');
         }
+      }
+    });
+  }
+
+  onForgotPasswordSubmit(): void {
+    if (!this.forgotEmail) return;
+
+    this.isSendingOtp.set(true);
+    this.forgotError.set('');
+
+    this.authService.forgotPassword(this.forgotEmail).subscribe({
+      next: () => {
+        this.isSendingOtp.set(false);
+        this.toastService.success('Mã OTP khôi phục đã được gửi đến email của bạn.');
+        this.viewMode = 'reset';
+      },
+      error: (err) => {
+        this.isSendingOtp.set(false);
+        this.forgotError.set(err.error?.message || 'Không thể gửi yêu cầu khôi phục. Vui lòng thử lại.');
+      }
+    });
+  }
+
+  onResetPasswordSubmit(): void {
+    if (!this.resetOtp || !this.resetNewPassword || this.resetNewPassword !== this.resetConfirmPassword) {
+      this.resetError.set('Vui lòng điền đúng thông tin và khớp mật khẩu mới.');
+      return;
+    }
+
+    if (this.resetNewPassword.length < 6) {
+      this.resetError.set('Mật khẩu mới phải dài ít nhất 6 ký tự.');
+      return;
+    }
+
+    this.isResettingPassword.set(true);
+    this.resetError.set('');
+
+    this.authService.resetPassword(this.resetOtp, this.resetNewPassword).subscribe({
+      next: () => {
+        this.isResettingPassword.set(false);
+        this.toastService.success('Khôi phục mật khẩu thành công! Hãy đăng nhập lại.');
+        this.viewMode = 'login';
+        this.password = '';
+        this.resetOtp = '';
+        this.resetNewPassword = '';
+        this.resetConfirmPassword = '';
+      },
+      error: (err) => {
+        this.isResettingPassword.set(false);
+        this.resetError.set(err.error?.message || 'Khôi phục mật khẩu thất bại. Vui lòng thử lại.');
       }
     });
   }

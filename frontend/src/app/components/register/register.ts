@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -46,7 +46,7 @@ import { ToastService } from '../../services/toast.service';
           </div>
 
           <div class="flex items-center gap-2 relative z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-white select-none shrink-0"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 18.8v-4L2 13"/><path d="M12 22v-6.1"/></svg>
+            <img src="logo.png" class="w-5 h-5 object-contain rounded" alt="Logo" />
             <span class="text-xs font-black tracking-wider text-white uppercase">ENGLISH ASCENSION</span>
           </div>
         </div>
@@ -93,22 +93,10 @@ import { ToastService } from '../../services/toast.service';
             </div>
           }
 
-          <!-- Social Logins (Google, Facebook, Apple) -->
+          <!-- Social Logins (Google only) -->
           <div class="space-y-2.5">
-            <!-- Google -->
-            <button
-              type="button"
-              class="w-full flex items-center justify-center gap-3 bg-slate-50 dark:bg-bg-main hover:bg-slate-100 dark:hover:bg-bg-card border border-border-main text-text-main font-bold py-2.5 px-4 rounded-full text-xs transition-colors cursor-pointer shadow-sm"
-            >
-              <!-- Google icon SVG -->
-              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M12 5.04c1.62 0 3.08.56 4.22 1.66l3.15-3.15C17.45 1.84 14.94 1 12 1 7.35 1 3.39 3.67 1.48 7.56l3.75 2.91C6.12 7.02 8.84 5.04 12 5.04z" />
-                <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.28 1.48-1.11 2.73-2.36 3.57l3.66 2.84c2.14-1.97 3.37-4.87 3.37-8.56z" />
-                <path fill="#FBBC05" d="M5.23 14.43c-.24-.73-.38-1.5-.38-2.3s.14-1.57.38-2.3L1.48 6.92C.54 8.75 0 10.81 0 13s.54 4.25 1.48 6.08l3.75-2.65z" />
-                <path fill="#34A853" d="M12 23c3.24 0 5.97-1.08 7.96-2.91l-3.66-2.84c-1.01.68-2.31 1.09-4.3 1.09-3.16 0-5.88-1.98-6.84-4.96l-3.75 2.91C3.39 20.33 7.35 23 12 23z" />
-              </svg>
-              Đăng ký bằng Google
-            </button>
+            <!-- Google Login Button Container -->
+            <div id="googleBtn" class="w-full flex justify-center py-1 select-none"></div>
           </div>
 
           <!-- Divider -->
@@ -204,7 +192,7 @@ import { ToastService } from '../../services/toast.service';
     </div>
   `
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
@@ -216,6 +204,69 @@ export class RegisterComponent {
   isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
+
+  ngOnInit(): void {
+    this.checkAndInitGoogle();
+  }
+
+  private checkAndInitGoogle(): void {
+    if (typeof window === 'undefined') return;
+
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      // @ts-ignore
+      const googleDefined = typeof google !== 'undefined' && google.accounts && google.accounts.id;
+      const elementExists = document.getElementById('googleBtn') !== null;
+
+      if (googleDefined && elementExists) {
+        clearInterval(interval);
+        this.initGoogleSignIn();
+      } else if (attempts > 30) { // Stop after 15 seconds
+        clearInterval(interval);
+        console.warn('Google Sign-In API or button container not found after 15 seconds.');
+      }
+    }, 500);
+  }
+
+  private initGoogleSignIn(): void {
+    try {
+      // @ts-ignore
+      google.accounts.id.initialize({
+        client_id: '685073393507-kd768suv87jepg4b37bmlaf4j7lf7bav.apps.googleusercontent.com',
+        callback: this.handleGoogleCredentialResponse.bind(this)
+      });
+      // @ts-ignore
+      google.accounts.id.renderButton(
+        document.getElementById('googleBtn'),
+        { theme: 'outline', size: 'large', width: '280px', shape: 'pill' }
+      );
+    } catch (e) {
+      console.error('Error rendering Google Sign-In button', e);
+    }
+  }
+
+  handleGoogleCredentialResponse(response: any): void {
+    if (response && response.credential) {
+      this.isLoading.set(true);
+      this.errorMessage.set('');
+      this.authService.googleLogin(response.credential).subscribe({
+        next: (res) => {
+          this.isLoading.set(false);
+          this.toastService.success('Đăng nhập thành công! Chào mừng quay trở lại.');
+          if (res && !res.hasCharacter) {
+            this.router.navigate(['/character-customization']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(err.error?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
+        }
+      });
+    }
+  }
 
   onSubmit(): void {
     if (!this.email || !this.password || this.password !== this.confirmPassword) return;

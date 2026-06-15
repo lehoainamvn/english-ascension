@@ -90,7 +90,7 @@ export interface WorldMapItem {
           </p>
           <a
             routerLink="/placement-test"
-            class="bg-brand-primary hover:bg-brand-secondary text-white font-bold px-5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md cursor-pointer text-xs"
+            class="bg-brand-primary hover:bg-brand-secondary text-bg-card font-bold px-5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md cursor-pointer text-xs"
           >
             Làm bài Placement Test ngay
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -102,7 +102,7 @@ export interface WorldMapItem {
           <span class="text-xs text-text-muted font-black tracking-wider uppercase">BẢN ĐỒ TIẾN TRÌNH AI (TOEIC)</span>
           <button
             (click)="isRoadmapDrawerOpen.set(true)"
-            class="px-3 py-1.5 bg-brand-primary hover:bg-brand-secondary text-white text-[11px] font-black rounded-xl transition-all cursor-pointer shadow-md flex items-center gap-1.5 active:scale-98 border-none"
+            class="px-3 py-1.5 bg-brand-primary hover:bg-brand-secondary text-bg-card text-[11px] font-black rounded-xl transition-all cursor-pointer shadow-md flex items-center gap-1.5 active:scale-98 border-none"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list shrink-0"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
             Xem Tóm Tắt Lộ Trình
@@ -269,7 +269,7 @@ export interface WorldMapItem {
                           <a
                             [routerLink]="pop.link"
                             [queryParams]="pop.queryParams"
-                            class="flex-1 text-center bg-brand-primary hover:bg-brand-secondary text-white text-[10px] font-black py-2 rounded-xl transition-all cursor-pointer shadow-md decoration-none flex items-center justify-center gap-1"
+                            class="flex-1 text-center bg-brand-primary hover:bg-brand-secondary text-bg-card text-[10px] font-black py-2 rounded-xl transition-all cursor-pointer shadow-md decoration-none flex items-center justify-center gap-1"
                           >
                             Học Ngay
                             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play shrink-0"><polygon points="6 3 20 12 6 21 6 3"/></svg>

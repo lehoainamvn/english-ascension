@@ -31,7 +31,7 @@ import { VocabularyService, VocabTopic } from '../../services/vocabulary.service
           <button
             (click)="selectPrimaryTab('CEFR')"
             [class.bg-brand-primary]="activeTab() === 'CEFR'"
-            [class.text-white]="activeTab() === 'CEFR'"
+            [class.text-bg-card]="activeTab() === 'CEFR'"
             [class.shadow-md]="activeTab() === 'CEFR'"
             [class.text-text-muted]="activeTab() !== 'CEFR'"
             class="flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5"
@@ -42,7 +42,7 @@ import { VocabularyService, VocabTopic } from '../../services/vocabulary.service
           <button
             (click)="selectPrimaryTab('TOEIC')"
             [class.bg-brand-primary]="activeTab() === 'TOEIC'"
-            [class.text-white]="activeTab() === 'TOEIC'"
+            [class.text-bg-card]="activeTab() === 'TOEIC'"
             [class.shadow-md]="activeTab() === 'TOEIC'"
             [class.text-text-muted]="activeTab() !== 'TOEIC'"
             class="flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5"

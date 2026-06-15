@@ -31,7 +31,7 @@ import { ToastService } from '../../services/toast.service';
             
             <button
               (click)="showAddModal.set(true)"
-              class="px-4 py-2 bg-brand-primary hover:bg-brand-secondary text-white font-black text-xs rounded-xl shadow-md cursor-pointer transition-all border-none flex items-center gap-1.5 active:scale-95"
+              class="px-4 py-2 bg-brand-primary hover:bg-brand-secondary text-bg-card font-black text-xs rounded-xl shadow-md cursor-pointer transition-all border-none flex items-center gap-1.5 active:scale-95"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
               Thêm từ mới
@@ -63,7 +63,7 @@ import { ToastService } from '../../services/toast.service';
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             Ôn tập Spaced Repetition
             @if (words().length > 0) {
-              <span class="bg-brand-primary text-white text-[9px] px-1.5 py-0.5 rounded-full shrink-0 font-bold">NEW</span>
+              <span class="bg-brand-primary text-bg-card text-[9px] px-1.5 py-0.5 rounded-full shrink-0 font-bold">NEW</span>
             }
           </button>
         </div>
@@ -335,7 +335,7 @@ import { ToastService } from '../../services/toast.service';
                     </button>
                     <button
                       (click)="rateConfidence(5)"
-                      class="bg-brand-primary text-white hover:opacity-90 py-2 rounded-xl text-xxs font-black transition-all shadow-sm border-none cursor-pointer"
+                      class="bg-brand-primary text-bg-card hover:opacity-90 py-2 rounded-xl text-xxs font-black transition-all shadow-sm border-none cursor-pointer"
                     >
                       Thuộc Lòng
                     </button>

@@ -97,7 +97,7 @@ import { WorldMapComponent } from '../world-map/world-map';
                 <p class="text-xs text-text-muted max-w-xs mx-auto">Khám phá Kho lộ trình và thêm lộ trình bạn muốn học!</p>
                 <button
                   (click)="activeTab.set('library')"
-                  class="px-4 py-2 bg-brand-primary text-white font-bold rounded-xl text-xs hover:opacity-90 transition-all cursor-pointer border-none"
+                  class="px-4 py-2 bg-brand-primary text-bg-card font-bold rounded-xl text-xs hover:opacity-90 transition-all cursor-pointer border-none"
                 >
                   Khám phá Kho lộ trình
                 </button>
@@ -221,7 +221,7 @@ import { WorldMapComponent } from '../world-map/world-map';
                 <div class="pt-2">
                   <button
                     routerLink="/placement-test"
-                    class="px-5 py-2.5 bg-brand-primary text-white font-bold rounded-xl hover:opacity-90 transition-all text-xs shadow-md cursor-pointer border-none"
+                    class="px-5 py-2.5 bg-brand-primary text-bg-card font-bold rounded-xl hover:opacity-90 transition-all text-xs shadow-md cursor-pointer border-none"
                   >
                     Làm Bài Placement Test
                   </button>
