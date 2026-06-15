@@ -37,20 +37,20 @@ interface UserAnswer {
             </p>
             
             <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto text-left">
-              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-languages text-green-500 shrink-0"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
                 <span class="text-xs font-bold text-text-main">Vocabulary</span>
               </div>
-              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-spell-check text-purple-500 shrink-0"><path d="m6 16 6-12 6 12"/><path d="M8 12h8"/><path d="m16 20 2 2 4-4"/></svg>
                 <span class="text-xs font-bold text-text-main">Grammar</span>
               </div>
-              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headphones text-blue-500 shrink-0"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
                 <span class="text-xs font-bold text-text-main">Listening</span>
               </div>
-              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open text-orange-500 shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                 <span class="text-xs font-bold text-text-main">Reading</span>
               </div>
             </div>
@@ -62,12 +62,12 @@ interface UserAnswer {
                 [(ngModel)]="selectedGoal"
                 class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-3 text-xs text-text-main font-semibold focus:outline-none focus:ring-1 focus:ring-brand-primary cursor-pointer"
               >
-                <option value="TOEIC 450">🎯 Mục tiêu: TOEIC 450+ (Cơ bản)</option>
-                <option value="TOEIC 550">🎯 Mục tiêu: TOEIC 550+ (Tốt nghiệp / Đi làm)</option>
-                <option value="TOEIC 650">🎯 Mục tiêu: TOEIC 650+ (Khá)</option>
-                <option value="TOEIC 750">🎯 Mục tiêu: TOEIC 750+ (Trung cao cấp)</option>
-                <option value="TOEIC 850">🎯 Mục tiêu: TOEIC 850+ (Cao cấp)</option>
-                <option value="TOEIC 990">🎯 Mục tiêu: TOEIC 990+ (Xuất sắc)</option>
+                <option value="TOEIC 450">Mục tiêu: TOEIC 450+ (Cơ bản)</option>
+                <option value="TOEIC 550">Mục tiêu: TOEIC 550+ (Tốt nghiệp / Đi làm)</option>
+                <option value="TOEIC 650">Mục tiêu: TOEIC 650+ (Khá)</option>
+                <option value="TOEIC 750">Mục tiêu: TOEIC 750+ (Trung cao cấp)</option>
+                <option value="TOEIC 850">Mục tiêu: TOEIC 850+ (Cao cấp)</option>
+                <option value="TOEIC 990">Mục tiêu: TOEIC 990+ (Xuất sắc)</option>
               </select>
             </div>
 
@@ -78,9 +78,10 @@ interface UserAnswer {
             <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <button
                 (click)="startTest()"
-                class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-brand-primary/20 active:scale-[0.98] transition-all cursor-pointer"
+                class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-brand-primary/20 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 border-none"
               >
-                Bắt Đầu Làm Bài 🚀
+                <span>Bắt Đầu Làm Bài</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rocket shrink-0"><path d="M4.5 16.5c-1.5 1.26-2 3.38-2 3.38s2.12-.5 3.38-2c.86-.86.86-2.24 0-3.1a2.2 2.2 0 0 0-3.38 0z"/><path d="M12 15c-3.5 3.5-7.9 3.5-7.9 3.5s-.1-4.4 3.4-7.9c1-1 2.2-1.5 3.4-1.5L12 10l-1.5 1.5L12 13l1.5-1.5 1 1.1c0 1.2-.5 2.4-1.5 3.4z"/><path d="M16.5 4.5c1.26-1.5 3.38-2 3.38-2s-.5 2.12-2 3.38c-.86.86-2.24.86-3.1 0a2.2 2.2 0 0 1 0-3.38z"/><path d="m9 15 3-3"/><path d="m15 9 3-3"/></svg>
               </button>
               <a
                 routerLink="/dashboard"
@@ -95,8 +96,8 @@ interface UserAnswer {
         <!-- Error Screen -->
         @if (testState() === 'error') {
           <div class="text-center py-10 space-y-4">
-            <div class="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto text-3xl">
-              ⚠️
+            <div class="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
             </div>
             <h3 class="text-xl font-bold text-text-main">Không thể tải đề thi</h3>
             <p class="text-text-muted text-sm max-w-sm mx-auto">
@@ -105,9 +106,10 @@ interface UserAnswer {
             <div class="pt-4">
               <button
                 (click)="loadQuestions()"
-                class="bg-brand-primary hover:bg-brand-secondary text-white font-bold px-6 py-2.5 rounded-xl transition-all cursor-pointer"
+                class="bg-brand-primary hover:bg-brand-secondary text-white font-bold px-6 py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 mx-auto border-none"
               >
-                Tải Lại Đề 🔄
+                <span>Tải Lại Đề</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw shrink-0"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
               </button>
             </div>
           </div>
@@ -153,7 +155,7 @@ interface UserAnswer {
                       (click)="toggleAudio(currentQuestion().audioUrl!)"
                       [class.bg-brand-primary]="!isAudioPlaying"
                       [class.bg-red-500]="isAudioPlaying"
-                      class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                      class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold transition-all shadow-md active:scale-95 cursor-pointer border-none"
                     >
                       @if (isAudioPlaying) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause fill-current"><rect width="4" height="16" x="6" y="4" rx="1"/><rect width="4" height="16" x="14" y="4" rx="1"/></svg>
@@ -259,7 +261,7 @@ interface UserAnswer {
                 <button
                   (click)="nextQuestion()"
                   [disabled]="!getSelectedOption()"
-                  class="bg-brand-primary hover:bg-brand-secondary text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                  class="bg-brand-primary hover:bg-brand-secondary text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer border-none"
                 >
                   Tiếp theo &rarr;
                 </button>
@@ -267,9 +269,10 @@ interface UserAnswer {
                 <button
                   (click)="submitTest()"
                   [disabled]="!allQuestionsAnswered()"
-                  class="bg-gradient-to-r from-brand-primary to-brand-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-brand-primary/15 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                  class="bg-gradient-to-r from-brand-primary to-brand-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-brand-primary/15 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1.5 border-none"
                 >
-                  Nộp Bài Thi 🎯
+                  <span>Nộp Bài Thi</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send shrink-0"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
               }
             </div>
@@ -293,15 +296,18 @@ interface UserAnswer {
             </div>
 
             <!-- Fake processing details to make user experience interesting -->
-            <div class="max-w-xs mx-auto p-3.5 bg-bg-input border border-border-main rounded-xl text-xxs text-text-muted text-left font-mono space-y-1 text-[11px]">
-              <div class="flex items-center gap-1.5">
-                <span class="text-green-500">✓</span> <span>Checking answers correctness...</span>
+            <div class="max-w-xs mx-auto p-3.5 bg-bg-input border border-border-main rounded-xl text-xxs text-text-muted text-left font-mono space-y-2 text-[11px]">
+              <div class="flex items-center gap-1.5 text-green-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 15.01 9 12.01"/></svg>
+                <span>Checking answers correctness...</span>
               </div>
-              <div class="flex items-center gap-1.5 animate-pulse">
-                <span class="text-brand-primary">⏳</span> <span>Generating personalized learning modules...</span>
+              <div class="flex items-center gap-1.5 animate-pulse text-brand-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock shrink-0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Generating personalized learning modules...</span>
               </div>
               <div class="flex items-center gap-1.5 opacity-55">
-                <span>▫️</span> <span>Structuring timeline layout...</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader shrink-0"><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="4.93" x2="7.76" y1="4.93" y2="7.76"/><line x1="16.24" x2="19.07" y1="16.24" y2="19.07"/><line x1="2" x2="6" y1="12" y2="12"/><line x1="18" x2="22" y1="12" y2="12"/><line x1="4.93" x2="7.76" y1="19.07" y2="16.24"/><line x1="16.24" x2="19.07" y1="7.76" y2="4.93"/></svg>
+                <span>Structuring timeline layout...</span>
               </div>
             </div>
           </div>
@@ -311,12 +317,19 @@ interface UserAnswer {
         @if (testState() === 'results' && roadmapResult()) {
           <div class="text-center py-6 space-y-6">
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold uppercase tracking-wider animate-bounce">
-              <span>🎉</span> Chúc mừng bạn đã hoàn thành bài thi!
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award shrink-0"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              Chúc mừng bạn đã hoàn thành bài thi!
             </div>
 
             <div class="flex justify-center gap-4 text-xs font-bold my-1">
-              <span class="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-3 py-1.5 rounded-full">⚡ +100 EXP</span>
-              <span class="bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 px-3 py-1.5 rounded-full">🪙 +50 Xu</span>
+              <span class="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-3 py-1.5 rounded-full flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap fill-current shrink-0"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                +100 EXP
+              </span>
+              <span class="bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 px-3 py-1.5 rounded-full flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins shrink-0"><circle cx="8" cy="8" r="6"/><circle cx="18" cy="18" r="4"/><path d="M12 18a6 6 0 0 0-6-6"/></svg>
+                +50 Xu
+              </span>
             </div>
             
             <h2 class="text-3xl font-extrabold text-text-main tracking-tight">
@@ -372,9 +385,10 @@ interface UserAnswer {
             <div class="pt-6 border-t border-border-main/50">
               <button
                 (click)="goToWorldMap()"
-                class="w-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent hover:shadow-brand-primary/20 text-white font-extrabold py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer text-sm"
+                class="w-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent hover:shadow-brand-primary/20 text-white font-extrabold py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer text-sm flex items-center justify-center gap-2 border-none"
               >
-                Bắt Đầu Hành Trình Luyện Tập ⚔️
+                <span>Bắt Đầu Hành Trình Luyện Tập</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-swords shrink-0"><polyline points="20 4 20 8 16 8"/><polyline points="4 20 4 16 8 16"/><line x1="4" x2="20" y1="20" y2="4"/><line x1="14" x2="20" y1="14" y2="20"/><line x1="4" x2="10" y1="4" y2="10"/></svg>
               </button>
             </div>
           </div>
