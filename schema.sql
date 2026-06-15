@@ -38,6 +38,8 @@ CREATE TABLE users (
     character_face_style VARCHAR(100),
     character_outfit_style VARCHAR(100),
     character_title VARCHAR(100) DEFAULT 'Novice',
+    reset_token VARCHAR(255),
+    reset_token_expiry TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

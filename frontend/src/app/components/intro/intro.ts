@@ -15,9 +15,7 @@ import { AuthService } from '../../services/auth.service';
       <!-- Minimalist Header -->
       <header class="w-full max-w-7xl mx-auto px-6 h-20 flex items-center justify-between transition-colors duration-300 relative z-10">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center shadow-md">
-            <span class="text-white font-black text-sm">EA</span>
-          </div>
+          <img src="logo.png" class="w-8 h-8 object-contain rounded-lg shadow-md" alt="Logo" />
           <span class="text-sm font-black text-text-main tracking-tight">
             English Ascension
           </span>

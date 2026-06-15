@@ -442,7 +442,7 @@ import { ToastService } from '../../services/toast.service';
                       <button
                         (click)="submitListeningAnswer()"
                         [disabled]="!selectedListeningAnswer() || listeningSubmitted()"
-                        class="flex-1 bg-brand-primary text-white hover:opacity-90 py-2 rounded-xl transition-all cursor-pointer disabled:opacity-40 border-none font-black"
+                        class="flex-1 bg-brand-primary text-bg-card hover:opacity-90 py-2 rounded-xl transition-all cursor-pointer disabled:opacity-40 border-none font-black"
                       >
                         Kiểm tra câu trả lời
                       </button>

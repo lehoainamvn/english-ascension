@@ -28,6 +28,27 @@ export class AuthService {
     return this.http.post(API_URL + 'change-password', { oldPassword, newPassword });
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(API_URL + 'forgot-password', { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post(API_URL + 'reset-password', { token, newPassword });
+  }
+
+  googleLogin(idToken: string): Observable<any> {
+    return this.http.post<any>(API_URL + 'google', { idToken }).pipe(
+      tap(response => {
+        if (response && response.token) {
+          this.saveToken(response.token);
+          this.saveUser(response);
+          this.currentUser.set(response);
+          this.hasCharacterState.set(response.hasCharacter);
+        }
+      })
+    );
+  }
+
   login(email: string, password: string): Observable<any> {
     return this.http.post<any>(API_URL + 'login', { email, password }).pipe(
       tap(response => {

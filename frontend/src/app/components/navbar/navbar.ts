@@ -19,9 +19,7 @@ import { ToastService } from '../../services/toast.service';
           
           <!-- Left: Logo -->
           <div class="flex items-center gap-2.5 shrink-0">
-            <div class="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center shadow-md">
-              <span class="text-white font-black text-sm">EA</span>
-            </div>
+            <img src="logo.png" class="w-8 h-8 object-contain rounded-lg shadow-md" alt="Logo" />
             <span class="text-sm font-black text-text-main tracking-tight">
               English Ascension
             </span>
@@ -174,10 +172,14 @@ import { ToastService } from '../../services/toast.service';
 
             <button
               (click)="toggleTheme()"
-              class="px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-main bg-bg-card hover:bg-bg-input/60 border border-border-main rounded-lg transition-all cursor-pointer"
+              class="w-8 h-8 rounded-lg hover:bg-bg-input/60 border border-transparent hover:border-border-main flex items-center justify-center text-text-muted hover:text-text-main cursor-pointer transition-all"
               title="Chuyển chế độ sáng/tối"
             >
-              {{ isDark() ? 'Sáng' : 'Tối' }}
+              @if (isDark()) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="lucide lucide-moon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+              }
             </button>
 
             <!-- User profile dropdown trigger -->

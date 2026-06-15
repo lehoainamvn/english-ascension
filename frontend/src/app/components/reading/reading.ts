@@ -19,7 +19,7 @@ import { ReadingService, ReadingArticle } from '../../services/reading.service';
         <!-- Header -->
         <div class="text-center space-y-2 max-w-2xl mx-auto">
           <div class="flex items-center justify-center gap-2 select-none shrink-0 font-bold text-xs">
-            <span class="bg-brand-primary text-white px-3 py-1 rounded-xl shadow-sm flex items-center gap-1">
+            <span class="bg-brand-primary text-bg-card px-3 py-1 rounded-xl shadow-sm flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               Học
             </span>

@@ -423,7 +423,7 @@ interface MatchCard {
                         <button
                           (click)="checkTyping()"
                           [disabled]="typingChecked() || !typingInput.trim()"
-                          class="bg-brand-primary hover:bg-brand-secondary text-white text-xxs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer"
+                          class="bg-brand-primary hover:bg-brand-secondary text-bg-card text-xxs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer"
                         >
                           Kiểm tra
                         </button>
