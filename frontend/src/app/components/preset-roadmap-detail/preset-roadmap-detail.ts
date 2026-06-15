@@ -27,9 +27,10 @@ export interface MapItem {
         <!-- Back Button -->
         <button
           (click)="goBack()"
-          class="flex items-center gap-2 text-xs font-bold text-text-muted hover:text-text-main mb-6 transition-colors cursor-pointer bg-transparent border-none"
+          class="btn-back mb-6"
         >
-          ← Quay lại
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Quay lại
         </button>
 
         @if (isLoading()) {
@@ -279,8 +280,9 @@ export interface MapItem {
           <div class="text-center py-24 space-y-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-circle mx-auto text-text-muted"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
             <p class="text-sm font-black text-text-main">Không tìm thấy lộ trình này.</p>
-            <button (click)="goBack()" class="text-xs text-brand-primary hover:underline cursor-pointer bg-transparent border-none">
-              ← Quay lại trang chủ
+            <button (click)="goBack()" class="btn-back mt-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Quay lại trang chủ
             </button>
           </div>
         }

@@ -90,9 +90,10 @@ export interface WorldMapItem {
           </p>
           <a
             routerLink="/placement-test"
-            class="bg-brand-primary hover:bg-brand-secondary text-white font-bold px-5 py-2 rounded-xl transition-all inline-block shadow-md cursor-pointer text-xs"
+            class="bg-brand-primary hover:bg-brand-secondary text-white font-bold px-5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md cursor-pointer text-xs"
           >
-            Làm bài Placement Test ngay 🚀
+            Làm bài Placement Test ngay
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>
       } @else {
@@ -103,7 +104,8 @@ export interface WorldMapItem {
             (click)="isRoadmapDrawerOpen.set(true)"
             class="px-3 py-1.5 bg-brand-primary hover:bg-brand-secondary text-white text-[11px] font-black rounded-xl transition-all cursor-pointer shadow-md flex items-center gap-1.5 active:scale-98 border-none"
           >
-            📋 Xem Tóm Tắt Lộ Trình
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list shrink-0"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Xem Tóm Tắt Lộ Trình
           </button>
         </div>
 
@@ -189,7 +191,19 @@ export interface WorldMapItem {
                       ? 'border-brand-accent/50 bg-brand-accent/5 dark:bg-brand-accent/15'
                       : 'border-border-main bg-bg-main'"
                   >
-                    {{ getNodeEmoji(item.nodeType!) }}
+                    @if (item.nodeType === 'THEORY_GRAMMAR') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open text-blue-500 shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    } @else if (item.nodeType === 'THEORY_VOCABULARY') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers text-emerald-500 shrink-0"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+                    } @else if (item.nodeType === 'THEORY_LISTENING') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headphones text-purple-500 shrink-0"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                    } @else if (item.nodeType === 'THEORY_PRONUNCIATION') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-orange-500 shrink-0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                    } @else if (item.nodeType === 'BATTLE') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-swords text-rose-500 shrink-0"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="9.5 6.5 21 18 21 21 18 21 6.5 9.5"/><line x1="11" y1="5" x2="5" y2="11"/><line x1="8" y1="8" x2="4" y2="4"/><line x1="5" x2="3" y1="3" y2="5"/></svg>
+                    } @else if (item.nodeType === 'QUIZ') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy text-yellow-500 shrink-0"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    }
                   </div>
 
                   <!-- Node Info -->
@@ -206,13 +220,13 @@ export interface WorldMapItem {
                   </div>
 
                   <!-- Node Status Indicator -->
-                  <div class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black">
+                  <div class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full text-text-main">
                     @if (getSubNodeStatus(item.module, item.nodeType!) === 'COMPLETED') {
-                      <span class="text-green-500 text-xs">✓</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-500"><polyline points="20 6 9 17 4 12"/></svg>
                     } @else if (getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS') {
-                      <span class="text-brand-accent animate-pulse">🎯</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target text-brand-accent animate-pulse"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                     } @else {
-                      <span class="text-text-muted text-[10px]">🔒</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock text-text-muted opacity-60"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     }
                   </div>
                 </div>
@@ -241,11 +255,11 @@ export interface WorldMapItem {
                       <div class="flex items-center justify-between text-[10px] font-bold">
                         <span class="text-text-muted">Trạng thái:</span>
                         @if (pop.status === 'COMPLETED') {
-                          <span class="text-green-500 font-extrabold">✓ Đã Hoàn Thành</span>
+                          <span class="text-green-500 font-extrabold flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check shrink-0"><polyline points="20 6 9 17 4 12"/></svg>Đã Hoàn Thành</span>
                         } @else if (pop.status === 'IN_PROGRESS') {
-                          <span class="text-brand-primary font-extrabold animate-pulse">⚔️ Đang Học</span>
+                          <span class="text-brand-primary font-extrabold animate-pulse flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target shrink-0"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Đang Học</span>
                         } @else {
-                          <span class="text-text-muted font-extrabold">🔒 Đang Khóa</span>
+                          <span class="text-text-muted font-extrabold flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Đang Khóa</span>
                         }
                       </div>
                       
@@ -255,9 +269,10 @@ export interface WorldMapItem {
                           <a
                             [routerLink]="pop.link"
                             [queryParams]="pop.queryParams"
-                            class="flex-1 text-center bg-brand-primary hover:bg-brand-secondary text-white text-[10px] font-black py-2 rounded-xl transition-all cursor-pointer shadow-md decoration-none"
+                            class="flex-1 text-center bg-brand-primary hover:bg-brand-secondary text-white text-[10px] font-black py-2 rounded-xl transition-all cursor-pointer shadow-md decoration-none flex items-center justify-center gap-1"
                           >
-                            Học Ngay 🚀
+                            Học Ngay
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play shrink-0"><polygon points="6 3 20 12 6 21 6 3"/></svg>
                           </a>
                         } @else {
                           <button
@@ -676,7 +691,7 @@ export class WorldMapComponent implements OnInit {
       estimatedToeic = 'TOEIC ' + (scores[mod.orderIndex - 1] || '600+');
     }
 
-    let title = this.getNodeTitle(type) + ' ' + this.getNodeEmoji(type);
+    let title = this.getNodeTitle(type);
     let description = this.getNodeDesc(type);
     let link: any[] = [];
     let queryParams: any = null;

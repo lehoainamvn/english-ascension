@@ -29,8 +29,8 @@ import { GrammarService, GrammarLesson } from '../../services/grammar.service';
         <!-- Banner: Luyện tập ngẫu nhiên -->
         <div class="p-6 bg-gradient-to-r from-brand-primary/10 via-brand-secondary/5 to-transparent border border-border-main rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center text-xl text-brand-primary">
-              🔀
+            <div class="w-12 h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shuffle shrink-0"><polyline points="16 3 21 3 21 8"/><line x1="4" x2="20" y1="20" y2="4"/><polyline points="21 16 21 21 16 21"/><line x1="15" x2="20" y1="15" y2="20"/><line x1="4" x2="9" y1="4" y2="9"/></svg>
             </div>
             <div>
               <h3 class="text-sm font-black text-text-main">Luyện tập ngẫu nhiên</h3>
@@ -39,16 +39,17 @@ import { GrammarService, GrammarLesson } from '../../services/grammar.service';
           </div>
           <button
             (click)="startRandomPractice()"
-            class="bg-brand-primary hover:bg-brand-secondary text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm"
+            class="bg-brand-primary hover:bg-brand-secondary text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
           >
-            ✈️ Bắt đầu
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play shrink-0 fill-current"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            Bắt đầu
           </button>
         </div>
 
         <!-- Search bar & Stats -->
         <div class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
           <div class="flex items-center w-full max-w-md bg-bg-card border border-border-main rounded-2xl px-4 py-2.5 shadow-sm">
-            <span class="text-text-muted text-base shrink-0 mr-3">🔍</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search text-text-muted shrink-0 mr-2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input
               type="text"
               [(ngModel)]="searchQuery"
@@ -103,7 +104,7 @@ import { GrammarService, GrammarLesson } from '../../services/grammar.service';
                 <div class="flex justify-between items-end border-t border-border-main/40 pt-4 mt-6">
                   <div class="space-y-1 text-[10px] font-bold">
                     <div class="flex items-center gap-1.5 text-brand-primary">
-                      <span class="text-xs">🌐</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                       <span>{{ card.questionsCount }} câu hỏi luyện tập</span>
                     </div>
                     @if (card.practiceCompleted && card.score !== null) {

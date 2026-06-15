@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { PlacementTestService } from '../../services/placement-test.service';
 import { StudyService } from '../../services/study.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-navbar',
@@ -457,19 +458,24 @@ import { StudyService } from '../../services/study.service';
           </div>
 
           @if (passwordError()) {
-            <p class="text-red-500 text-[10px] font-semibold mt-2">{{ passwordError() }}</p>
-          }
-          @if (passwordSuccess()) {
-            <p class="text-green-500 text-[10px] font-semibold mt-2">{{ passwordSuccess() }}</p>
+            <div class="bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-[10px] p-2.5 rounded-xl flex items-center gap-2 font-bold mt-2 animate-fade-in">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+              <span>{{ passwordError() }}</span>
+            </div>
           }
 
           <div class="flex gap-3 mt-5 pt-3 border-t border-border-main/50 text-xs font-bold">
             <button
               (click)="changePassword()"
-              [disabled]="isChangingPassword()"
-              class="flex-1 bg-[#0F1729] dark:bg-white text-white dark:text-[#0F1729] py-2 rounded-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer border-none"
+              [disabled]="isChangingPassword() || !oldPassword || !newPassword || !confirmPassword"
+              class="flex-1 bg-[#0F1729] dark:bg-white text-white dark:text-[#0F1729] py-2 rounded-xl active:scale-98 transition-all disabled:opacity-50 cursor-pointer border-none flex items-center justify-center gap-1.5"
             >
-              Lưu mật khẩu
+              @if (isChangingPassword()) {
+                Đang xử lý...
+              } @else {
+                Lưu mật khẩu
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 15.01 9 12.01"/></svg>
+              }
             </button>
             <button
               (click)="closePasswordModal()"
@@ -507,6 +513,7 @@ export class NavbarComponent implements OnInit {
   private readonly studyService = inject(StudyService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef);
+  private readonly toastService = inject(ToastService);
 
   profile = signal<any>(null);
   activeModuleId = signal<number | null>(null);
@@ -529,7 +536,6 @@ export class NavbarComponent implements OnInit {
   newPassword = '';
   confirmPassword = '';
   passwordError = signal('');
-  passwordSuccess = signal('');
 
   ngOnInit(): void {
     this.checkCurrentTheme();
@@ -644,7 +650,6 @@ export class NavbarComponent implements OnInit {
     this.newPassword = '';
     this.confirmPassword = '';
     this.passwordError.set('');
-    this.passwordSuccess.set('');
   }
 
   closePasswordModal(): void {
@@ -670,15 +675,18 @@ export class NavbarComponent implements OnInit {
     this.passwordError.set('');
     this.isChangingPassword.set(true);
 
-    // Simulate API request to update password
-    setTimeout(() => {
-      this.isChangingPassword.set(false);
-      this.passwordSuccess.set('Đổi mật khẩu thành công! Cửa sổ sẽ đóng sau giây lát.');
-      
-      setTimeout(() => {
+    this.authService.changePassword(this.oldPassword, this.newPassword).subscribe({
+      next: () => {
+        this.isChangingPassword.set(false);
         this.closePasswordModal();
-      }, 1500);
-    }, 1200);
+        this.toastService.success('Đổi mật khẩu thành công!');
+      },
+      error: (err) => {
+        this.isChangingPassword.set(false);
+        const errMsg = err.error?.message || 'Không thể đổi mật khẩu. Vui lòng thử lại.';
+        this.passwordError.set(errMsg);
+      }
+    });
   }
 
   toggleTheme(): void {

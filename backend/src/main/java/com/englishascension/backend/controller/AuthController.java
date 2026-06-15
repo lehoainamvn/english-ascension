@@ -3,6 +3,7 @@ package com.englishascension.backend.controller;
 import com.englishascension.backend.dto.AuthResponse;
 import com.englishascension.backend.dto.LoginRequest;
 import com.englishascension.backend.dto.MessageResponse;
+import com.englishascension.backend.dto.ChangePasswordRequest;
 import com.englishascension.backend.dto.RegisterRequest;
 import com.englishascension.backend.model.Role;
 import com.englishascension.backend.model.User;
@@ -81,5 +82,27 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getName().equals("anonymousUser")) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Error: Unauthorized!"));
+        }
+
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found with email: " + email));
+
+        if (!encoder.matches(request.getOldPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Mật khẩu hiện tại không chính xác!"));
+        }
+
+        user.setPassword(encoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("Đổi mật khẩu thành công!"));
     }
 }

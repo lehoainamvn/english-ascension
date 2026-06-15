@@ -24,6 +24,10 @@ export class AuthService {
     return this.http.post(API_URL + 'register', { email, password });
   }
 
+  changePassword(oldPassword: string, newPassword: string): Observable<any> {
+    return this.http.post(API_URL + 'change-password', { oldPassword, newPassword });
+  }
+
   login(email: string, password: string): Observable<any> {
     return this.http.post<any>(API_URL + 'login', { email, password }).pipe(
       tap(response => {
