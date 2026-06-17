@@ -515,45 +515,12 @@ export class MyVocabularyComponent implements OnInit {
   loadWords(): void {
     this.userWordService.getUserWords().subscribe({
       next: (data) => {
-        if (data && data.length > 0) {
-          this.words.set(data);
-        } else {
-          // If completely empty database, load default starting seed words
-          this.seedInitialWords();
-        }
+        this.words.set(data || []);
       },
       error: (err) => {
-        console.error('Error loading saved words, using mock fallback', err);
-        this.seedInitialWords();
+        console.error('Error loading saved words', err);
+        this.words.set([]);
       }
-    });
-  }
-
-  seedInitialWords(): void {
-    const defaultSeeds = [
-      { id: 1, word: 'Procrastinate', partOfSpeech: 'verb', definition: 'Trì hoãn, chần chừ', savedDate: '06/06/2026', phonetic: '/prəˈkræstɪneɪt/', notes: '📝 Ghi nhớ: Hãy nghĩ về việc hẹn báo thức lại nhiều lần vào mỗi buổi sáng.', efactor: 2.5, interval: 1, repetitions: 2 },
-      { id: 2, word: 'Cognitive', partOfSpeech: 'adjective', definition: 'Liên quan đến nhận thức', savedDate: '05/06/2026', phonetic: '/ˈkɒɡnətɪv/', notes: '📝 Ví dụ: Cognitive load (quá tải nhận thức) khi thiết kế UI.', efactor: 2.4, interval: 1, repetitions: 1 },
-      { id: 3, word: 'Equilibrium', partOfSpeech: 'noun', definition: 'Trạng thái cân bằng', savedDate: '03/06/2026', phonetic: '/ˌiːkwɪˈlɪbriəm/', notes: '📝 Mẹo: Nhớ đến thế cân bằng trong các môn võ thuật.', efactor: 2.6, interval: 4, repetitions: 3 },
-      { id: 4, word: 'Collaborate', partOfSpeech: 'verb', definition: 'Cộng tác, hợp tác làm việc', savedDate: '07/06/2026', phonetic: '/kəˈlæbəreɪt/', notes: '📝 Nhớ: Co-worker hay Co-operate đều có chung tiền tố làm việc cùng nhau.', efactor: 2.5, interval: 1, repetitions: 0 },
-      { id: 5, word: 'Negotiation', partOfSpeech: 'noun', definition: 'Cuộc đàm phán, thương thảo', savedDate: '08/06/2026', phonetic: '/nɪˌɡəʊʃiˈeɪʃn/', notes: '📝 Ghi chú: Kỹ năng đàm phán lương bổng rất quan trọng!', efactor: 2.3, interval: 2, repetitions: 1 }
-    ];
-
-    // Seed defaults sequentially to the backend DB so that it is persisted
-    defaultSeeds.forEach(w => {
-      this.userWordService.saveUserWord({
-        word: w.word,
-        partOfSpeech: w.partOfSpeech,
-        definition: w.definition,
-        phonetic: w.phonetic,
-        notes: w.notes
-      }).subscribe({
-        next: (saved) => {
-          // Append to local list
-          if (!this.words().some(item => item.word.toLowerCase() === saved.word.toLowerCase())) {
-            this.words.set([...this.words(), saved]);
-          }
-        }
-      });
     });
   }
 

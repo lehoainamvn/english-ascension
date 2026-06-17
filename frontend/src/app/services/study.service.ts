@@ -68,6 +68,10 @@ export class StudyService {
     return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/battle-complete`, {});
   }
 
+  analyzePronunciation(targetWord: string, transcribedText: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/pronunciation/analyze`, { targetWord, transcribedText });
+  }
+
   getProfile(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/profile`);
   }

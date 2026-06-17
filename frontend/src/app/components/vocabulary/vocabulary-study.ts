@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { VocabularyService, VocabTopic, VocabWord, RewardResult } from '../../services/vocabulary.service';
 import { UserWordService, UserWord } from '../../services/user-word.service';
 import { ToastService } from '../../services/toast.service';
+import { StudyService } from '../../services/study.service';
 
 
 interface MatchCard {
@@ -481,15 +482,46 @@ interface MatchCard {
                         </span>
                       </div>
 
-                      @if (speechResult()) {
-                        <div class="text-center text-xs font-bold flex items-center justify-center gap-1.5" [class.text-green-500]="speechResult() === 'correct'" [class.text-red-500]="speechResult() === 'incorrect'">
-                          @if (speechResult() === 'correct') {
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2 shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                            <span>Phát âm chính xác! Trùng khớp 100%.</span>
-                          } @else {
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-circle shrink-0"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                            <span>Chưa khớp. Thử phát âm rõ ràng lại nhé!</span>
+                      @if (isAnalyzing()) {
+                        <div class="p-3 bg-bg-input border border-border-main text-text-muted rounded-xl text-xs font-semibold leading-relaxed animate-pulse flex items-center justify-center gap-2 w-full max-w-sm mt-2">
+                          <svg class="animate-spin h-4 w-4 text-brand-primary" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>AI đang phân tích giọng nói của bạn...</span>
+                        </div>
+                      }
+
+                      @if (aiFeedback(); as feedback) {
+                        <div class="w-full max-w-sm space-y-3 p-4 bg-bg-input/60 border border-border-main rounded-2xl text-left animate-fade-in text-xs leading-relaxed mt-2">
+                          <div class="flex items-center justify-between border-b border-border-main/50 pb-2">
+                            <span class="font-bold flex items-center gap-1.5" [class.text-green-500]="feedback.score >= 80" [class.text-yellow-500]="feedback.score >= 60 && feedback.score < 80" [class.text-red-500]="feedback.score < 60">
+                              @if (feedback.score >= 80) {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2 shrink-0"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                              } @else {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-circle shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                              }
+                              Điểm phát âm: <strong>{{ feedback.score }}%</strong> ({{ feedback.accuracy }})
+                            </span>
+                            <span class="text-[9px] text-text-muted bg-bg-card border border-border-main px-2 py-0.5 rounded font-mono font-bold">AI Coach</span>
+                          </div>
+
+                          @if (feedback.spokenText) {
+                            <div>
+                              <p class="text-[9px] font-black text-text-muted uppercase tracking-wider mb-0.5">Bạn đã phát âm thành:</p>
+                              <p class="font-bold text-text-main italic text-sm">"{{ feedback.spokenText }}"</p>
+                            </div>
                           }
+
+                          <div>
+                            <p class="text-[9px] font-black text-text-muted uppercase tracking-wider mb-0.5">Phân tích lỗi phát âm:</p>
+                            <p class="text-text-main leading-normal font-medium">{{ feedback.errorAnalysis }}</p>
+                          </div>
+
+                          <div>
+                            <p class="text-[9px] font-black text-text-muted uppercase tracking-wider mb-0.5">Hướng dẫn cải thiện:</p>
+                            <p class="text-text-main leading-normal font-medium">{{ feedback.suggestions }}</p>
+                          </div>
                         </div>
                       }
                     </div>
@@ -659,6 +691,7 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly userWordService = inject(UserWordService);
   private readonly toastService = inject(ToastService);
+  private readonly studyService = inject(StudyService);
 
   topicId = 0;
   savedWords = signal<UserWord[]>([]);
@@ -702,7 +735,15 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
 
   // Sub-mode Pronunciation Speaking
   isRecording = signal(false);
+  isAnalyzing = signal(false);
   speechResult = signal<'correct' | 'incorrect' | null>(null);
+  aiFeedback = signal<{
+    score: number;
+    accuracy: string;
+    errorAnalysis: string;
+    suggestions: string;
+    spokenText?: string;
+  } | null>(null);
 
   // Match Game details
   gameStarted = signal(false);
@@ -900,7 +941,9 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
     this.typingChecked.set(false);
     this.isTypingCorrect.set(false);
     this.isRecording.set(false);
+    this.isAnalyzing.set(false);
     this.speechResult.set(null);
+    this.aiFeedback.set(null);
 
     // Generate choices for Quiz
     if (this.studySubMode() === 'quiz' && this.unlearnedWords().length > 0) {
@@ -940,6 +983,7 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
   startSpeechRecognition() {
     this.isRecording.set(true);
     this.speechResult.set(null);
+    this.aiFeedback.set(null);
     
     if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -948,12 +992,43 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
       recognition.onresult = (event: any) => {
         const resultText = event.results[0][0].transcript.toLowerCase().trim();
         const target = this.currentWord().word.toLowerCase().trim();
+        this.isRecording.set(false);
+
         if (resultText === target) {
           this.speechResult.set('correct');
+          this.aiFeedback.set({
+            score: 100,
+            accuracy: 'Xuất sắc',
+            errorAnalysis: 'Phát âm chuẩn xác, trùng khớp hoàn toàn với từ mẫu.',
+            suggestions: 'Tuyệt vời! Hãy tiếp tục phát huy.',
+            spokenText: event.results[0][0].transcript
+          });
         } else {
           this.speechResult.set('incorrect');
+          this.isAnalyzing.set(true);
+          this.studyService.analyzePronunciation(this.currentWord().word, event.results[0][0].transcript).subscribe({
+            next: (res) => {
+              this.isAnalyzing.set(false);
+              this.aiFeedback.set({
+                score: res.score,
+                accuracy: res.accuracy,
+                errorAnalysis: res.errorAnalysis,
+                suggestions: res.suggestions,
+                spokenText: event.results[0][0].transcript
+              });
+            },
+            error: (err) => {
+              this.isAnalyzing.set(false);
+              this.aiFeedback.set({
+                score: 65,
+                accuracy: 'Cần cải thiện',
+                errorAnalysis: 'Không thể phân tích lỗi chi tiết do sự cố kết nối AI.',
+                suggestions: `Bạn đã nói "${event.results[0][0].transcript}". Hãy thử phát âm lại rõ ràng hơn nhé!`,
+                spokenText: event.results[0][0].transcript
+              });
+            }
+          });
         }
-        this.isRecording.set(false);
       };
       recognition.onerror = () => {
         this.runSimulatedSpeech();
@@ -968,8 +1043,71 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       if (this.isRecording()) {
         this.isRecording.set(false);
-        // Simulate high success rate for a realistic demo
-        this.speechResult.set(Math.random() > 0.15 ? 'correct' : 'incorrect');
+        
+        // Randomly simulate user's speech output
+        const target = this.currentWord().word;
+        const targetLower = target.toLowerCase();
+        
+        // 40% chance of 100% correct, 60% chance of slight error
+        const isCorrect = Math.random() > 0.6;
+        let spokenText = target;
+        
+        if (!isCorrect) {
+          // Simulate some common misspellings/mispronunciations
+          if (targetLower === 'elaborate') spokenText = 'e-laboratory';
+          else if (targetLower === 'pragmatic') spokenText = 'pragmat';
+          else if (targetLower === 'consolidate') spokenText = 'consoldiate';
+          else if (targetLower === 'achievement') spokenText = 'archivement';
+          else if (targetLower === 'vocabulary') spokenText = 'vocabery';
+          else if (targetLower === 'fundamental') spokenText = 'fundament';
+          else if (targetLower === 'collaborate') spokenText = 'collabrate';
+          else if (targetLower === 'negotiation') spokenText = 'negotiate';
+          else if (targetLower === 'colleague') spokenText = 'college';
+          else if (targetLower === 'presentation') spokenText = 'present';
+          else if (targetLower === 'schedule') spokenText = 'schedu';
+          else if (targetLower === 'comprehension') spokenText = 'comprehens';
+          else if (targetLower === 'academic') spokenText = 'academe';
+          else if (targetLower === 'analysis') spokenText = 'analys';
+          else if (targetLower === 'perspective') spokenText = 'perspect';
+          else if (targetLower === 'terminology') spokenText = 'terminolog';
+          else spokenText = target + 's';
+        }
+        
+        if (spokenText.toLowerCase().trim() === targetLower.trim()) {
+          this.speechResult.set('correct');
+          this.aiFeedback.set({
+            score: 100,
+            accuracy: 'Xuất sắc',
+            errorAnalysis: 'Phát âm chuẩn xác, trùng khớp hoàn toàn với từ mẫu.',
+            suggestions: 'Tuyệt vời! Hãy tiếp tục phát huy.',
+            spokenText: spokenText
+          });
+        } else {
+          this.speechResult.set('incorrect');
+          this.isAnalyzing.set(true);
+          this.studyService.analyzePronunciation(target, spokenText).subscribe({
+            next: (res) => {
+              this.isAnalyzing.set(false);
+              this.aiFeedback.set({
+                score: res.score,
+                accuracy: res.accuracy,
+                errorAnalysis: res.errorAnalysis,
+                suggestions: res.suggestions,
+                spokenText: spokenText
+              });
+            },
+            error: (err) => {
+              this.isAnalyzing.set(false);
+              this.aiFeedback.set({
+                score: 70,
+                accuracy: 'Cần cải thiện',
+                errorAnalysis: 'Không thể phân tích lỗi chi tiết do sự cố kết nối AI.',
+                suggestions: `Bạn đã nói "${spokenText}". Hãy thử phát âm lại rõ ràng hơn nhé!`,
+                spokenText: spokenText
+              });
+            }
+          });
+        }
       }
     }, 1500);
   }
