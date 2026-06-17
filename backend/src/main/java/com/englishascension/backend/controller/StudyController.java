@@ -451,6 +451,40 @@ public class StudyController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/pronunciation/analyze")
+    public ResponseEntity<?> analyzePronunciation(@RequestBody Map<String, String> request) {
+        String targetWord = request.get("targetWord");
+        String transcribedText = request.get("transcribedText");
+
+        if (targetWord == null || targetWord.trim().isEmpty() ||
+            transcribedText == null || transcribedText.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Tham số targetWord và transcribedText không được để trống."));
+        }
+
+        log.info("Analyzing pronunciation. Target: '{}', Transcribed: '{}'", targetWord, transcribedText);
+
+        String systemPrompt = "You are an AI Pronunciation Coach. Your task is to analyze the user's pronunciation based on the target English word/phrase and the transcribed text captured by speech recognition.\n" +
+                "Analyze the phonetic difference and potential errors. Return ONLY a JSON object with the following fields:\n" +
+                "- 'score': an integer from 0 to 100 representing how close the transcription is to the target word/phrase.\n" +
+                "- 'accuracy': a short string in Vietnamese describing the level of accuracy ('Xuất sắc', 'Tốt', 'Khá', 'Cần cải thiện').\n" +
+                "- 'errorAnalysis': a descriptive sentence in Vietnamese explaining what sound was mispronounced or why the transcription turned out the way it did.\n" +
+                "- 'suggestions': helpful tips in Vietnamese on how to improve pronunciation of this word (e.g. focus on word endings, vowel length, stress, etc.).\n" +
+                "Ensure the response is a valid, raw JSON object matching the requested schema and nothing else.";
+
+        String userPrompt = String.format("Target word: \"%s\"\nTranscribed text: \"%s\"", targetWord, transcribedText);
+
+        try {
+            String jsonResponse = groqService.generateJsonResponse(systemPrompt, userPrompt);
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/json; charset=UTF-8")
+                    .body(jsonResponse);
+        } catch (Exception e) {
+            log.error("Error analyzing pronunciation with AI", e);
+            return ResponseEntity.internalServerError().body(Map.of("error", "AI Coach đang bận, vui lòng thử lại sau. Chi tiết: " + e.getMessage()));
+        }
+    }
+
+
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
