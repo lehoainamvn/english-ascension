@@ -1,0 +1,1509 @@
+<div class="flex min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
+  
+  <!-- Left Admin Sidebar -->
+  <aside class="hidden md:flex w-64 bg-white border-r border-slate-200/80 flex-col justify-between h-screen sticky top-0 shrink-0 z-30 select-none">
+    <div>
+      <!-- Admin Header Logo -->
+      <div class="p-5 border-b border-slate-100 flex items-center gap-2.5">
+        <!-- SVG icon matching mockup -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2.5" class="text-slate-900">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <span class="text-base font-black text-slate-900 tracking-tight">English LMS</span>
+      </div>
+
+      <!-- Navigation Links with consistent outline style -->
+      <div class="p-4 space-y-1.5 font-bold">
+        <!-- Dashboard Button -->
+        <button
+          (click)="switchTab('dashboard')"
+          [class.bg-slate-950]="activeTab() === 'dashboard'"
+          [class.text-white]="activeTab() === 'dashboard'"
+          [class.text-slate-600]="activeTab() !== 'dashboard'"
+          class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all border-none text-left cursor-pointer bg-transparent hover:bg-slate-100 hover:text-slate-900"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          Tổng quan Dashboard
+        </button>
+
+        <!-- Roadmap Management Button -->
+        <button
+          (click)="switchTab('roadmap')"
+          [class.bg-slate-950]="activeTab() === 'roadmap'"
+          [class.text-white]="activeTab() === 'roadmap'"
+          [class.text-slate-600]="activeTab() !== 'roadmap'"
+          class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all border-none text-left cursor-pointer bg-transparent hover:bg-slate-100 hover:text-slate-900"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+          Quản lý Lộ trình
+        </button>
+
+        <!-- User Management Button -->
+        <button
+          (click)="switchTab('users')"
+          [class.bg-slate-950]="activeTab() === 'users'"
+          [class.text-white]="activeTab() === 'users'"
+          [class.text-slate-600]="activeTab() !== 'users'"
+          class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all border-none text-left cursor-pointer bg-transparent hover:bg-slate-100 hover:text-slate-900"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Quản lý Học viên
+        </button>
+
+        <!-- Content Management Button -->
+        <button
+          (click)="switchTab('content')"
+          [class.bg-slate-950]="activeTab() === 'content'"
+          [class.text-white]="activeTab() === 'content'"
+          [class.text-slate-600]="activeTab() !== 'content'"
+          class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all border-none text-left cursor-pointer bg-transparent hover:bg-slate-100 hover:text-slate-900"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Quản lý Nội dung
+        </button>
+
+        <!-- AI Content Generator Button -->
+        <button
+          (click)="switchTab('ai-generator')"
+          [class.bg-slate-950]="activeTab() === 'ai-generator'"
+          [class.text-white]="activeTab() === 'ai-generator'"
+          [class.text-slate-600]="activeTab() !== 'ai-generator'"
+          class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all border-none text-left cursor-pointer bg-transparent hover:bg-slate-100 hover:text-slate-900"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Công cụ Tạo AI
+        </button>
+
+        <!-- Analytics Button -->
+        <button
+          (click)="switchTab('analytics')"
+          [class.bg-slate-950]="activeTab() === 'analytics'"
+          [class.text-white]="activeTab() === 'analytics'"
+          [class.text-slate-600]="activeTab() !== 'analytics'"
+          class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all border-none text-left cursor-pointer bg-transparent hover:bg-slate-100 hover:text-slate-900"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Thống kê & Báo cáo
+        </button>
+      </div>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="p-4 border-t border-slate-100 space-y-2">
+      <!-- Admin Account Info -->
+      <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+        <div class="w-8 h-8 rounded-lg bg-slate-950 border border-slate-900 flex items-center justify-center text-white font-bold text-xs">
+          AD
+        </div>
+        <div class="min-w-0 flex-1 font-bold">
+          <span class="text-[10px] text-slate-800 block truncate">{{ adminEmail }}</span>
+          <span class="text-[8px] text-slate-600 uppercase tracking-widest block font-black">Quản trị viên</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <a
+        routerLink="/dashboard"
+        class="w-full text-center bg-slate-50 hover:bg-slate-100 border border-slate-200 py-2 rounded-lg text-[10px] font-bold transition-all text-slate-700 cursor-pointer no-underline block"
+      >
+        Về Giao Diện Học Viên
+      </a>
+
+      <button
+        (click)="onLogout()"
+        class="w-full bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-600 py-2 rounded-lg text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center"
+      >
+        Đăng xuất
+      </button>
+    </div>
+  </aside>
+
+  <!-- Right Main Workspace Container -->
+  <main class="flex-1 min-h-screen overflow-y-auto">
+    
+    <!-- Top Mobile Header for Admin -->
+    <header class="md:hidden flex items-center justify-between h-14 px-4 bg-white border-b border-slate-200 sticky top-0 z-40">
+      <div class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" class="text-blue-600">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <span class="text-sm font-black text-slate-900">English LMS Admin</span>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <a routerLink="/dashboard" class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 text-xs no-underline font-bold cursor-pointer">
+          Học viên
+        </a>
+        <button (click)="onLogout()" class="p-1.5 rounded-lg border border-slate-200 text-rose-500 cursor-pointer bg-transparent text-xs font-bold">
+          Thoát
+        </button>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      <!-- TOP CONTROL / BREADCRUMB -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div>
+          <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+            <span>Hệ thống quản trị</span>
+            <span>/</span>
+            <span class="text-slate-600">
+              @if (activeTab() === 'dashboard') { Tổng quan Dashboard }
+              @else if (activeTab() === 'roadmap') { Quản lý Lộ trình }
+              @else if (activeTab() === 'users') { Quản lý Học viên }
+              @else if (activeTab() === 'content') { Quản lý Nội dung }
+              @else if (activeTab() === 'ai-generator') { Công cụ Tạo AI }
+              @else if (activeTab() === 'analytics') { Báo cáo Thống kê }
+            </span>
+          </div>
+          
+          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+            @if (activeTab() === 'dashboard') { Tổng quan Dashboard }
+            @else if (activeTab() === 'roadmap') { Quản lý Lộ trình }
+            @else if (activeTab() === 'users') { Quản lý Học viên }
+            @else if (activeTab() === 'content') { Quản lý Nội dung }
+            @else if (activeTab() === 'ai-generator') { Công cụ Tạo AI }
+            @else if (activeTab() === 'analytics') { Thống kê & Báo cáo }
+          </h1>
+          
+          <p class="text-xs text-slate-500 mt-1.5 font-medium">
+            @if (activeTab() === 'dashboard') { Thống kê tổng quan và tiến trình hoạt động của toàn hệ thống học tập. }
+            @else if (activeTab() === 'roadmap') { Thiết lập lộ trình học, cấu trúc cấp độ và quản lý các modules liên quan. }
+            @else if (activeTab() === 'users') { Quản lý tài khoản học viên, vai trò, tiến trình học và tiền xu (coins). }
+            @else if (activeTab() === 'content') { Quản lý từ vựng chuyên đề, ngữ pháp lý thuyết và kho luyện nghe. }
+            @else if (activeTab() === 'ai-generator') { Công cụ tạo nội dung thông minh bằng AI hỗ trợ tạo bài học tự động. }
+            @else if (activeTab() === 'analytics') { Báo cáo trực quan về tỉ lệ hoàn thành, hoạt động hàng tuần của học viên. }
+          </p>
+        </div>
+        
+        <!-- TOP ACTIONS (Pure text buttons) -->
+        <div class="flex gap-2 shrink-0">
+          @if (activeTab() === 'roadmap') {
+            <button (click)="openRoadmapCreate()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg border-none cursor-pointer flex items-center gap-1.5 shadow-sm">
+              <span>+</span> Thêm Lộ trình
+            </button>
+          } @else if (activeTab() === 'users') {
+            <button (click)="openUserEdit({ id: 0, email: '', role: 'ROLE_USER', exp: 0, level: 1, coins: 0, characterTitle: '' })" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg border-none cursor-pointer shadow-sm">
+              <span>+</span> Thêm Học viên
+            </button>
+          } @else if (activeTab() === 'content') {
+            @if (activeContentSubTab() === 'vocabulary' && !selectedVocabTopic()) {
+              <button (click)="openVocabTopicCreate()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg border-none cursor-pointer shadow-sm">
+                <span>+</span> Thêm Chủ đề
+              </button>
+            } @else if (activeContentSubTab() === 'vocabulary' && selectedVocabTopic()) {
+              <button (click)="openWordCreate()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg border-none cursor-pointer shadow-sm">
+                <span>+</span> Thêm Từ vựng
+              </button>
+            } @else if (activeContentSubTab() === 'grammar' && !selectedGrammarLesson()) {
+              <button (click)="openGrammarLessonCreate()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg border-none cursor-pointer shadow-sm">
+                <span>+</span> Thêm Bài học
+              </button>
+            } @else if (activeContentSubTab() === 'grammar' && selectedGrammarLesson()) {
+              <button (click)="openGrammarQuestionCreate()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg border-none cursor-pointer shadow-sm">
+                <span>+</span> Thêm Câu hỏi
+              </button>
+            } @else if (activeContentSubTab() === 'listening' && !selectedListeningTopic()) {
+              <button (click)="openListeningTopicCreate()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg border-none cursor-pointer shadow-sm">
+                <span>+</span> Thêm Chủ đề
+              </button>
+            } @else if (activeContentSubTab() === 'listening' && selectedListeningTopic()) {
+              <button (click)="openListeningQuestionCreate()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg border-none cursor-pointer shadow-sm">
+                <span>+</span> Thêm Câu hỏi
+              </button>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- MAIN AREA SHIMMER LOADING -->
+      @if (isLoading()) {
+        <div class="space-y-4 animate-pulse">
+          <div class="h-12 bg-white border border-slate-100 rounded-xl w-full"></div>
+          <div class="h-12 bg-white border border-slate-100 rounded-xl w-full"></div>
+          <div class="h-12 bg-white border border-slate-100 rounded-xl w-full"></div>
+        </div>
+      } @else {
+        
+        <!-- ========================================== -->
+        <!-- TAB: DASHBOARD                             -->
+        <!-- ========================================== -->
+        @if (activeTab() === 'dashboard') {
+          <div class="space-y-8">
+            <!-- 4 Metrics Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              
+              <!-- Total Users -->
+              <div class="bg-white border border-slate-200/60 p-5 rounded-2xl flex items-center justify-between shadow-xs">
+                <div>
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tổng học viên</span>
+                  <span class="text-2xl font-black text-slate-900 block mt-1.5">{{ users().length || '2,543' }}</span>
+                  <span class="inline-flex items-center text-[10px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="mr-0.5"><polyline points="18 15 12 9 6 15"/></svg>
+                    +12.5%
+                  </span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+              </div>
+
+              <!-- Active Roadmaps -->
+              <div class="bg-white border border-slate-200/60 p-5 rounded-2xl flex items-center justify-between shadow-xs">
+                <div>
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Lộ trình kích hoạt</span>
+                  <span class="text-2xl font-black text-slate-900 block mt-1.5">{{ roadmaps().length || '42' }}</span>
+                  <span class="inline-flex items-center text-[10px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="mr-0.5"><polyline points="18 15 12 9 6 15"/></svg>
+                    +8.2%
+                  </span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                </div>
+              </div>
+
+              <!-- Total Lessons -->
+              <div class="bg-white border border-slate-200/60 p-5 rounded-2xl flex items-center justify-between shadow-xs">
+                <div>
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tổng số bài học</span>
+                  <span class="text-2xl font-black text-slate-900 block mt-1.5">{{ (vocabTopics().length + grammarLessons().length) || '1,234' }}</span>
+                  <span class="inline-flex items-center text-[10px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="mr-0.5"><polyline points="18 15 12 9 6 15"/></svg>
+                    +24.3%
+                  </span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+              </div>
+
+              <!-- Completion Rate -->
+              <div class="bg-white border border-slate-200/60 p-5 rounded-2xl flex items-center justify-between shadow-xs">
+                <div>
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tỷ lệ hoàn thành</span>
+                  <span class="text-2xl font-black text-slate-900 block mt-1.5">68.4%</span>
+                  <span class="inline-flex items-center text-[10px] font-black text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-md mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="mr-0.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    -2.1%
+                  </span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polygon points="17 6 23 6 23 12"/></svg>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Two Side-by-Side SVG Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              <!-- User Growth Chart -->
+              <div class="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-xs">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-sm font-bold text-slate-900">Tăng trưởng học viên</h3>
+                  <span class="text-[10px] font-semibold text-slate-400">Tháng 1 - Tháng 6 2026</span>
+                </div>
+                <div class="relative">
+                  <!-- SVG Responsive Area Line Chart -->
+                  <svg viewBox="0 0 500 200" class="w-full h-56">
+                    <defs>
+                      <linearGradient id="userGrowthGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15" />
+                        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    <!-- Horizontal Gridlines -->
+                    <line x1="50" y1="20" x2="480" y2="20" stroke="#f1f5f9" stroke-width="1.5" />
+                    <line x1="50" y1="60" x2="480" y2="60" stroke="#f1f5f9" stroke-width="1.5" />
+                    <line x1="50" y1="100" x2="480" y2="100" stroke="#f1f5f9" stroke-width="1.5" />
+                    <line x1="50" y1="140" x2="480" y2="140" stroke="#f1f5f9" stroke-width="1.5" />
+                    <line x1="50" y1="180" x2="480" y2="180" stroke="#f1f5f9" stroke-width="1.5" />
+                    <!-- Y-Axis Texts -->
+                    <text x="15" y="24" fill="#94a3b8" font-size="10" font-weight="600">2600</text>
+                    <text x="15" y="64" fill="#94a3b8" font-size="10" font-weight="600">1950</text>
+                    <text x="15" y="104" fill="#94a3b8" font-size="10" font-weight="600">1300</text>
+                    <text x="15" y="144" fill="#94a3b8" font-size="10" font-weight="600">650</text>
+                    <text x="15" y="184" fill="#94a3b8" font-size="10" font-weight="600">0</text>
+                    <!-- Graph Area gradient -->
+                    <path d="M 50 180 Q 130 140 210 115 T 370 85 T 480 20 L 480 180 Z" fill="url(#userGrowthGrad)" />
+                    <!-- Graph Line -->
+                    <path d="M 50 180 Q 130 140 210 115 T 370 85 T 480 20" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" />
+                    <!-- Graph Dots -->
+                    <circle cx="50" cy="180" r="3.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1" />
+                    <circle cx="130" cy="140" r="3.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1" />
+                    <circle cx="210" cy="115" r="3.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1" />
+                    <circle cx="290" cy="100" r="3.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1" />
+                    <circle cx="370" cy="85" r="3.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1" />
+                    <circle cx="480" cy="20" r="4" fill="#2563eb" stroke="#ffffff" stroke-width="1.5" />
+                    <!-- X-Axis Texts -->
+                    <text x="50" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">Th1</text>
+                    <text x="130" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">Th2</text>
+                    <text x="210" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">Th3</text>
+                    <text x="290" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">Th4</text>
+                    <text x="370" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">Th5</text>
+                    <text x="480" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">Th6</text>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Weekly Progress Chart -->
+              <div class="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-xs">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-sm font-bold text-slate-900">Tiến trình bài học hàng tuần</h3>
+                  <span class="text-[10px] font-semibold text-slate-400">Tiến trình học tập thực tế</span>
+                </div>
+                <div class="relative">
+                  <!-- SVG Responsive Bar Chart -->
+                  <svg viewBox="0 0 500 200" class="w-full h-56">
+                    <!-- Horizontal Gridlines -->
+                    <line x1="50" y1="20" x2="480" y2="20" stroke="#f1f5f9" stroke-width="1.5" />
+                    <line x1="50" y1="60" x2="480" y2="60" stroke="#f1f5f9" stroke-width="1.5" />
+                    <line x1="50" y1="100" x2="480" y2="100" stroke="#f1f5f9" stroke-width="1.5" />
+                    <line x1="50" y1="140" x2="480" y2="140" stroke="#f1f5f9" stroke-width="1.5" />
+                    <line x1="50" y1="180" x2="480" y2="180" stroke="#f1f5f9" stroke-width="1.5" />
+                    <!-- Y-Axis Texts -->
+                    <text x="15" y="24" fill="#94a3b8" font-size="10" font-weight="600">220</text>
+                    <text x="15" y="64" fill="#94a3b8" font-size="10" font-weight="600">165</text>
+                    <text x="15" y="104" fill="#94a3b8" font-size="10" font-weight="600">110</text>
+                    <text x="15" y="144" fill="#94a3b8" font-size="10" font-weight="600">55</text>
+                    <text x="15" y="184" fill="#94a3b8" font-size="10" font-weight="600">0</text>
+                    <!-- Teal Bars -->
+                    <rect x="75" y="55" width="16" height="125" rx="2.5" fill="#10b981" />
+                    <rect x="135" y="38" width="16" height="142" rx="2.5" fill="#10b981" />
+                    <rect x="195" y="48" width="16" height="132" rx="2.5" fill="#10b981" />
+                    <rect x="255" y="23" width="16" height="157" rx="2.5" fill="#10b981" />
+                    <rect x="315" y="29" width="16" height="151" rx="2.5" fill="#10b981" />
+                    <rect x="375" y="65" width="16" height="115" rx="2.5" fill="#10b981" />
+                    <rect x="435" y="80" width="16" height="100" rx="2.5" fill="#10b981" />
+                    <!-- X-Axis Texts -->
+                    <text x="83" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">T2</text>
+                    <text x="143" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">T3</text>
+                    <text x="203" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">T4</text>
+                    <text x="263" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">T5</text>
+                    <text x="323" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">T6</text>
+                    <text x="383" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">T7</text>
+                    <text x="443" y="198" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">CN</text>
+                  </svg>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        }
+
+        <!-- ========================================== -->
+        <!-- TAB: ROADMAP MANAGEMENT                    -->
+        <!-- ========================================== -->
+        @if (activeTab() === 'roadmap') {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (roadmap of roadmaps(); track roadmap.id) {
+              <div class="bg-white border border-slate-200/60 rounded-2xl p-6 flex flex-col justify-between shadow-xs">
+                <div>
+                  <div class="flex justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 text-base">
+                      {{ getEmoji(roadmap.thumbnailEmoji) }}
+                    </span>
+                    <div class="flex gap-1.5">
+                      <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold border bg-slate-50 text-slate-600 border-slate-200">
+                        {{ roadmap.difficultyLabel }}
+                      </span>
+                      <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold text-slate-800 bg-slate-100 border border-slate-200">
+                        TOEIC {{ roadmap.toeicEquivalent }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <h3 class="text-base font-bold text-slate-900 mb-2">Lộ trình {{ roadmap.cefrLevel }}</h3>
+                  <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 mb-4">{{ roadmap.overallEvaluation }}</p>
+
+                  <div class="border-t border-slate-100 pt-4 mb-4">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                      Cấu trúc chặng học ({{ roadmap.modules.length }} modules)
+                    </span>
+                    <div class="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                      @for (mod of roadmap.modules; track mod.id; let idx = $index) {
+                        <div class="flex justify-between text-[10px] font-semibold text-slate-700 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                          <span class="truncate pr-2">#{{ idx + 1 }} - {{ mod.title }}</span>
+                          <span class="text-[8px] text-slate-400 uppercase tracking-widest">{{ mod.category || 'Mặc định' }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-slate-100 mt-auto">
+                  <div class="flex gap-1.5">
+                    <button (click)="openRoadmapEdit(roadmap)" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer">
+                      Sửa
+                    </button>
+                    <button (click)="triggerRoadmapDelete(roadmap)" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-600 rounded-lg text-[10px] font-bold cursor-pointer">
+                      Xóa
+                    </button>
+                  </div>
+                  <a [routerLink]="['/preset-roadmap', roadmap.id]" class="text-[10px] font-bold text-blue-600 hover:underline no-underline">
+                    Xem bản đồ
+                  </a>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ========================================== -->
+        <!-- TAB: USER MANAGEMENT                       -->
+        <!-- ========================================== -->
+        @if (activeTab() === 'users') {
+          <div class="space-y-4">
+            <!-- Table Header search & filters -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200/60 shadow-xs">
+              <div class="relative flex-1 max-w-md">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm học viên..."
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+                />
+              </div>
+              <div class="flex items-center gap-2">
+                <select class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none">
+                  <option>Mọi vai trò</option>
+                  <option>ROLE_USER</option>
+                  <option>ROLE_ADMIN</option>
+                </select>
+                <select class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none">
+                  <option>Mọi trạng thái</option>
+                  <option>Đang hoạt động</option>
+                  <option>Vô hiệu hóa</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Modern Table of Users -->
+            <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-xs">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <th class="p-4">Học viên</th>
+                      <th class="p-4">Vai trò</th>
+                      <th class="p-4">Trạng thái</th>
+                      <th class="p-4">Cấp độ</th>
+                      <th class="p-4">Tiến trình</th>
+                      <th class="p-4">Ngày tham gia</th>
+                      <th class="p-4">Hoạt động cuối</th>
+                      <th class="p-4 text-right">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-xs font-medium text-slate-600">
+                    @for (u of users(); track u.id) {
+                      <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                        <!-- User (Avatar circle + name/email stacked) -->
+                        <td class="p-4 flex items-center gap-3">
+                          <div class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                            {{ getUserInitials(u.email) }}
+                          </div>
+                          <div class="min-w-0">
+                            <span class="block font-semibold text-slate-900 truncate">{{ getUserName(u.email) }}</span>
+                            <span class="block text-[10px] text-slate-400 truncate">{{ u.email }}</span>
+                          </div>
+                        </td>
+
+                        <!-- Role Badge -->
+                        <td class="p-4">
+                          @if (u.role === 'ROLE_ADMIN') {
+                            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black text-purple-600 bg-purple-50 border border-purple-100">
+                              Quản trị viên
+                            </span>
+                          } @else {
+                            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black text-slate-600 bg-slate-50 border border-slate-200">
+                              Học viên
+                            </span>
+                          }
+                        </td>
+
+                        <!-- Status Badge (whitespace-nowrap inline-block prevents wrapping) -->
+                        <td class="p-4">
+                          <span class="inline-block whitespace-nowrap px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-900 text-white border border-transparent">
+                            Hoạt động
+                          </span>
+                        </td>
+
+                        <!-- Courses (Coins or Exp mapped) -->
+                        <td class="p-4 font-bold text-slate-900">
+                          LV. {{ u.level }}
+                        </td>
+
+                        <!-- Progress Bar column (using slate-900 instead of blue) -->
+                        <td class="p-4 min-w-[140px]">
+                          <div class="flex items-center gap-2">
+                            <div class="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                              <div class="bg-slate-900 h-1.5 rounded-full transition-all duration-300" [style.width.%]="getUserProgress(u)"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500">{{ getUserProgress(u) }}%</span>
+                          </div>
+                        </td>
+
+                        <!-- Join Date -->
+                        <td class="p-4 text-slate-400 font-mono text-[10px]">
+                          {{ getUserJoinDate(u) }}
+                        </td>
+
+                        <!-- Last Active -->
+                        <td class="p-4 text-slate-400 font-mono text-[10px]">
+                          {{ getUserLastActive(u) }}
+                        </td>
+
+                        <!-- Dropdown Actions -->
+                        <td class="p-4 text-right relative">
+                          <div class="inline-block text-left">
+                            <button type="button" (click)="toggleActionMenu('user', u.id, $event)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer border-none bg-transparent flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                            </button>
+                            @if (activeActionMenu()?.type === 'user' && activeActionMenu()?.id === u.id) {
+                              <div class="absolute right-4 mt-1 w-24 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 text-left">
+                                <button type="button" (click)="openUserEdit(u); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Sửa</button>
+                                <button type="button" (click)="deleteUser(u.id); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-rose-600 hover:bg-rose-50 border-none bg-transparent cursor-pointer">Xóa</button>
+                              </div>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ========================================== -->
+        <!-- TAB: CONTENT MANAGEMENT                    -->
+        <!-- ========================================== -->
+        @if (activeTab() === 'content') {
+          <div class="space-y-6">
+            
+            <!-- Capsule Tab Selector matching mockup -->
+            <div class="flex bg-slate-100 p-1 rounded-xl max-w-sm border border-slate-200/50">
+              <button
+                (click)="switchContentSubTab('vocabulary')"
+                [class.bg-white]="activeContentSubTab() === 'vocabulary'"
+                [class.shadow-xs]="activeContentSubTab() === 'vocabulary'"
+                [class.text-slate-900]="activeContentSubTab() === 'vocabulary'"
+                [class.text-slate-500]="activeContentSubTab() !== 'vocabulary'"
+                class="flex-1 text-center py-1.5 rounded-lg text-xs font-semibold border-none cursor-pointer bg-transparent transition-all"
+              >
+                Từ vựng
+              </button>
+              <button
+                (click)="switchContentSubTab('grammar')"
+                [class.bg-white]="activeContentSubTab() === 'grammar'"
+                [class.shadow-xs]="activeContentSubTab() === 'grammar'"
+                [class.text-slate-900]="activeContentSubTab() === 'grammar'"
+                [class.text-slate-500]="activeContentSubTab() !== 'grammar'"
+                class="flex-1 text-center py-1.5 rounded-lg text-xs font-semibold border-none cursor-pointer bg-transparent transition-all"
+              >
+                Ngữ pháp
+              </button>
+              <button
+                (click)="switchContentSubTab('listening')"
+                [class.bg-white]="activeContentSubTab() === 'listening'"
+                [class.shadow-xs]="activeContentSubTab() === 'listening'"
+                [class.text-slate-900]="activeContentSubTab() === 'listening'"
+                [class.text-slate-500]="activeContentSubTab() !== 'listening'"
+                class="flex-1 text-center py-1.5 rounded-lg text-xs font-semibold border-none cursor-pointer bg-transparent transition-all"
+              >
+                Luyện nghe
+              </button>
+            </div>
+
+            <!-- Content Area Search Control -->
+            <div class="flex items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200/60 shadow-xs">
+              <div class="relative flex-1 max-w-md">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input
+                  type="text"
+                  [placeholder]="activeContentSubTab() === 'vocabulary' ? 'Tìm kiếm từ vựng...' : activeContentSubTab() === 'grammar' ? 'Tìm kiếm bài học ngữ pháp...' : 'Tìm kiếm đề luyện nghe...'"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+                />
+              </div>
+            </div>
+
+            <!-- Subtab Content Tables -->
+
+            <!-- VOCABULARY VIEW -->
+            @if (activeContentSubTab() === 'vocabulary') {
+              @if (!selectedVocabTopic()) {
+                <!-- Vocabulary Topics Table -->
+                <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-xs">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="bg-slate-50/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th class="p-4">ID</th>
+                        <th class="p-4">Chủ đề từ vựng</th>
+                        <th class="p-4">Mô tả</th>
+                        <th class="p-4">Phân loại (Category)</th>
+                        <th class="p-4 text-right">Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-xs font-medium text-slate-600">
+                      @for (topic of vocabTopics(); track topic.id) {
+                        <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                          <td class="p-4 text-slate-400 font-mono">{{ topic.id }}</td>
+                          <td class="p-4 font-bold text-slate-900">{{ topic.title }}</td>
+                          <td class="p-4 text-slate-500 max-w-xs truncate">{{ topic.description }}</td>
+                          <td class="p-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold border border-slate-200 bg-slate-50 text-slate-600">{{ topic.category }}</span>
+                          </td>
+                          <td class="p-4 text-right relative">
+                            <div class="inline-block text-left">
+                              <button type="button" (click)="toggleActionMenu('vocab-topic', topic.id, $event)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer border-none bg-transparent flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                              </button>
+                              @if (activeActionMenu()?.type === 'vocab-topic' && activeActionMenu()?.id === topic.id) {
+                                <div class="absolute right-4 mt-1 w-32 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 text-left">
+                                  <button type="button" (click)="manageWords(topic); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Quản lý từ vựng</button>
+                                  <button type="button" (click)="openVocabTopicEdit(topic); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Sửa</button>
+                                  <button type="button" (click)="deleteVocabTopic(topic.id); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-rose-600 hover:bg-rose-50 border-none bg-transparent cursor-pointer">Xóa</button>
+                                </div>
+                              }
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <!-- Words Inside Topic (as shown in mockup image 1) -->
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-black text-slate-900 uppercase tracking-tight">
+                      Chủ đề: {{ selectedVocabTopic()?.title }} ({{ vocabWords().length }} từ vựng)
+                    </h2>
+                    <button (click)="selectedVocabTopic.set(null)" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold cursor-pointer">
+                      Quay lại chủ đề
+                    </button>
+                  </div>
+
+                  <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-xs">
+                    <table class="w-full text-left border-collapse">
+                      <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          <th class="p-4">Từ vựng</th>
+                          <th class="p-4">Phiên âm</th>
+                          <th class="p-4">Định nghĩa</th>
+                          <th class="p-4">Từ loại</th>
+                          <th class="p-4">Cấp độ</th>
+                          <th class="p-4">Số ví dụ</th>
+                          <th class="p-4">Trạng thái</th>
+                          <th class="p-4 text-right">Hành động</th>
+                        </tr>
+                      </thead>
+                      <tbody class="text-xs font-medium text-slate-600">
+                        @for (w of vocabWords(); track w.id) {
+                          <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                            <td class="p-4 font-bold text-slate-900">{{ w.word }}</td>
+                            <td class="p-4 text-blue-600 font-mono text-[10px]">{{ w.phonetic }}</td>
+                            <td class="p-4 text-slate-700 max-w-sm">{{ w.definition }}</td>
+                            <td class="p-4">
+                              <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-50 border border-slate-200 text-slate-500">{{ w.partOfSpeech }}</span>
+                            </td>
+                            <td class="p-4">
+                              <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-50 border border-slate-200 text-slate-600">Nâng cao</span>
+                            </td>
+                            <td class="p-4">
+                              2
+                            </td>
+                            <td class="p-4">
+                              <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-900 text-white">
+                                Đang hoạt động
+                              </span>
+                            </td>
+                            <td class="p-4 text-right relative">
+                              <div class="inline-block text-left">
+                                <button type="button" (click)="toggleActionMenu('word', w.id!, $event)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer border-none bg-transparent flex items-center justify-center">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                </button>
+                                @if (activeActionMenu()?.type === 'word' && activeActionMenu()?.id === w.id) {
+                                  <div class="absolute right-4 mt-1 w-24 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 text-left">
+                                    <button type="button" (click)="openWordEdit(w); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Sửa</button>
+                                    <button type="button" (click)="deleteWord(w.id!); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-rose-600 hover:bg-rose-50 border-none bg-transparent cursor-pointer">Xóa</button>
+                                  </div>
+                                }
+                              </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            }
+
+            <!-- GRAMMAR VIEW -->
+            @if (activeContentSubTab() === 'grammar') {
+              @if (!selectedGrammarLesson()) {
+                <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-xs">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="bg-slate-50/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th class="p-4">ID</th>
+                        <th class="p-4">Tiêu đề (Tiếng Anh)</th>
+                        <th class="p-4">Tên tiếng Việt</th>
+                        <th class="p-4">Số câu hỏi</th>
+                        <th class="p-4 text-right">Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-xs font-medium text-slate-600">
+                      @for (lesson of grammarLessons(); track lesson.id) {
+                        <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                          <td class="p-4 text-slate-400 font-mono">{{ lesson.id }}</td>
+                          <td class="p-4 font-bold text-slate-900">{{ lesson.title }}</td>
+                          <td class="p-4 text-slate-500">{{ lesson.category }}</td>
+                          <td class="p-4 text-slate-900 font-bold">{{ lesson.questionsCount }} câu hỏi</td>
+                          <td class="p-4 text-right relative">
+                            <div class="inline-block text-left">
+                              <button type="button" (click)="toggleActionMenu('grammar-lesson', lesson.id, $event)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer border-none bg-transparent flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                              </button>
+                              @if (activeActionMenu()?.type === 'grammar-lesson' && activeActionMenu()?.id === lesson.id) {
+                                <div class="absolute right-4 mt-1 w-32 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 text-left">
+                                  <button type="button" (click)="manageGrammarQuestions(lesson); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Quản lý câu hỏi</button>
+                                  <button type="button" (click)="openGrammarLessonEdit(lesson); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Sửa</button>
+                                  <button type="button" (click)="deleteGrammarLesson(lesson.id); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-rose-600 hover:bg-rose-50 border-none bg-transparent cursor-pointer">Xóa</button>
+                                </div>
+                              }
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-black text-slate-900 uppercase tracking-tight">
+                      Bài học: {{ selectedGrammarLesson()?.title }} ({{ grammarQuestions().length }} câu hỏi)
+                    </h2>
+                    <button (click)="selectedGrammarLesson.set(null)" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold cursor-pointer">
+                      Quay lại bài học
+                    </button>
+                  </div>
+
+                  <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-xs">
+                    <table class="w-full text-left border-collapse">
+                      <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          <th class="p-4">STT</th>
+                          <th class="p-4">Câu hỏi</th>
+                          <th class="p-4">Lựa chọn</th>
+                          <th class="p-4">Đáp án</th>
+                          <th class="p-4">Giải thích</th>
+                          <th class="p-4 text-right">Hành động</th>
+                        </tr>
+                      </thead>
+                      <tbody class="text-xs font-medium text-slate-600">
+                        @for (q of grammarQuestions(); track q.id; let idx = $index) {
+                          <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                            <td class="p-4 text-slate-400 font-bold">#{{ q.questionNumber }}</td>
+                            <td class="p-4 font-bold text-slate-900 max-w-xs">{{ q.questionText }}</td>
+                            <td class="p-4">
+                              <div class="text-[10px] space-y-0.5 text-slate-400">
+                                <div>A. {{ q.options ? getOptionsArray(q.options)[0] : '' }}</div>
+                                <div>B. {{ q.options ? getOptionsArray(q.options)[1] : '' }}</div>
+                                <div>C. {{ q.options ? getOptionsArray(q.options)[2] : '' }}</div>
+                                <div>D. {{ q.options ? getOptionsArray(q.options)[3] : '' }}</div>
+                              </div>
+                            </td>
+                            <td class="p-4 text-slate-900 font-bold">
+                              {{ q.correctOption }}
+                            </td>
+                            <td class="p-4 text-slate-500 max-w-xs truncate">{{ q.explanation }}</td>
+                            <td class="p-4 text-right relative">
+                              <div class="inline-block text-left">
+                                <button type="button" (click)="toggleActionMenu('grammar-question', q.id!, $event)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer border-none bg-transparent flex items-center justify-center">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                </button>
+                                @if (activeActionMenu()?.type === 'grammar-question' && activeActionMenu()?.id === q.id) {
+                                  <div class="absolute right-4 mt-1 w-24 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 text-left">
+                                    <button type="button" (click)="openGrammarQuestionEdit(q); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Sửa</button>
+                                    <button type="button" (click)="deleteGrammarQuestion(q.id!); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-rose-600 hover:bg-rose-50 border-none bg-transparent cursor-pointer">Xóa</button>
+                                  </div>
+                                }
+                              </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            }
+
+            <!-- LISTENING VIEW -->
+            @if (activeContentSubTab() === 'listening') {
+              @if (!selectedListeningTopic()) {
+                <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-xs">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="bg-slate-50/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th class="p-4">ID</th>
+                        <th class="p-4">Tiêu đề bài nghe</th>
+                        <th class="p-4">Mô tả</th>
+                        <th class="p-4">Đợt đề</th>
+                        <th class="p-4">Số câu hỏi</th>
+                        <th class="p-4 text-right">Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-xs font-medium text-slate-600">
+                      @for (topic of listeningTopics(); track topic.id) {
+                        <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                          <td class="p-4 text-slate-400 font-mono">{{ topic.id }}</td>
+                          <td class="p-4 font-bold text-slate-900">{{ topic.title }}</td>
+                          <td class="p-4 text-slate-500 max-w-xs truncate">{{ topic.description }}</td>
+                          <td class="p-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold border border-slate-200 bg-slate-50 text-slate-600">{{ topic.category }}</span>
+                          </td>
+                          <td class="p-4 text-slate-900 font-bold">{{ topic.questionsCount }} câu hỏi</td>
+                          <td class="p-4 text-right relative">
+                            <div class="inline-block text-left">
+                              <button type="button" (click)="toggleActionMenu('listening-topic', topic.id, $event)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer border-none bg-transparent flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                              </button>
+                              @if (activeActionMenu()?.type === 'listening-topic' && activeActionMenu()?.id === topic.id) {
+                                <div class="absolute right-4 mt-1 w-36 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 text-left">
+                                  <button type="button" (click)="manageListeningQuestions(topic); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Quản lý câu hỏi nghe</button>
+                                  <button type="button" (click)="openListeningTopicEdit(topic); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Sửa</button>
+                                  <button type="button" (click)="deleteListeningTopic(topic.id); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-rose-600 hover:bg-rose-50 border-none bg-transparent cursor-pointer">Xóa</button>
+                                </div>
+                              }
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-black text-slate-900 uppercase tracking-tight">
+                      Đề nghe: {{ selectedListeningTopic()?.title }} ({{ listeningQuestions().length }} câu hỏi)
+                    </h2>
+                    <button (click)="selectedListeningTopic.set(null)" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold cursor-pointer">
+                      Quay lại đề nghe
+                    </button>
+                  </div>
+
+                  <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-xs">
+                    <table class="w-full text-left border-collapse">
+                      <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          <th class="p-4">STT</th>
+                          <th class="p-4">Phần thi</th>
+                          <th class="p-4">Audio URL</th>
+                          <th class="p-4">Câu hỏi / Script</th>
+                          <th class="p-4">Lựa chọn</th>
+                          <th class="p-4 text-right">Hành động</th>
+                        </tr>
+                      </thead>
+                      <tbody class="text-xs font-medium text-slate-600">
+                        @for (q of listeningQuestions(); track q.id) {
+                          <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                            <td class="p-4 text-slate-400 font-bold">#{{ q.questionNumber }}</td>
+                            <td class="p-4 text-slate-900 font-bold">{{ q.difficulty }}</td>
+                            <td class="p-4 text-slate-900 font-mono text-[10px] max-w-xxs truncate">{{ q.audioUrl }}</td>
+                            <td class="p-4 text-slate-700 max-w-xs">
+                              <span class="block truncate font-bold text-slate-900">{{ q.questionText }}</span>
+                              <span class="block truncate text-[10px] text-slate-400">{{ q.explanation }}</span>
+                            </td>
+                            <td class="p-4">
+                              <div class="text-[10px] space-y-0.5 text-slate-400">
+                                <div>A. {{ q.options ? getOptionsArray(q.options)[0] : '' }}</div>
+                                <div>B. {{ q.options ? getOptionsArray(q.options)[1] : '' }}</div>
+                                <div>C. {{ q.options ? getOptionsArray(q.options)[2] : '' }}</div>
+                                <div>D. {{ q.options ? getOptionsArray(q.options)[3] : '' }}</div>
+                              </div>
+                              <div class="text-[9px] text-slate-900 font-bold mt-1">Đáp án: {{ q.correctOption }}</div>
+                            </td>
+                            <td class="p-4 text-right relative">
+                              <div class="inline-block text-left">
+                                <button type="button" (click)="toggleActionMenu('listening-question', q.id!, $event)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer border-none bg-transparent flex items-center justify-center">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                </button>
+                                @if (activeActionMenu()?.type === 'listening-question' && activeActionMenu()?.id === q.id) {
+                                  <div class="absolute right-4 mt-1 w-24 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 text-left">
+                                    <button type="button" (click)="openListeningQuestionEdit(q); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-none bg-transparent cursor-pointer">Sửa</button>
+                                    <button type="button" (click)="deleteListeningQuestion(q.id!); toggleActionMenu('', 0)" class="w-full text-left px-3.5 py-2 text-[10px] font-bold text-rose-600 hover:bg-rose-50 border-none bg-transparent cursor-pointer">Xóa</button>
+                                  </div>
+                                }
+                              </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            }
+
+            <!-- Three summary metrics cards at bottom of Content Tab as shown in mockup -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4">
+              <div class="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-xs">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tổng số từ vựng</span>
+                <span class="text-2xl font-black text-slate-900 block mt-1">1.234</span>
+                <span class="text-[9px] font-bold text-slate-400 block mt-1">+48 tuần này</span>
+              </div>
+              <div class="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-xs">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Chủ đề ngữ pháp</span>
+                <span class="text-2xl font-black text-slate-900 block mt-1">156</span>
+                <span class="text-[9px] font-bold text-slate-400 block mt-1">+12 tuần này</span>
+              </div>
+              <div class="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-xs">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tổng số bài học</span>
+                <span class="text-2xl font-black text-slate-900 block mt-1">342</span>
+                <span class="text-[9px] font-bold text-slate-400 block mt-1">+8 tuần này</span>
+              </div>
+            </div>
+
+          </div>
+        }
+
+        <!-- ========================================== -->
+        <!-- TAB: AI CONTENT GENERATOR                  -->
+        <!-- ========================================== -->
+        @if (activeTab() === 'ai-generator') {
+          <div class="bg-white border border-slate-200/60 p-6 rounded-2xl max-w-2xl shadow-xs space-y-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Công cụ tạo nội dung thông minh AI</h3>
+                <p class="text-xs text-slate-400">Tự động tạo các bộ câu hỏi từ vựng hoặc bài luyện tập đọc hiểu trong vài giây.</p>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tên chủ đề / Thể loại cần tạo *</label>
+                <input type="text" placeholder="Ví dụ: Công nghệ, Ăn uống, Business..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-blue-500" />
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Mức độ phức tạp / Trình độ</label>
+                <select class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none">
+                  <option>A1 - Sơ cấp cơ bản</option>
+                  <option>B1 - Trung cấp thực hành</option>
+                  <option>C1 - Cao cấp Học thuật</option>
+                </select>
+              </div>
+
+              <button class="w-full bg-slate-950 hover:bg-slate-900 text-white border-none py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs">
+                Tạo bài tập bằng Trí tuệ Nhân tạo (AI)
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ========================================== -->
+        <!-- TAB: ANALYTICS                             -->
+        <!-- ========================================== -->
+        @if (activeTab() === 'analytics') {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-xs space-y-4">
+              <h3 class="text-sm font-bold text-slate-900">Số liệu hoàn thành</h3>
+              <p class="text-xs text-slate-500">Báo cáo số lượng hoàn thành bài học theo các nhóm học viên.</p>
+              <div class="h-40 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 text-xs">
+                [ Biểu đồ thống kê chi tiết đang được phát triển ]
+              </div>
+            </div>
+            <div class="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-xs space-y-4">
+              <h3 class="text-sm font-bold text-slate-900">Hoạt động học viên hàng ngày</h3>
+              <p class="text-xs text-slate-500">Số liệu thống kê số lượng học viên tích cực hoạt động mỗi ngày.</p>
+              <div class="h-40 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 text-xs">
+                [ Biểu đồ nhiệt hoạt động đang được phát triển ]
+              </div>
+            </div>
+          </div>
+        }
+
+      }
+    </div>
+  </main>
+</div>
+
+<!-- ========================================================== -->
+<!-- DIALOGS AND EDITING FORMS (Modern Clean Light Layout)      -->
+<!-- ========================================================== -->
+
+<!-- ROADMAP CREATE / EDIT DRAWER -->
+@if (showRoadmapModal()) {
+  <div class="fixed inset-0 z-100 overflow-hidden bg-black/50 backdrop-blur-xs flex justify-end">
+    <div class="relative w-full max-w-3xl bg-white border-l border-slate-200 h-full flex flex-col shadow-2xl animate-slide-in-drawer">
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div>
+          <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">
+            {{ roadmapForm().id ? 'Cập Nhật Lộ Trình' : 'Tạo Mới Lộ Trình' }}
+          </h3>
+        </div>
+        <button (click)="showRoadmapModal.set(false)" class="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-950 hover:bg-slate-100 cursor-pointer bg-transparent text-xs font-bold">
+          Đóng
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div class="space-y-4">
+          <h4 class="text-xs font-black text-blue-600 uppercase tracking-widest border-b border-slate-100 pb-2">1. Thông tin chung (Metadata)</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Mục tiêu CEFR *</label>
+              <input type="text" [(ngModel)]="roadmapForm().cefrLevel" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white" required />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tương đương TOEIC (Label) *</label>
+              <input type="text" [(ngModel)]="roadmapForm().toeicEquivalent" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white" required />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Độ khó *</label>
+              <select [(ngModel)]="roadmapForm().difficultyLabel" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none">
+                <option value="Basic">Basic</option>
+                <option value="Trung cap">Trung cấp</option>
+                <option value="TOEIC">TOEIC</option>
+                <option value="IELTS">IELTS</option>
+                <option value="Business">Business</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Biểu tượng Emoji *</label>
+              <select [(ngModel)]="roadmapForm().thumbnailEmoji" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none">
+                <option value="flag">Flag</option>
+                <option value="star">Star</option>
+                <option value="trophy">Trophy</option>
+                <option value="diamond">Diamond</option>
+                <option value="briefcase">Briefcase</option>
+                <option value="book">Book</option>
+                <option value="rocket">Rocket</option>
+                <option value="target">Target</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Đánh giá chung / Mô tả *</label>
+            <textarea [(ngModel)]="roadmapForm().overallEvaluation" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white resize-y" required></textarea>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="text-xs font-black text-blue-600 uppercase tracking-widest">2. Cấu trúc các Chặng học (Modules)</h4>
+            <button type="button" (click)="addNewModuleToRoadmapForm()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-[10px] font-bold rounded-lg cursor-pointer">Thêm Chặng</button>
+          </div>
+
+          <div class="space-y-4">
+            @for (modItem of roadmapForm().modules; track $index; let idx = $index) {
+              <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 space-y-3 relative">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-[10px] font-bold text-slate-900 bg-white border border-slate-200 px-2 py-0.5 rounded">Chặng #{{ idx + 1 }}</span>
+                  <div class="flex items-center gap-1">
+                    <button type="button" (click)="moveModuleUp(idx)" [disabled]="idx === 0" class="px-2 py-1 bg-white border border-slate-200 rounded text-[9px] font-bold cursor-pointer text-slate-500 hover:text-slate-900 disabled:opacity-50">Lên</button>
+                    <button type="button" (click)="moveModuleDown(idx)" [disabled]="idx === roadmapForm().modules.length - 1" class="px-2 py-1 bg-white border border-slate-200 rounded text-[9px] font-bold cursor-pointer text-slate-500 hover:text-slate-900 disabled:opacity-50">Xuống</button>
+                    <button type="button" (click)="removeModuleFromRoadmapForm(idx)" class="px-2 py-1 bg-rose-50 border border-rose-100 text-rose-600 rounded text-[9px] font-bold cursor-pointer ml-2">Xóa</button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="sm:col-span-2">
+                    <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tiêu đề chặng *</label>
+                    <input type="text" [(ngModel)]="modItem.title" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900" required />
+                  </div>
+                  <div>
+                    <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-1">Thể loại (Category)</label>
+                    <input type="text" [(ngModel)]="modItem.category" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-1">Mô tả tóm tắt nội dung học *</label>
+                  <input type="text" [(ngModel)]="modItem.description" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900" required />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/50">
+        <button (click)="showRoadmapModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy bỏ</button>
+        <button (click)="submitRoadmapForm()" [disabled]="isSaving()" class="px-6 py-2 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer border-none">Lưu Lộ Trình</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- VOCABULARY TOPIC MODAL -->
+@if (showVocabTopicModal()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+        {{ vocabTopicForm().id ? 'Sửa chủ đề từ vựng' : 'Thêm chủ đề từ vựng mới' }}
+      </h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tên chủ đề *</label>
+          <input type="text" [(ngModel)]="vocabTopicForm().title" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white" placeholder="Ví dụ: Công sở, Business" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phân loại (Category)</label>
+          <input type="text" [(ngModel)]="vocabTopicForm().category" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Mô tả chủ đề</label>
+          <textarea [(ngModel)]="vocabTopicForm().description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white resize-y"></textarea>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button (click)="showVocabTopicModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy</button>
+        <button (click)="submitVocabTopic()" [disabled]="isSaving()" class="px-6 py-2 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer border-none">Lưu chủ đề</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- VOCABULARY WORD CREATE/EDIT MODAL -->
+@if (showVocabWordModal()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-lg shadow-2xl space-y-4">
+      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+        {{ vocabWordForm().id ? 'Cập nhật từ vựng' : 'Thêm từ vựng mới' }}
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Từ vựng *</label>
+          <input type="text" [(ngModel)]="vocabWordForm().word" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phiên âm (Phonetic) *</label>
+          <input type="text" [(ngModel)]="vocabWordForm().phonetic" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Từ loại (Part of Speech)</label>
+          <input type="text" [(ngModel)]="vocabWordForm().partOfSpeech" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="noun, verb, adj..." />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Định nghĩa tiếng Việt *</label>
+          <input type="text" [(ngModel)]="vocabWordForm().definition" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Câu ví dụ (English) *</label>
+        <input type="text" [(ngModel)]="vocabWordForm().exampleSentence" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Bản dịch câu ví dụ (Vietnamese) *</label>
+        <input type="text" [(ngModel)]="vocabWordForm().exampleTranslation" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button (click)="showVocabWordModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy</button>
+        <button (click)="submitWord()" [disabled]="isSaving()" class="px-6 py-2 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer border-none">Lưu từ vựng</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- GRAMMAR LESSON MODAL -->
+@if (showGrammarLessonModal()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-lg shadow-2xl space-y-4">
+      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+        {{ grammarLessonForm().id ? 'Sửa bài học ngữ pháp' : 'Thêm bài học ngữ pháp mới' }}
+      </h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tiêu đề tiếng Anh *</label>
+          <input type="text" [(ngModel)]="grammarLessonForm().title" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="Ví dụ: Present Simple" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tên tiếng Việt *</label>
+          <input type="text" [(ngModel)]="grammarLessonForm().category" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="Ví dụ: Thì Hiện Tại Đơn" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nội dung lý thuyết (Markdown / Text) *</label>
+          <textarea [(ngModel)]="grammarLessonForm().bodyText" rows="6" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none resize-y font-mono" required></textarea>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button (click)="showGrammarLessonModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy</button>
+        <button (click)="submitGrammarLesson()" [disabled]="isSaving()" class="px-6 py-2 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer border-none">Lưu bài học</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- GRAMMAR QUESTION CREATE/EDIT MODAL -->
+@if (showGrammarQuestionModal()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-xl shadow-2xl space-y-4">
+      
+      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+        {{ grammarQuestionForm().id ? 'Sửa câu hỏi ngữ pháp' : 'Thêm câu hỏi ngữ pháp' }}
+      </h3>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="sm:col-span-2">
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nội dung câu hỏi *</label>
+          <input type="text" #qText [value]="grammarQuestionForm().questionText" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Thứ tự câu hỏi *</label>
+          <input type="number" [(ngModel)]="grammarQuestionForm().questionNumber" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+      </div>
+
+      <!-- Multiple choices grid -->
+      <div class="space-y-3">
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Các đáp án lựa chọn</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[9px] text-slate-400 font-bold block mb-0.5">Đáp án A</label>
+            <input type="text" #inA [value]="getOptionsArray(grammarQuestionForm().options)[0]" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-1.5 text-xs text-slate-900" />
+          </div>
+          <div>
+            <label class="text-[9px] text-slate-400 font-bold block mb-0.5">Đáp án B</label>
+            <input type="text" #inB [value]="getOptionsArray(grammarQuestionForm().options)[1]" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-1.5 text-xs text-slate-900" />
+          </div>
+          <div>
+            <label class="text-[9px] text-slate-400 font-bold block mb-0.5">Đáp án C</label>
+            <input type="text" #inC [value]="getOptionsArray(grammarQuestionForm().options)[2]" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-1.5 text-xs text-slate-900" />
+          </div>
+          <div>
+            <label class="text-[9px] text-slate-400 font-bold block mb-0.5">Đáp án D</label>
+            <input type="text" #inD [value]="getOptionsArray(grammarQuestionForm().options)[3]" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-1.5 text-xs text-slate-900" />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đáp án đúng *</label>
+          <select [(ngModel)]="grammarQuestionForm().correctOption" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Giải thích chi tiết *</label>
+          <input type="text" [(ngModel)]="grammarQuestionForm().explanation" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button (click)="showGrammarQuestionModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy</button>
+        <button (click)="grammarQuestionForm().questionText = qText.value; submitGrammarQuestion(inA.value, inB.value, inC.value, inD.value)" [disabled]="isSaving()" class="px-6 py-2 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer border-none">Lưu câu hỏi</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- LISTENING TOPIC MODAL -->
+@if (showListeningTopicModal()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+        {{ listeningTopicForm().id ? 'Sửa đề luyện nghe' : 'Thêm đề luyện nghe mới' }}
+      </h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tiêu đề bài nghe *</label>
+          <input type="text" [(ngModel)]="listeningTopicForm().title" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đợt đề (Category)</label>
+          <input type="text" [(ngModel)]="listeningTopicForm().category" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white" placeholder="Ví dụ: Test 1, Practice 2" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Mô tả bài nghe</label>
+          <textarea [(ngModel)]="listeningTopicForm().description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white resize-y"></textarea>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button (click)="showListeningTopicModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy</button>
+        <button (click)="submitListeningTopic()" [disabled]="isSaving()" class="px-6 py-2 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer border-none">Lưu bài nghe</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- LISTENING QUESTION CREATE/EDIT MODAL -->
+@if (showListeningQuestionModal()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-xl shadow-2xl space-y-4">
+      
+      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+        {{ listeningQuestionForm().id ? 'Sửa câu hỏi luyện nghe' : 'Thêm câu hỏi luyện nghe mới' }}
+      </h3>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phần thi / Section *</label>
+          <input type="text" [(ngModel)]="listeningQuestionForm().difficulty" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="Ví dụ: Part 1: Photo Description" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Thứ tự câu hỏi *</label>
+          <input type="number" [(ngModel)]="listeningQuestionForm().questionNumber" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đường dẫn file Audio (.mp3) *</label>
+        <input type="text" [(ngModel)]="listeningQuestionForm().audioUrl" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none font-mono" placeholder="http://example.com/audio.mp3" required />
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nội dung câu hỏi / Script chính *</label>
+          <input type="text" #lQText [value]="listeningQuestionForm().questionText" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Dịch nghĩa / Giải thích ngữ cảnh *</label>
+          <input type="text" [(ngModel)]="listeningQuestionForm().explanation" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" required />
+        </div>
+      </div>
+
+      <!-- Multiple choices grid -->
+      <div class="space-y-3">
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Các đáp án lựa chọn</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[9px] text-slate-400 font-bold block mb-0.5">Đáp án A</label>
+            <input type="text" #lInA [value]="getOptionsArray(listeningQuestionForm().options)[0]" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-1.5 text-xs text-slate-900" />
+          </div>
+          <div>
+            <label class="text-[9px] text-slate-400 font-bold block mb-0.5">Đáp án B</label>
+            <input type="text" #lInB [value]="getOptionsArray(listeningQuestionForm().options)[1]" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-1.5 text-xs text-slate-900" />
+          </div>
+          <div>
+            <label class="text-[9px] text-slate-400 font-bold block mb-0.5">Đáp án C</label>
+            <input type="text" #lInC [value]="getOptionsArray(listeningQuestionForm().options)[2]" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-1.5 text-xs text-slate-900" />
+          </div>
+          <div>
+            <label class="text-[9px] text-slate-400 font-bold block mb-0.5">Đáp án D</label>
+            <input type="text" #lInD [value]="getOptionsArray(listeningQuestionForm().options)[3]" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-1.5 text-xs text-slate-900" />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đáp án đúng *</label>
+        <select [(ngModel)]="listeningQuestionForm().correctOption" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none">
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+        </select>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button (click)="showListeningQuestionModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy</button>
+        <button (click)="listeningQuestionForm().questionText = lQText.value; submitListeningQuestion(lInA.value, lInB.value, lInC.value, lInD.value)" [disabled]="isSaving()" class="px-6 py-2 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer border-none">Lưu câu hỏi</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- USER EDIT MODAL -->
+@if (showUserModal()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+        {{ userForm().id ? 'Sửa thông tin học viên' : 'Thêm tài khoản mới' }}
+      </h3>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email tài khoản *</label>
+          <input type="email" [(ngModel)]="userForm().email" [disabled]="userForm().id !== 0" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none disabled:opacity-60" required />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cấp độ (Level)</label>
+            <input type="number" [(ngModel)]="userForm().level" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Kinh nghiệm (EXP)</label>
+            <input type="number" [(ngModel)]="userForm().exp" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Số xu (Coins)</label>
+            <input type="number" [(ngModel)]="userForm().coins" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Vai trò (Role) *</label>
+            <select [(ngModel)]="userForm().role" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none">
+              <option value="ROLE_USER">ROLE_USER (Học viên)</option>
+              <option value="ROLE_ADMIN">ROLE_ADMIN (Quản trị viên)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Danh hiệu nhân vật (Character Title)</label>
+          <input type="text" [(ngModel)]="userForm().characterTitle" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="Novice, Scholar..." />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button (click)="showUserModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy</button>
+        <button (click)="submitUser()" [disabled]="isSaving()" class="px-6 py-2 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer border-none">Lưu thông tin</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ROADMAP DELETE CONFIRMATION MODAL -->
+@if (showRoadmapDeleteModal()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Xác nhận xóa lộ trình học</h3>
+      <p class="text-xs text-slate-500 leading-relaxed">
+        Hành động này sẽ xóa vĩnh viễn lộ trình <strong class="text-slate-900">{{ roadmapToDelete()?.cefrLevel }}</strong> và tất cả các chặng học (modules) trực thuộc. Dữ liệu không thể khôi phục.
+      </p>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+          Nhập lại mã CEFR <strong class="text-slate-900">"{{ roadmapToDelete()?.cefrLevel }}"</strong> để xác nhận:
+        </label>
+        <input type="text" [(ngModel)]="roadmapDeleteConfirmText" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="Nhập mã CEFR" />
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button (click)="showRoadmapDeleteModal.set(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold cursor-pointer">Hủy</button>
+        <button
+          (click)="confirmRoadmapDelete()"
+          [disabled]="isDeleting() || roadmapDeleteConfirmText !== roadmapToDelete()?.cefrLevel"
+          class="px-6 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold cursor-pointer border-none disabled:opacity-50"
+        >
+          Xóa vĩnh viễn
+        </button>
+      </div>
+    </div>
+  </div>
+}

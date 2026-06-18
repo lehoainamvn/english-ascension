@@ -1,7 +1,7 @@
 package com.englishascension.backend;
 
-import com.englishascension.backend.service.GroqService;
-import com.englishascension.backend.repository.UserRepository;
+import com.englishascension.backend.feature.ai.GroqService;
+import com.englishascension.backend.feature.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +16,8 @@ class BackendApplicationTests {
 	private UserRepository userRepository;
 
 	@Autowired
-	private com.englishascension.backend.repository.FlashcardRepository flashcardRepository;
+	private com.englishascension.backend.feature.study.FlashcardRepository flashcardRepository;
+
 
 	@Test
 	void contextLoads() {

@@ -12,6 +12,12 @@ export const authGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
+  const user = authService.getUser();
+  if (user && user.role === 'ROLE_ADMIN') {
+    router.navigate(['/admin-roadmap']);
+    return false;
+  }
+
   const url = state.url;
 
   return authService.checkOnboardingStatus().pipe(

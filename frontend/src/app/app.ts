@@ -2,8 +2,8 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth.service';
-import { NavbarComponent } from './components/navbar/navbar';
-import { AiChatBubbleComponent } from './components/ai-chat-bubble/ai-chat-bubble';
+import { NavbarComponent } from './components/common/navbar/navbar';
+import { AiChatBubbleComponent } from './components/common/ai-chat-bubble/ai-chat-bubble';
 import { ToastService } from './services/toast.service';
 import { filter } from 'rxjs';
 
@@ -23,6 +23,9 @@ export class App {
   currentUrl = signal('');
 
   constructor() {
+    // Đánh thức server backend (Render cold start mitigation)
+    this.authService.ping().subscribe();
+
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
@@ -38,7 +41,8 @@ export class App {
            !url.includes('/register') && 
            !url.includes('/character-customization') && 
            !url.includes('/placement-test') &&
-           !url.includes('/intro');
+           !url.includes('/intro') &&
+           !url.includes('/admin-roadmap');
   });
 }
 
