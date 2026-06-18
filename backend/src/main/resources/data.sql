@@ -18,6 +18,20 @@ VALUES (
     CURRENT_TIMESTAMP
 ) ON CONFLICT (email) DO NOTHING;
 
+INSERT INTO users (email, password, role, active, streak, coins, exp, level, created_at, updated_at)
+VALUES (
+    'admin@gmail.com', 
+    '$2a$10$wPxq/hC9KzXb4sVqJb6d2eC0bL/XlJ0.w8wOqJgC4yZ.OpxP6.Wc.', -- Mật khẩu: 123456
+    'ROLE_ADMIN', 
+    TRUE, 
+    10, 
+    500, 
+    5000, 
+    10,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+) ON CONFLICT (email) DO NOTHING;
+
 -- 2. Seed 12 câu hỏi Placement Test (3 câu cho mỗi kỹ năng)
 -- VOCABULARY
 INSERT INTO questions (source_type, type, difficulty, question_text, option_a, option_b, option_c, option_d, correct_option, correct_answer, explanation)

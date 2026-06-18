@@ -1,6 +1,6 @@
 package com.englishascension.backend.security;
 
-import com.englishascension.backend.model.User;
+import com.englishascension.backend.feature.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

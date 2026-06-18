@@ -20,6 +20,12 @@ export class AuthService {
   readonly hasCharacterState = signal<boolean | null>(null);
   readonly hasRoadmapState = signal<boolean | null>(null);
 
+  ping(): Observable<any> {
+    return this.http.get(API_URL + 'ping').pipe(
+      catchError(() => of(null))
+    );
+  }
+
   register(email: string, password: string): Observable<any> {
     return this.http.post(API_URL + 'register', { email, password });
   }

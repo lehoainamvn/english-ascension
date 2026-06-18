@@ -1,0 +1,83 @@
+/* Animations */
+.animate-slide-in-drawer {
+  animation: slideInDrawer 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInDrawer {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Custom modern scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Table overrides for clean line layout */
+table {
+  border-spacing: 0;
+  width: 100%;
+}
+
+th {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+td, th {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* SVG Chart details */
+svg text {
+  font-family: inherit;
+  user-select: none;
+}
+
+svg rect, svg path {
+  transition: all 0.3s ease;
+}
+
+svg rect:hover {
+  filter: brightness(0.92);
+}
+
+svg circle:hover {
+  r: 6px;
+  cursor: pointer;
+}
