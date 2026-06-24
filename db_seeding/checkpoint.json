@@ -1,0 +1,40 @@
+{
+    "vocab": {
+        "A1": 10,
+        "A2": 10,
+        "B1": 10,
+        "B2": 10,
+        "C1": 10
+    },
+    "grammar": {
+        "A1": 10,
+        "A2": 10,
+        "B1": 10,
+        "B2": 10,
+        "C1": 10
+    },
+    "reading": {
+        "A1": 20,
+        "A2": 20,
+        "B1": 20,
+        "B2": 20,
+        "C1": 20
+    },
+    "listening": {
+        "A1": 5,
+        "A2": 0,
+        "B1": 0,
+        "B2": 0,
+        "C1": 20
+    },
+    "placement_test": true,
+    "level_tests": {
+        "A1": true,
+        "A2": true,
+        "B1": true,
+        "B2": true,
+        "C1": true
+    },
+    "toeic_mini": 0,
+    "toeic_full": 0
+}

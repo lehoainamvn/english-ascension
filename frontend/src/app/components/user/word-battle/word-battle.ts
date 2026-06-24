@@ -1,10 +1,9 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { StudyService, Flashcard, CompletionResult } from '../../../services/study.service';
+import { StudyService, BattleWord, CompletionResult } from '../../../services/study.service';
 import { CharacterService, Character } from '../../../services/character.service';
 import { CharacterAvatarComponent } from '../../common/character-avatar/character-avatar';
-import { PlacementTestService, LearningRoadmap } from '../../../services/placement-test.service';
 
 interface BattleQuestion {
   questionText: string;
@@ -435,7 +434,7 @@ export class WordBattleComponent implements OnInit, OnDestroy {
   moduleId = 0;
   worldNum = 1;
 
-  flashcards: Flashcard[] = [];
+  flashcards: BattleWord[] = [];
   character = signal<Character | null>(null);
 
   isLoading = signal(true);
@@ -501,12 +500,13 @@ export class WordBattleComponent implements OnInit, OnDestroy {
       error: () => this.character.set(null)
     });
 
-    // Fetch study content (we extract flashcards to build vocabulary questions)
-    this.studyService.getModuleContent(this.moduleId).subscribe({
-      next: (data) => {
+    // Fetch vocabulary words specific to this module's CEFR level
+    // This ensures Word Battle always uses real vocab, not grammar/reading content
+    this.studyService.getBattleWords(this.moduleId).subscribe({
+      next: (words) => {
         this.isLoading.set(false);
-        if (data && data.flashcards && data.flashcards.length > 0) {
-          this.flashcards = data.flashcards;
+        if (words && words.length > 0) {
+          this.flashcards = words;
           this.determineMonsterSettings();
           this.initializeBattle();
         } else {
@@ -514,7 +514,7 @@ export class WordBattleComponent implements OnInit, OnDestroy {
         }
       },
       error: (err) => {
-        console.error('Error loading battle flashcards', err);
+        console.error('Error loading battle vocabulary', err);
         this.isLoading.set(false);
         this.errorState.set(true);
       }

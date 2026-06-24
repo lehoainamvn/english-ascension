@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReadingService, ReadingArticleDetails, ReadingQuestion, RewardResult } from '../../../services/reading.service';
@@ -16,7 +16,7 @@ interface DictionaryEntry {
 @Component({
   selector: 'app-reading-study',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="min-h-screen bg-bg-main text-text-main p-4 md:p-6 flex flex-col relative overflow-hidden transition-colors duration-300 select-none">
       <!-- Decorative Glows -->
@@ -156,14 +156,15 @@ interface DictionaryEntry {
           </div>
 
           <!-- Back button -->
-          <div class="pt-4 border-t border-border-main/40 mt-4 shrink-0">
-            <a 
-              routerLink="/reading" 
-              class="btn-back"
+          <div class="pt-4 border-t border-border-main/40 mt-4 shrink-0 flex items-center gap-3">
+
+            <button 
+              (click)="goBack()" 
+              class="btn-back border-none cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
               Danh sách bài đọc
-            </a>
+            </button>
           </div>
 
         </div>
@@ -376,6 +377,8 @@ export class ReadingStudyComponent implements OnInit {
   private notesSaveTimeout: any = null;
 
 
+  isRoadmap = false;
+  roadmapId: number | null = null;
   articleId = 0;
   articleTitle = signal<string>('Article');
   articleLevel = signal<number>(1);
@@ -401,8 +404,15 @@ export class ReadingStudyComponent implements OnInit {
 
   ngOnInit() {
     this.articleId = Number(this.route.snapshot.paramMap.get('id'));
+    const isRoadmapParam = this.route.snapshot.queryParamMap.get('isRoadmap');
+    const roadmapIdParam = this.route.snapshot.queryParamMap.get('roadmapId');
+    this.isRoadmap = isRoadmapParam === 'true';
+    if (roadmapIdParam) {
+      this.roadmapId = Number(roadmapIdParam);
+    }
+
     if (!this.articleId) {
-      this.router.navigate(['/reading']);
+      this.goBack();
     } else {
       this.loadSavedWords();
       this.loadContent();
@@ -546,14 +556,22 @@ export class ReadingStudyComponent implements OnInit {
           return a;
         });
         this.allArticles.set(updated);
-        this.router.navigate(['/reading']);
+        this.goBack();
       },
       error: (err) => {
         console.error('Error completing article', err);
         this.isSubmitting.set(false);
-        this.router.navigate(['/reading']);
+        this.goBack();
       }
     });
+  }
+
+  goBack() {
+    if (this.isRoadmap && this.roadmapId) {
+      this.router.navigate(['/preset-roadmap', this.roadmapId]);
+    } else {
+      this.router.navigate(['/reading']);
+    }
   }
 
   prevArticle() {

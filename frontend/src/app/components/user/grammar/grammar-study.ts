@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GrammarService, GrammarLesson, GrammarQuestion, RewardResult } from '../../../services/grammar.service';
@@ -10,7 +10,7 @@ import { ToastService } from '../../../services/toast.service';
 @Component({
   selector: 'app-grammar-study',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="min-h-screen bg-bg-main text-text-main p-4 md:p-8 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-300">
       <!-- Decorative Glows -->
@@ -30,13 +30,16 @@ import { ToastService } from '../../../services/toast.service';
               TOEIC
             </span>
           </div>
-          <a
-            routerLink="/grammar-topics"
-            class="btn-back"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            Danh sách chủ đề
-          </a>
+          <div class="flex items-center gap-3">
+
+            <button
+              (click)="goBack()"
+              class="btn-back border-none cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Danh sách chủ đề
+            </button>
+          </div>
         </div>
 
         @if (isLoading()) {
@@ -54,13 +57,13 @@ import { ToastService } from '../../../services/toast.service';
             <p class="text-text-muted text-xxs max-w-sm mx-auto">
               Không tìm thấy chủ đề ngữ pháp được yêu cầu hoặc lỗi giao tiếp với máy chủ. Vui lòng thử lại sau.
             </p>
-            <a
-              routerLink="/grammar-topics"
-              class="btn-back mt-2"
+            <button
+              (click)="goBack()"
+              class="btn-back mt-2 border-none cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
               Về Danh Sách
-            </a>
+            </button>
           </div>
         } @else {
           
@@ -437,13 +440,13 @@ import { ToastService } from '../../../services/toast.service';
               </div>
 
               <div class="pt-6 max-w-sm mx-auto">
-                <a
-                  routerLink="/grammar-topics"
-                  class="w-full bg-brand-primary hover:opacity-90 text-bg-main font-bold py-3.5 rounded-xl shadow-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer text-xs"
+                <button
+                  (click)="goBack()"
+                  class="w-full bg-brand-primary hover:opacity-90 text-bg-main font-bold py-3.5 rounded-xl shadow-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer border-none text-xs"
                 >
                   Quay Lại Danh Sách Chủ Đề
                   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
-                </a>
+                </button>
               </div>
             </div>
           }
@@ -513,6 +516,8 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
   private readonly userWordService = inject(UserWordService);
   private readonly toastService = inject(ToastService);
 
+  isRoadmap = false;
+  roadmapId: number | null = null;
   lessonId = 0;
   savedWords = signal<UserWord[]>([]);
   grammarNotesMap: { [qText: string]: string } = {};
@@ -539,6 +544,13 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.lessonId = Number(this.route.snapshot.paramMap.get('lessonId'));
+    const isRoadmapParam = this.route.snapshot.queryParamMap.get('isRoadmap');
+    const roadmapIdParam = this.route.snapshot.queryParamMap.get('roadmapId');
+    this.isRoadmap = isRoadmapParam === 'true';
+    if (roadmapIdParam) {
+      this.roadmapId = Number(roadmapIdParam);
+    }
+
     if (!this.lessonId) {
       this.errorState.set(true);
       this.isLoading.set(false);
@@ -693,15 +705,56 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
         if (res.leveledUp) {
           this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
         }
-        this.router.navigate(['/grammar-topics']);
+        this.goBack();
       },
       error: (err) => {
         console.error('Error completing practice rewards', err);
         this.isSubmitting.set(false);
         this.toastService.success('🎉 Đã hoàn thành luyện tập!');
-        this.router.navigate(['/grammar-topics']);
+        this.goBack();
       }
     });
+  }
+
+  completeGrammarLessonDirectly() {
+    this.isSubmitting.set(true);
+    this.grammarService.completeLesson(this.lessonId).subscribe({
+      next: () => {
+        this.grammarService.completePractice(this.lessonId, 100).subscribe({
+          next: (res) => {
+            this.isSubmitting.set(false);
+            this.toastService.success(`🎉 Hoàn thành bài học ngữ pháp: +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+            this.goBack();
+          },
+          error: (err) => {
+            console.error('Error completing practice', err);
+            this.isSubmitting.set(false);
+            this.goBack();
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error completing lesson', err);
+        this.grammarService.completePractice(this.lessonId, 100).subscribe({
+          next: () => {
+            this.isSubmitting.set(false);
+            this.goBack();
+          },
+          error: () => {
+            this.isSubmitting.set(false);
+            this.goBack();
+          }
+        });
+      }
+    });
+  }
+
+  goBack() {
+    if (this.isRoadmap && this.roadmapId) {
+      this.router.navigate(['/preset-roadmap', this.roadmapId]);
+    } else {
+      this.router.navigate(['/grammar-topics']);
+    }
   }
 
   closeLevelUpModal() {

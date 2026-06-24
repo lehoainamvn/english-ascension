@@ -1,7 +1,7 @@
 package com.englishascension.backend.security;
 
-import com.englishascension.backend.feature.user.User;
-import com.englishascension.backend.feature.user.UserRepository;
+import com.englishascension.backend.feature.user.entity.User;
+import com.englishascension.backend.feature.user.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

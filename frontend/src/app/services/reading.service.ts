@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface ReadingArticle {
   id: number;
   title: string;
+  category?: string;
   level: number;
   questionsCount: number;
   isCompleted: boolean;
@@ -28,6 +29,7 @@ export interface ReadingQuestion {
 export interface ReadingArticleDetails {
   id: number;
   title: string;
+  category?: string;
   content: string;
   vietnameseContent: string;
   level: number;

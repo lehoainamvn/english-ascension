@@ -12,6 +12,16 @@ export interface Flashcard {
   exampleTranslation: string;
 }
 
+export interface BattleWord {
+  id: number;
+  word: string;
+  definition: string;
+  partOfSpeech: string;
+  phonetic: string;
+  exampleSentence: string;
+  exampleTranslation: string;
+}
+
 export interface QuizQuestion {
   id: number;
   questionText: string;
@@ -27,6 +37,9 @@ export interface QuizQuestion {
 export interface StudyContent {
   moduleTitle?: string;
   moduleDescription?: string;
+  lessonType?: string;
+  bodyText?: string;
+  mediaUrl?: string;
   flashcards: Flashcard[];
   quizQuestions: QuizQuestion[];
 }
@@ -52,8 +65,12 @@ export class StudyService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/api/study`;
 
-  getModuleContent(moduleId: number): Observable<StudyContent> {
-    return this.http.get<StudyContent>(`${this.baseUrl}/modules/${moduleId}/content`);
+  getModuleContent(moduleId: number, category?: string): Observable<StudyContent> {
+    let url = `${this.baseUrl}/modules/${moduleId}/content`;
+    if (category) {
+      url += `?category=${category}`;
+    }
+    return this.http.get<StudyContent>(url);
   }
 
   completeModule(moduleId: number, correctAnswers: number): Observable<CompletionResult> {
@@ -66,6 +83,10 @@ export class StudyService {
 
   completeBattle(moduleId: number): Observable<CompletionResult> {
     return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/battle-complete`, {});
+  }
+
+  getBattleWords(moduleId: number): Observable<BattleWord[]> {
+    return this.http.get<BattleWord[]>(`${this.baseUrl}/modules/${moduleId}/battle-words`);
   }
 
   analyzePronunciation(targetWord: string, transcribedText: string): Observable<any> {

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VocabularyService, VocabTopic, VocabWord, RewardResult } from '../../../services/vocabulary.service';
@@ -20,7 +20,7 @@ interface MatchCard {
 @Component({
   selector: 'app-vocabulary-study',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="min-h-screen bg-bg-main text-text-main p-4 md:p-8 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-300">
       <!-- Decorative Glows -->
@@ -37,13 +37,16 @@ interface MatchCard {
               TỪ VỰNG: {{ topicTitle() }}
             </h2>
           </div>
-          <a
-            routerLink="/vocabulary"
-            class="btn-back"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            Kho từ vựng
-          </a>
+          <div class="flex items-center gap-3">
+
+            <button
+              (click)="goBack()"
+              class="btn-back border-none cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Kho từ vựng
+            </button>
+          </div>
         </div>
 
         @if (isLoading()) {
@@ -61,13 +64,13 @@ interface MatchCard {
             <p class="text-text-muted text-xxs max-w-sm mx-auto">
               Chủ đề từ vựng được yêu cầu không tồn tại hoặc có lỗi giao tiếp.
             </p>
-            <a
-              routerLink="/vocabulary"
-              class="btn-back mt-2"
+            <button
+              (click)="goBack()"
+              class="btn-back mt-2 border-none cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
               Về Danh Sách
-            </a>
+            </button>
           </div>
         } @else {
           
@@ -207,12 +210,12 @@ interface MatchCard {
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gamepad-2"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="17" x2="17.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>
                     Chơi Game Ghép Thẻ
                   </button>
-                  <a
-                    routerLink="/vocabulary"
-                    class="bg-bg-input border border-border-main text-text-main font-bold text-xs px-5 py-2.5 rounded-xl transition-all hover:bg-bg-card"
+                  <button
+                    (click)="goBack()"
+                    class="bg-bg-input border border-border-main text-text-main font-bold text-xs px-5 py-2.5 rounded-xl transition-all hover:bg-bg-card cursor-pointer"
                   >
                     Học chủ đề khác
-                  </a>
+                  </button>
                 </div>
               </div>
             } @else {
@@ -693,6 +696,8 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
   private readonly toastService = inject(ToastService);
   private readonly studyService = inject(StudyService);
 
+  isRoadmap = false;
+  roadmapId: number | null = null;
   topicId = 0;
   savedWords = signal<UserWord[]>([]);
   wordNotesMap: { [word: string]: string } = {};
@@ -768,6 +773,13 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.topicId = Number(this.route.snapshot.paramMap.get('topicId'));
+    const isRoadmapParam = this.route.snapshot.queryParamMap.get('isRoadmap');
+    const roadmapIdParam = this.route.snapshot.queryParamMap.get('roadmapId');
+    this.isRoadmap = isRoadmapParam === 'true';
+    if (roadmapIdParam) {
+      this.roadmapId = Number(roadmapIdParam);
+    }
+
     if (!this.topicId) {
       this.errorState.set(true);
       this.isLoading.set(false);
@@ -1168,11 +1180,11 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
         if (res.leveledUp) {
           this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
         }
-        this.router.navigate(['/vocabulary']);
+        this.goBack();
       },
       error: (err) => {
         console.error('Error completing topic progress', err);
-        this.router.navigate(['/vocabulary']);
+        this.goBack();
       }
     });
   }
@@ -1313,13 +1325,21 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
         if (res.leveledUp) {
           this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
         }
-        this.router.navigate(['/vocabulary']);
+        this.goBack();
       },
       error: (err) => {
         console.error('Error sending match game rewards', err);
         this.toastService.success('🎉 Đã hoàn thành game ghép thẻ!');
-        this.router.navigate(['/vocabulary']);
+        this.goBack();
       }
     });
+  }
+
+  goBack() {
+    if (this.isRoadmap && this.roadmapId) {
+      this.router.navigate(['/preset-roadmap', this.roadmapId]);
+    } else {
+      this.router.navigate(['/vocabulary']);
+    }
   }
 }
