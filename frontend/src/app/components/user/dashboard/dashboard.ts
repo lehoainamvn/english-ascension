@@ -7,11 +7,12 @@ import { CharacterService, Character } from '../../../services/character.service
 import { StudyService } from '../../../services/study.service';
 import { PresetRoadmapService, PresetRoadmap, Enrollment } from '../../../services/preset-roadmap.service';
 import { WorldMapComponent } from '../../common/world-map/world-map';
+import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-roadmap-detail';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, CommonModule, WorldMapComponent],
+  imports: [RouterLink, CommonModule, WorldMapComponent, PresetRoadmapDetailComponent],
   template: `
     <div class="min-h-screen bg-bg-main text-text-main transition-colors duration-300">
       <div class="max-w-5xl mx-auto px-4 py-6">
@@ -47,7 +48,7 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
         <!-- Tab Selector -->
         <div class="flex p-1 bg-bg-input/60 border border-border-main/50 rounded-2xl max-w-md mb-6 shadow-inner">
           <button
-            (click)="activeTab.set('learning')"
+            (click)="activeTab.set('learning'); selectedRoadmapId.set(null)"
             [class.bg-bg-card]="activeTab() === 'learning'"
             [class.text-text-main]="activeTab() === 'learning'"
             [class.shadow-xs]="activeTab() === 'learning'"
@@ -60,7 +61,7 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
             }
           </button>
           <button
-            (click)="activeTab.set('library')"
+            (click)="activeTab.set('library'); selectedRoadmapId.set(null)"
             [class.bg-bg-card]="activeTab() === 'library'"
             [class.text-text-main]="activeTab() === 'library'"
             [class.shadow-xs]="activeTab() === 'library'"
@@ -70,7 +71,7 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
             Kho lộ trình
           </button>
           <button
-            (click)="activeTab.set('suggested')"
+            (click)="activeTab.set('suggested'); selectedRoadmapId.set(null)"
             [class.bg-bg-card]="activeTab() === 'suggested'"
             [class.text-text-main]="activeTab() === 'suggested'"
             [class.shadow-xs]="activeTab() === 'suggested'"
@@ -84,7 +85,13 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
         <!-- ===== TAB: ĐANG HỌC ===== -->
         @if (activeTab() === 'learning') {
           <div class="space-y-4 animate-fade-in">
-            @if (isLoadingEnrollments()) {
+            @if (selectedRoadmapId()) {
+              <app-preset-roadmap-detail
+                [id]="selectedRoadmapId()!"
+                (back)="selectedRoadmapId.set(null)"
+              ></app-preset-roadmap-detail>
+            } @else {
+              @if (isLoadingEnrollments()) {
               <div class="flex items-center justify-center py-16">
                 <svg class="animate-spin h-8 w-8 text-brand-primary" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -105,7 +112,7 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
             } @else {
               @for (enrollment of enrollments(); track enrollment.id) {
                 <div
-                  [routerLink]="['/preset-roadmap', enrollment.roadmap.id]"
+                  (click)="selectRoadmap(enrollment.roadmap.id)"
                   class="bg-bg-card border border-border-main hover:border-brand-primary/40 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group"
                 >
                   <div class="flex items-start gap-4">
@@ -131,13 +138,20 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
                 </div>
               }
             }
+            }
           </div>
         }
 
         <!-- ===== TAB: KHO LỘ TRÌNH ===== -->
         @if (activeTab() === 'library') {
           <div class="space-y-8 animate-fade-in">
-            @if (isLoadingPresets()) {
+            @if (selectedRoadmapId()) {
+              <app-preset-roadmap-detail
+                [id]="selectedRoadmapId()!"
+                (back)="selectedRoadmapId.set(null)"
+              ></app-preset-roadmap-detail>
+            } @else {
+              @if (isLoadingPresets()) {
               <div class="flex items-center justify-center py-16">
                 <svg class="animate-spin h-8 w-8 text-brand-primary" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -156,7 +170,7 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
                   <div class="flex gap-4 overflow-x-auto pb-3 scrollbar-thin select-none">
                     @for (rm of group.roadmaps; track rm.id) {
                       <div
-                        [routerLink]="['/preset-roadmap', rm.id]"
+                        (click)="selectRoadmap(rm.id)"
                         class="w-72 shrink-0 bg-bg-card border border-border-main hover:border-brand-primary/40 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[150px] relative group"
                       >
                         <!-- Enrolled badge -->
@@ -197,6 +211,7 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
                   </div>
                 </div>
               }
+            }
             }
           </div>
         }
@@ -260,6 +275,12 @@ export class DashboardComponent implements OnInit {
   private readonly studyService = inject(StudyService);
   private readonly presetRoadmapService = inject(PresetRoadmapService);
   private readonly route = inject(ActivatedRoute);
+
+  selectedRoadmapId = signal<number | null>(null);
+
+  selectRoadmap(id: number): void {
+    this.selectedRoadmapId.set(id);
+  }
 
   roadmap = signal<any>(null);
   character = signal<Character | null>(null);

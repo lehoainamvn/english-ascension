@@ -221,13 +221,16 @@ VALUES (
 );
 
 -- ====================================================================
+-- ====================================================================
 -- 3. Clear Existing Preset Roadmaps & Modules (For clean re-seed)
 -- ====================================================================
-DELETE FROM user_progress WHERE resource_type = 'ROADMAP' AND (resource_id IN (100, 101, 102, 103) OR resource_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
-DELETE FROM user_progress WHERE resource_type = 'MODULE' AND resource_id IN (SELECT id FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
-DELETE FROM flashcards WHERE module_id IN (SELECT id FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
-DELETE FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE);
-DELETE FROM learning_roadmaps WHERE id IN (100, 101, 102, 103) OR is_preset = TRUE;
+DELETE FROM user_progress WHERE resource_type = 'ROADMAP' AND (resource_id IN (100, 101, 102, 103, 104) OR resource_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
+DELETE FROM user_progress WHERE resource_type = 'MODULE' AND resource_id IN (SELECT id FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103, 104) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
+DELETE FROM flashcards WHERE module_id IN (SELECT id FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103, 104) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE));
+DELETE FROM learning_modules WHERE roadmap_id IN (100, 101, 102, 103, 104) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE);
+UPDATE user_learning_paths SET roadmap_id = NULL WHERE roadmap_id IN (100, 101, 102, 103, 104) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE);
+DELETE FROM roadmap_lessons WHERE roadmap_id IN (100, 101, 102, 103, 104) OR roadmap_id IN (SELECT id FROM learning_roadmaps WHERE is_preset = TRUE);
+DELETE FROM learning_roadmaps WHERE id IN (100, 101, 102, 103, 104) OR is_preset = TRUE;
 
 -- ====================================================================
 -- 4. Seed Preset Roadmaps (Lộ trình chung - Bắt đầu từ ID 100)
@@ -236,49 +239,61 @@ INSERT INTO learning_roadmaps (id, cefr_level, toeic_equivalent, overall_evaluat
 VALUES 
 (
     100, 
-    'A1-A2', 
-    '150-300', 
-    'Lộ trình học tiếng Anh căn bản từ con số 0 giúp bạn làm quen với ngữ pháp cơ bản, từ vựng thông dụng và rèn luyện kỹ năng nghe nói cơ bản.', 
+    'A1', 
+    '100-150', 
+    'Lộ trình cơ bản A1 giúp nắm bắt từ vựng, ngữ pháp đơn giản, và làm quen với các chủ đề hội thoại đời sống hàng ngày.', 
     TRUE, 
     'star', 
     'Co ban', 
-    3, 
+    4, 
     CURRENT_TIMESTAMP, 
     CURRENT_TIMESTAMP
 ),
 (
     101, 
-    'B1-B2', 
-    '450-650', 
-    'Lộ trình trung cấp giúp nâng cao vốn từ vựng học thuật, nắm vững các cấu trúc ngữ pháp phức tạp và cải thiện kỹ năng giao tiếp phản xạ tự nhiên.', 
+    'A2', 
+    '150-350', 
+    'Lộ trình A2 giúp mở rộng từ vựng, củng cố các cấu trúc ngữ pháp thông dụng và nâng cao khả năng nghe đọc cơ bản.', 
     TRUE, 
-    'diamond', 
-    'Trung cap', 
-    3, 
+    'sparkles', 
+    'Co ban', 
+    4, 
     CURRENT_TIMESTAMP, 
     CURRENT_TIMESTAMP
 ),
 (
     102, 
-    'TOEIC 600+', 
-    '600-750', 
-    'Lộ trình chuyên sâu tập trung vào kỹ năng nghe và đọc theo định dạng đề thi TOEIC mới nhất, cung cấp các mẹo làm bài và từ vựng phòng thi cốt lõi.', 
+    'B1', 
+    '350-550', 
+    'Lộ trình B1 giúp bạn bước vào giai đoạn trung cấp, tự tin viết các đoạn văn dài, nắm vững câu điều kiện, bị động và cải thiện kỹ năng đàm thoại.', 
     TRUE, 
-    'trophy', 
-    'TOEIC', 
-    3, 
+    'diamond', 
+    'Trung cap', 
+    4, 
     CURRENT_TIMESTAMP, 
     CURRENT_TIMESTAMP
 ),
 (
     103, 
-    'Business English', 
-    '500-700', 
-    'Lộ trình tiếng Anh công sở thực tế giúp bạn tự tin viết email, thuyết trình dự án, đàm phán hợp đồng và giao tiếp chuyên nghiệp với đồng nghiệp.', 
+    'B2', 
+    '550-700', 
+    'Lộ trình B2 giúp bạn hoàn thiện ngữ pháp phức tạp, nâng cao từ vựng chuyên ngành xã hội, tài chính, công nghệ và phân tích các bài đọc chuyên sâu.', 
     TRUE, 
-    'briefcase', 
-    'Business', 
-    3, 
+    'trophy', 
+    'Trung cap', 
+    4, 
+    CURRENT_TIMESTAMP, 
+    CURRENT_TIMESTAMP
+),
+(
+    104, 
+    'C1', 
+    '700-990', 
+    'Lộ trình C1 chuyên sâu tập trung vào các văn bản học thuật phức tạp, đàm phán chính trị, kinh tế vĩ mô và cách diễn đạt tinh tế ở trình độ cao cấp.', 
+    TRUE, 
+    'crown', 
+    'Cao cap', 
+    4, 
     CURRENT_TIMESTAMP, 
     CURRENT_TIMESTAMP
 );
@@ -288,121 +303,95 @@ VALUES
 -- ====================================================================
 INSERT INTO learning_modules (roadmap_id, title, description, order_index, category, status, created_at)
 VALUES 
--- Modules for Roadmap 100 (A1-A2)
-(
-    100, 
-    'Từ vựng A1 cơ bản', 
-    'Học các từ vựng căn bản nhất về đời sống hàng ngày: Chào hỏi, gia đình, sở thích, màu sắc...', 
-    1, 
-    'VOCABULARY', 
-    'IN_PROGRESS', 
-    CURRENT_TIMESTAMP
-),
-(
-    100, 
-    'Ngữ pháp A1-A2 thông dụng', 
-    'Luyện tập các thì đơn giản (Hiện tại đơn, Quá khứ đơn, Tương lai đơn) và các cấu trúc câu phổ biến.', 
-    2, 
-    'GRAMMAR', 
-    'LOCKED', 
-    CURRENT_TIMESTAMP
-),
-(
-    100, 
-    'Luyện nghe giao tiếp cơ bản', 
-    'Luyện nghe các hội thoại ngắn về mua sắm, hỏi đường, đặt bàn nhà hàng.', 
-    3, 
-    'LISTENING', 
-    'LOCKED', 
-    CURRENT_TIMESTAMP
-),
+-- Modules for Roadmap 100 (A1)
+(100, 'Từ vựng A1', 'Học các chủ đề từ vựng A1 căn bản như: Chào hỏi, gia đình, trường học, đồ ăn...', 1, 'VOCABULARY', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(100, 'Ngữ pháp A1', 'Làm quen với các thì đơn giản, động từ To Be, danh từ số nhiều và câu hỏi WH-', 2, 'GRAMMAR', 'LOCKED', CURRENT_TIMESTAMP),
+(100, 'Đọc hiểu A1', 'Đọc các văn bản ngắn như email giới thiệu, thông báo đơn giản hoặc nhật ký hàng ngày', 3, 'READING', 'LOCKED', CURRENT_TIMESTAMP),
+(100, 'Nghe hiểu A1', 'Nghe các cuộc hội thoại ngắn về chỉ đường, mua sắm hoặc giới thiệu bản thân', 4, 'LISTENING', 'LOCKED', CURRENT_TIMESTAMP),
 
--- Modules for Roadmap 101 (B1-B2)
-(
-    101, 
-    'Từ vựng B1 Academic', 
-    'Mở rộng vốn từ vựng học thuật thuộc các chủ đề khoa học, giáo dục, và môi trường.', 
-    1, 
-    'VOCABULARY', 
-    'IN_PROGRESS', 
-    CURRENT_TIMESTAMP
-),
-(
-    101, 
-    'Cấu trúc Ngữ pháp Trung cấp', 
-    'Nắm vững các câu điều kiện, câu bị động, và mệnh đề quan hệ để viết câu phức tốt hơn.', 
-    2, 
-    'GRAMMAR', 
-    'LOCKED', 
-    CURRENT_TIMESTAMP
-),
-(
-    101, 
-    'Nghe hiểu hội thoại dài', 
-    'Luyện nghe các bài thuyết trình ngắn và các cuộc thảo luận nhóm phức tạp hơn.', 
-    3, 
-    'LISTENING', 
-    'LOCKED', 
-    CURRENT_TIMESTAMP
-),
+-- Modules for Roadmap 101 (A2)
+(101, 'Từ vựng A2', 'Mở rộng từ vựng về mua sắm, du lịch, sức khỏe, công việc và miêu tả người', 1, 'VOCABULARY', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(101, 'Ngữ pháp A2', 'Học thì Hiện tại tiếp diễn, Quá khứ đơn, Tương lai đơn và So sánh hơn/nhất', 2, 'GRAMMAR', 'LOCKED', CURRENT_TIMESTAMP),
+(101, 'Đọc hiểu A2', 'Đọc hiểu các thông báo công ty, cẩm nang du lịch và thư từ công sở đơn giản', 3, 'READING', 'LOCKED', CURRENT_TIMESTAMP),
+(101, 'Nghe hiểu A2', 'Nghe hiểu các thông báo nhà ga, thảo luận kế hoạch đi chơi hoặc phỏng vấn xin việc cơ bản', 4, 'LISTENING', 'LOCKED', CURRENT_TIMESTAMP),
 
--- Modules for Roadmap 102 (TOEIC 600+)
-(
-    102, 
-    'Từ vựng TOEIC thông dụng', 
-    '500 từ vựng cốt lõi thường xuất hiện trong đề thi TOEIC: Nhân sự, tài chính, văn phòng...', 
-    1, 
-    'VOCABULARY', 
-    'IN_PROGRESS', 
-    CURRENT_TIMESTAMP
-),
-(
-    102, 
-    'Chiến thuật TOEIC Reading Part 5 & 6', 
-    'Các dạng câu hỏi ngữ pháp và từ vựng thường gặp cùng phương pháp tối ưu hóa thời gian.', 
-    2, 
-    'GRAMMAR', 
-    'LOCKED', 
-    CURRENT_TIMESTAMP
-),
-(
-    102, 
-    'Luyện nghe TOEIC Listening Part 3', 
-    'Phân tích hội thoại 2-3 người nói, nhận diện bẫy thông tin và từ đồng nghĩa.', 
-    3, 
-    'LISTENING', 
-    'LOCKED', 
-    CURRENT_TIMESTAMP
-),
+-- Modules for Roadmap 102 (B1)
+(102, 'Từ vựng B1', 'Nâng cao từ vựng chủ đề môi trường, văn hóa, khoa học đổi mới và phát triển cá nhân', 1, 'VOCABULARY', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(102, 'Ngữ pháp B1', 'Nắm vững thì Hiện tại hoàn thành, câu bị động, câu điều kiện loại 1 & 2 và mệnh đề quan hệ', 2, 'GRAMMAR', 'LOCKED', CURRENT_TIMESTAMP),
+(102, 'Đọc hiểu B1', 'Đọc hiểu các báo cáo tóm tắt, thư tín đàm phán hợp đồng và bài viết năng suất công việc', 3, 'READING', 'LOCKED', CURRENT_TIMESTAMP),
+(102, 'Nghe hiểu B1', 'Nghe hiểu các cuộc họp phòng ban, trao đổi với nhà cung cấp hoặc hướng dẫn đào tạo nhân viên', 4, 'LISTENING', 'LOCKED', CURRENT_TIMESTAMP),
 
--- Modules for Roadmap 103 (Business English)
-(
-    103, 
-    'Tiếng Anh giao tiếp công sở', 
-    'Chào hỏi đồng nghiệp, giới thiệu bản thân trong công việc và sử dụng ngôn từ lịch thiệp.', 
-    1, 
-    'VOCABULARY', 
-    'IN_PROGRESS', 
-    CURRENT_TIMESTAMP
-),
-(
-    103, 
-    'Kỹ năng Viết Email chuyên nghiệp', 
-    'Cách mở đầu và kết thúc email lịch sự, viết yêu cầu, báo cáo tiến độ và hẹn gặp đối tác.', 
-    2, 
-    'GRAMMAR', 
-    'LOCKED', 
-    CURRENT_TIMESTAMP
-),
-(
-    103, 
-    'Thuyết trình dự án bằng Tiếng Anh', 
-    'Cấu trúc bài thuyết trình, các cụm từ chuyển ý mượt mà và cách giải thích biểu đồ.', 
-    3, 
-    'LISTENING', 
-    'LOCKED', 
-    CURRENT_TIMESTAMP
-);
+-- Modules for Roadmap 103 (B2)
+(103, 'Từ vựng B2', 'Từ vựng chuyên sâu về tài chính, quản trị, luật pháp, y học và trí tuệ nhân tạo', 1, 'VOCABULARY', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(103, 'Ngữ pháp B2', 'Học câu gián tiếp nâng cao, đảo ngữ, câu giả định, câu cleft và các thì tương lai hoàn thành', 2, 'GRAMMAR', 'LOCKED', CURRENT_TIMESTAMP),
+(103, 'Đọc hiểu B2', 'Đọc hiểu báo cáo tài chính quý, thông báo sáp nhập, phân tích rủi ro và điều khoản sử dụng AI', 3, 'READING', 'LOCKED', CURRENT_TIMESTAMP),
+(103, 'Nghe hiểu B2', 'Nghe hiểu tranh luận tài chính thường niên, hội thảo an ninh mạng và thảo luận hợp đồng liên doanh', 4, 'LISTENING', 'LOCKED', CURRENT_TIMESTAMP),
+
+-- Modules for Roadmap 104 (C1)
+(104, 'Từ vựng C1', 'Từ vựng học thuật cao cấp về quan hệ quốc tế, triết học, đạo đức nghề nghiệp và khoa học vũ trụ', 1, 'VOCABULARY', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(104, 'Ngữ pháp C1', 'Sử dụng cấu trúc đảo ngữ phức tạp, phân từ độc lập, câu cleft nhấn mạnh và liên từ liên kết ý tưởng nâng cao', 2, 'GRAMMAR', 'LOCKED', CURRENT_TIMESTAMP),
+(104, 'Đọc hiểu C1', 'Đọc các tóm tắt nghiên cứu khoa học, tài liệu ngoại giao, essay triết học và phán quyết pháp lý', 3, 'READING', 'LOCKED', CURRENT_TIMESTAMP),
+(104, 'Nghe hiểu C1', 'Nghe các bài giảng vật lý thiên văn, tranh luận chính trị, phỏng vấn giải Nobel và đàm phán M&A', 4, 'LISTENING', 'LOCKED', CURRENT_TIMESTAMP);
+
+-- ====================================================================
+-- 5B. Seed Self-Study CEFR Vocabulary Topics (roadmap_id = NULL)
+-- ====================================================================
+INSERT INTO learning_modules (roadmap_id, title, description, order_index, category, status, created_at)
+VALUES
+(NULL, 'A1 - Chào hỏi & Bản thân', 'Học từ vựng về Chào hỏi & Bản thân cơ bản', 1, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Gia đình & Bạn bè', 'Học từ vựng về Gia đình & Bạn bè cơ bản', 2, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Trường học & Học tập', 'Học từ vựng về Trường học & Học tập cơ bản', 3, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Đồ ăn & Đồ uống', 'Học từ vựng về Đồ ăn & Đồ uống cơ bản', 4, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Thời tiết & Quần áo', 'Học từ vựng về Thời tiết & Quần áo cơ bản', 5, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Nhà cửa & Đồ đạc', 'Học từ vựng về Nhà cửa & Đồ đạc cơ bản', 6, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Động vật & Thiên nhiên', 'Học từ vựng về Động vật & Thiên nhiên cơ bản', 7, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Hoạt động hàng ngày', 'Học từ vựng về Hoạt động hàng ngày cơ bản', 8, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Màu sắc & Số đếm', 'Học từ vựng về Màu sắc & Số đếm cơ bản', 9, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A1 - Phương tiện giao thông', 'Học từ vựng về Phương tiện giao thông cơ bản', 10, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+
+(NULL, 'A2 - Mua sắm & Giá cả', 'Học từ vựng về Mua sắm & Giá cả sơ cấp', 1, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Du lịch & Khách sạn', 'Học từ vựng về Du lịch & Khách sạn sơ cấp', 2, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Sức khỏe & Cơ thể', 'Học từ vựng về Sức khỏe & Cơ thể sơ cấp', 3, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Giải trí & Thể thao', 'Học từ vựng về Giải trí & Thể thao sơ cấp', 4, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Nghề nghiệp & Công việc', 'Học từ vựng về Nghề nghiệp & Công việc sơ cấp', 5, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Công nghệ cơ bản', 'Học từ vựng về Công nghệ cơ bản sơ cấp', 6, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Địa điểm trong thành phố', 'Học từ vựng về Địa điểm trong thành phố sơ cấp', 7, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Thời gian rảnh rỗi', 'Học từ vựng về Thời gian rảnh rỗi sơ cấp', 8, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Lễ hội & Sự kiện', 'Học từ vựng về Lễ hội & Sự kiện sơ cấp', 9, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'A2 - Mô tả người & vật', 'Học từ vựng về Mô tả người & vật sơ cấp', 10, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+
+(NULL, 'B1 - Môi trường & Biến đổi khí hậu', 'Học từ vựng về Môi trường & Biến đổi khí hậu trung cấp', 1, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Giáo dục & Học thuật', 'Học từ vựng về Giáo dục & Học thuật trung cấp', 2, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Văn hóa & Nghệ thuật', 'Học từ vựng về Văn hóa & Nghệ thuật trung cấp', 3, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Kinh doanh & Khởi nghiệp', 'Học từ vựng về Kinh doanh & Khởi nghiệp trung cấp', 4, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Phương tiện truyền thông', 'Học từ vựng về Phương tiện truyền thông trung cấp', 5, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Các mối quan hệ xã hội', 'Học từ vựng về Các mối quan hệ xã hội trung cấp', 6, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Phát triển cá nhân', 'Học từ vựng về Phát triển cá nhân trung cấp', 7, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Khoa học & Đổi mới', 'Học từ vựng về Khoa học & Đổi mới trung cấp', 8, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Giao thông công cộng', 'Học từ vựng về Giao thông công cộng trung cấp', 9, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B1 - Du lịch khám phá', 'Học từ vựng về Du lịch khám phá trung cấp', 10, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+
+(NULL, 'B2 - Tài chính & Đầu tư', 'Học từ vựng về Tài chính & Đầu tư trung cao cấp', 1, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Quản trị doanh nghiệp', 'Học từ vựng về Quản trị doanh nghiệp trung cao cấp', 2, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Luật pháp & Xã hội', 'Học từ vựng về Luật pháp & Xã hội trung cao cấp', 3, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Y học & Công nghệ sinh học', 'Học từ vựng về Y học & Công nghệ sinh học trung cao cấp', 4, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Toàn cầu hóa', 'Học từ vựng về Toàn cầu hóa trung cao cấp', 5, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Tâm lý học hành vi', 'Học từ vựng về Tâm lý học hành vi trung cao cấp', 6, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Thị trường lao động', 'Học từ vựng về Thị trường lao động trung cao cấp', 7, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Trí tuệ nhân tạo', 'Học từ vựng về Trí tuệ nhân tạo trung cao cấp', 8, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Thương mại quốc tế', 'Học từ vựng về Thương mại quốc tế trung cao cấp', 9, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'B2 - Truyền thông đại chúng', 'Học từ vựng về Truyền thông đại chúng trung cao cấp', 10, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+
+(NULL, 'C1 - Ngoại giao & Quan hệ quốc tế', 'Học từ vựng về Ngoại giao & Quan hệ quốc tế cao cấp', 1, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Nghiên cứu & Học thuật chuyên sâu', 'Học từ vựng về Nghiên cứu & Học thuật chuyên sâu cao cấp', 2, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Văn học & Ngôn ngữ học', 'Học từ vựng về Văn học & Ngôn ngữ học cao cấp', 3, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Triết học & Tư tưởng', 'Học từ vựng về Triết học & Tư tưởng cao cấp', 4, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Chính sách công & Quản lý nhà nước', 'Học từ vựng về Chính sách công & Quản lý nhà nước cao cấp', 5, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Đạo đức nghề nghiệp', 'Học từ vựng về Đạo đức nghề nghiệp cao cấp', 6, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Phát triển bền vững toàn cầu', 'Học từ vựng về Phát triển bền vững toàn cầu cao cấp', 7, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Khoa học không gian & Thiên văn học', 'Học từ vựng về Khoa học không gian & Thiên văn học cao cấp', 8, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Kinh tế học vĩ mô', 'Học từ vựng về Kinh tế học vĩ mô cao cấp', 9, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP),
+(NULL, 'C1 - Xu hướng văn hóa đương đại', 'Học từ vựng về Xu hướng văn hóa đương đại cao cấp', 10, 'TỪ VỰNG CEFR', 'IN_PROGRESS', CURRENT_TIMESTAMP);;
 
 -- ====================================================================
 -- 6. Cập nhật serial sequence cho PostgreSQL để tránh lỗi trùng lặp ID

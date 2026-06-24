@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ListeningService, ListeningSection, ListeningQuestion, RewardResult } from '../../../services/listening.service';
@@ -23,7 +24,7 @@ interface DiffWord {
 @Component({
   selector: 'app-listening-study',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="min-h-screen bg-bg-main text-text-main p-3 md:p-6 flex flex-col relative overflow-hidden transition-colors duration-300 select-none">
       <!-- Decorative Glows -->
@@ -44,13 +45,16 @@ interface DiffWord {
               <h3 class="text-sm font-black text-text-main tracking-tight uppercase">{{ topicTitle() }}</h3>
               <p class="text-[10px] text-text-muted mt-0.5">{{ topicDescription() }}</p>
             </div>
-            <a
-              routerLink="/listening"
-              class="btn-back"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-              Đề nghe
-            </a>
+            <div class="flex items-center gap-2">
+
+              <button
+                (click)="goBack()"
+                class="btn-back border-none cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left shrink-0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Đề nghe
+              </button>
+            </div>
           </div>
 
           <!-- Section List Accordion -->
@@ -591,6 +595,8 @@ export class ListeningStudyComponent implements OnInit, OnDestroy {
   private sentenceNotesTimeout: any = null;
 
 
+  isRoadmap = false;
+  roadmapId: number | null = null;
   topicId = 0;
   topicTitle = signal<string>('Test');
   topicDescription = signal<string>('Listening set');
@@ -665,8 +671,15 @@ export class ListeningStudyComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.topicId = Number(this.route.snapshot.paramMap.get('topicId'));
+    const isRoadmapParam = this.route.snapshot.queryParamMap.get('isRoadmap');
+    const roadmapIdParam = this.route.snapshot.queryParamMap.get('roadmapId');
+    this.isRoadmap = isRoadmapParam === 'true';
+    if (roadmapIdParam) {
+      this.roadmapId = Number(roadmapIdParam);
+    }
+
     if (!this.topicId) {
-      this.router.navigate(['/listening']);
+      this.goBack();
     } else {
       this.loadSavedWords();
       this.loadContent();
@@ -1059,11 +1072,43 @@ export class ListeningStudyComponent implements OnInit, OnDestroy {
         if (res.leveledUp) {
           this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
         }
-        this.router.navigate(['/listening']);
+        this.goBack();
       },
       error: (err) => {
         console.error('Error completing section', err);
-        this.router.navigate(['/listening']);
+        this.goBack();
+      }
+    });
+  }
+
+  goBack() {
+    if (this.isRoadmap && this.roadmapId) {
+      this.router.navigate(['/preset-roadmap', this.roadmapId]);
+    } else {
+      this.router.navigate(['/listening']);
+    }
+  }
+
+  completeListeningTopicDirectly() {
+    this.isSubmitting.set(true);
+    const secs = this.sections();
+    if (secs.length === 0) {
+      this.isSubmitting.set(false);
+      this.goBack();
+      return;
+    }
+
+    const obsList = secs.map(s => this.listeningService.completeSection(s.id));
+    forkJoin(obsList).subscribe({
+      next: (results) => {
+        this.isSubmitting.set(false);
+        this.toastService.success(`🎉 Hoàn thành bài luyện nghe thành công!`);
+        this.goBack();
+      },
+      error: (err) => {
+        console.error('Error completing sections', err);
+        this.isSubmitting.set(false);
+        this.goBack();
       }
     });
   }

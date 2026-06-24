@@ -110,7 +110,7 @@ import { ToastService } from '../../../services/toast.service';
               @if (!isSingleSkillMode()) {
                 <div class="flex border-b border-border-main/50 mb-6 overflow-x-auto select-none text-xs font-bold">
                   <button
-                    (click)="activeTab.set('grammar')"
+                    (click)="setActiveTab('grammar')"
                     [class.border-b-2]="activeTab() === 'grammar'"
                     [class.border-brand-primary]="activeTab() === 'grammar'"
                     [class.text-text-main]="activeTab() === 'grammar'"
@@ -121,7 +121,7 @@ import { ToastService } from '../../../services/toast.service';
                     Ngữ pháp
                   </button>
                   <button
-                    (click)="activeTab.set('vocabulary')"
+                    (click)="setActiveTab('vocabulary')"
                     [class.border-b-2]="activeTab() === 'vocabulary'"
                     [class.border-brand-primary]="activeTab() === 'grammar' ? '' : (activeTab() === 'vocabulary' ? 'border-brand-primary' : '')"
                     [class.text-text-main]="activeTab() === 'vocabulary'"
@@ -133,7 +133,7 @@ import { ToastService } from '../../../services/toast.service';
                     Từ vựng
                   </button>
                   <button
-                    (click)="activeTab.set('listening')"
+                    (click)="setActiveTab('listening')"
                     [class.border-b-2]="activeTab() === 'listening'"
                     [class.border-brand-primary]="activeTab() === 'listening'"
                     [class.text-text-main]="activeTab() === 'listening'"
@@ -144,7 +144,7 @@ import { ToastService } from '../../../services/toast.service';
                     Nghe
                   </button>
                   <button
-                    (click)="activeTab.set('pronunciation')"
+                    (click)="setActiveTab('pronunciation')"
                     [class.border-b-2]="activeTab() === 'pronunciation'"
                     [class.border-brand-primary]="activeTab() === 'pronunciation'"
                     [class.text-text-main]="activeTab() === 'pronunciation'"
@@ -175,7 +175,7 @@ import { ToastService } from '../../../services/toast.service';
                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-brand-primary shrink-0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                             {{ sec.heading }}
                           </h4>
-                          <p class="text-[11px] text-text-muted leading-relaxed">
+                          <p class="text-[11px] text-text-muted leading-relaxed whitespace-pre-wrap">
                             {{ sec.detail }}
                           </p>
                           @if (sec.example) {
@@ -191,15 +191,15 @@ import { ToastService } from '../../../services/toast.service';
                   <div class="pt-2 border-t border-border-main/50">
                     @if (isSingleSkillMode()) {
                       <button
-                        (click)="completeSkillAndGoBack()"
+                        (click)="finishStudyAndGoToTest()"
                         class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
-                        <span>Hoàn thành & Quay lại Bản đồ</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                        <span>Bắt đầu làm bài kiểm tra</span>
                       </button>
                     } @else {
                       <button
-                        (click)="activeTab.set('vocabulary'); updateLocalProgress('VOCABULARY')"
+                        (click)="setActiveTab('vocabulary'); updateLocalProgress('VOCABULARY')"
                         class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -215,7 +215,7 @@ import { ToastService } from '../../../services/toast.service';
                 <div class="space-y-6 animate-fade-in">
                   <div class="text-center">
                     <span class="text-xxs text-text-muted font-bold uppercase tracking-wider text-[10px]">
-                      Thẻ từ vựng {{ currentCardIndex + 1 }} / {{ flashcards.length }}
+                      Thẻ từ vựng {{ currentCardIndex + 1 }} / {{ getFilteredFlashcards().length }}
                     </span>
                     <h3 class="text-sm font-black text-text-main mt-0.5">Lật thẻ để ghi nhớ từ mới</h3>
                   </div>
@@ -224,7 +224,7 @@ import { ToastService } from '../../../services/toast.service';
                     <div
                       (click)="isFlipped = !isFlipped"
                       [class.flipped]="isFlipped"
-                      class="flip-card-inner relative w-full max-w-sm h-64 bg-bg-input border border-border-main rounded-2xl shadow-lg cursor-pointer transition-transform duration-500"
+                      class="flip-card-inner relative w-full max-w-sm h-96 bg-bg-input border border-border-main rounded-2xl shadow-lg cursor-pointer transition-transform duration-500"
                     >
                       <!-- Front Side -->
                       <div class="flip-card-front flex flex-col items-center justify-center p-6 bg-gradient-to-b from-bg-input/20 to-transparent">
@@ -261,7 +261,7 @@ import { ToastService } from '../../../services/toast.service';
                       </div>
 
                       <!-- Back Side -->
-                      <div class="flip-card-back flex flex-col justify-center p-6 bg-bg-card">
+                      <div class="flip-card-back flex flex-col justify-between p-6 bg-bg-card overflow-hidden">
                         <button
                           (click)="toggleSaveWord($event, currentCard())"
                           class="absolute top-4 right-4 w-9 h-9 rounded-full bg-bg-input hover:bg-bg-card border border-border-main flex items-center justify-center text-sm transition-all cursor-pointer shadow-sm z-20"
@@ -273,21 +273,36 @@ import { ToastService } from '../../../services/toast.service';
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart text-text-muted hover:text-red-500"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                           }
                         </button>
-                        <div class="text-center border-b border-border-main/50 pb-3 mb-3">
+                        
+                        <div class="text-center border-b border-border-main/50 pb-2 mb-2">
                           <p class="text-xs text-text-main font-bold uppercase tracking-wide">Giải nghĩa</p>
-                          <h3 class="text-sm font-black text-text-main mt-1">
+                        </div>
+                        
+                        <!-- Scrollable content to handle long text gracefully without overlap -->
+                        <div class="flex-1 overflow-y-auto pr-1 text-left my-1 space-y-3" (click)="$event.stopPropagation()">
+                          <h3 class="text-xs font-semibold text-text-main whitespace-pre-line leading-relaxed">
                             {{ currentCard().definition }}
                           </h3>
+                          
+                          @if (currentCard().exampleSentence) {
+                            <div class="pt-2 border-t border-border-main/20">
+                              <p class="text-[9px] text-text-muted uppercase tracking-wider font-bold">Ví dụ sử dụng:</p>
+                              <p class="text-xs font-semibold text-text-main italic mt-1 leading-normal">
+                                "{{ currentCard().exampleSentence }}"
+                              </p>
+                              @if (currentCard().exampleTranslation) {
+                                <p class="text-xs text-text-muted mt-1 leading-normal flex items-center gap-1">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right shrink-0"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                                  {{ currentCard().exampleTranslation }}
+                                </p>
+                              }
+                            </div>
+                          }
                         </div>
-                        <div class="text-left">
-                          <p class="text-[9px] text-text-muted uppercase tracking-wider font-bold">Ví dụ sử dụng:</p>
-                          <p class="text-xs font-semibold text-text-main italic mt-1 leading-normal">
-                            "{{ currentCard().exampleSentence }}"
-                          </p>
-                          <p class="text-xs text-text-muted mt-1 leading-normal flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right shrink-0"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                            {{ currentCard().exampleTranslation }}
-                          </p>
+                        
+                        <div class="text-center pt-2 border-t border-border-main/30 flex justify-center items-center gap-1 text-[9px] text-text-muted font-bold select-none cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-3d"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                          Nhấn ở đây để lật lại mặt trước
                         </div>
                       </div>
                     </div>
@@ -304,7 +319,7 @@ import { ToastService } from '../../../services/toast.service';
                     <span class="text-[10px] text-text-muted italic">Click vào thẻ để xoay</span>
                     <button
                       (click)="nextCard()"
-                      [disabled]="currentCardIndex === flashcards.length - 1"
+                      [disabled]="currentCardIndex === getFilteredFlashcards().length - 1"
                       class="bg-bg-input hover:bg-bg-card border border-border-main px-4 py-2 rounded-xl text-text-muted hover:text-text-main transition-all disabled:opacity-30 cursor-pointer font-bold"
                     >
                       Thẻ sau
@@ -336,15 +351,15 @@ import { ToastService } from '../../../services/toast.service';
                   <div class="pt-6 border-t border-border-main/50 mt-6">
                     @if (isSingleSkillMode()) {
                       <button
-                        (click)="completeSkillAndGoBack()"
+                        (click)="finishStudyAndGoToTest()"
                         class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
-                        <span>Hoàn thành & Quay lại Bản đồ</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                        <span>Bắt đầu làm bài kiểm tra</span>
                       </button>
                     } @else {
                       <button
-                        (click)="activeTab.set('listening'); updateLocalProgress('LISTENING')"
+                        (click)="setActiveTab('listening'); updateLocalProgress('LISTENING')"
                         class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headphones"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
@@ -360,16 +375,28 @@ import { ToastService } from '../../../services/toast.service';
                 <div class="space-y-6 animate-fade-in">
                   <div class="text-center">
                     <span class="bg-bg-input text-text-main border border-border-main text-xxs px-2.5 py-0.5 rounded font-bold uppercase tracking-wider text-[10px]">
-                      Luyện nghe hiểu
+                      {{ lessonType() === 'READING' ? 'Luyện đọc hiểu' : 'Luyện nghe hiểu' }}
                     </span>
-                    <h3 class="text-base font-black text-text-main mt-1">Lắng nghe đoạn văn hội thoại</h3>
+                    <h3 class="text-base font-black text-text-main mt-1">
+                      {{ lessonType() === 'READING' ? 'Đọc hiểu đoạn văn và trả lời câu hỏi' : 'Lắng nghe đoạn văn hội thoại' }}
+                    </h3>
                   </div>
+
+                  @if (getPassageText()) {
+                    <div class="p-5 bg-bg-input/30 border border-border-main rounded-2xl text-left text-xs leading-relaxed max-h-60 overflow-y-auto space-y-2 animate-fade-in shadow-inner">
+                      <h4 class="font-black text-brand-primary uppercase text-[9px] tracking-wider flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                        Nội dung bài đọc / Passage
+                      </h4>
+                      <p class="text-text-main font-semibold whitespace-pre-wrap leading-relaxed select-text">{{ getPassageText() }}</p>
+                    </div>
+                  }
 
                   <div class="p-4 bg-bg-input/60 border border-border-main rounded-2xl flex flex-col items-center gap-3 relative">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headphones text-text-main"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
                     <div class="text-center">
-                      <h4 class="text-xs font-bold text-text-main">Chuyên đề nghe: Weekly Study Dialogue</h4>
-                      <p class="text-[10px] text-text-muted mt-0.5">Bấm nút Play bên dưới để nghe bài phát âm nói.</p>
+                      <h4 class="text-xs font-bold text-text-main">{{ lessonType() === 'READING' ? 'Bài đọc:' : 'Chuyên đề nghe:' }} {{ quizQuestions.length > 0 && moduleTitle() === 'Chủ đề học' ? 'Weekly Study Dialogue' : moduleTitle() }}</h4>
+                      <p class="text-[10px] text-text-muted mt-0.5">{{ lessonType() === 'READING' ? 'Bấm Play bên dưới để nghe AI đọc đoạn văn (tùy chọn).' : 'Bấm nút Play bên dưới để nghe bài phát âm nói.' }}</p>
                     </div>
 
                     <div class="flex items-end justify-center gap-1.5 h-8 py-1">
@@ -397,43 +424,88 @@ import { ToastService } from '../../../services/toast.service';
                     </button>
                   </div>
 
+                  @if (quizQuestions.length > 1) {
+                    <div class="flex justify-center items-center gap-1.5 flex-wrap my-3">
+                      @for (q of quizQuestions; track q.id; let idx = $index) {
+                        <button
+                          (click)="currentListeningQuestionIndex.set(idx)"
+                          [class.bg-brand-primary]="currentListeningQuestionIndex() === idx"
+                          [class.text-bg-main]="currentListeningQuestionIndex() === idx"
+                          [class.border-brand-primary]="currentListeningQuestionIndex() === idx"
+                          [class.bg-green-500/10]="listeningSubmittedMap()[idx] && isListeningCorrectMap()[idx]"
+                          [class.text-green-500]="listeningSubmittedMap()[idx] && isListeningCorrectMap()[idx]"
+                          [class.border-green-500/30]="listeningSubmittedMap()[idx] && isListeningCorrectMap()[idx]"
+                          [class.bg-red-500/10]="listeningSubmittedMap()[idx] && !isListeningCorrectMap()[idx]"
+                          [class.text-red-500]="listeningSubmittedMap()[idx] && !isListeningCorrectMap()[idx]"
+                          [class.border-red-500/30]="listeningSubmittedMap()[idx] && !isListeningCorrectMap()[idx]"
+                          [class.bg-bg-input]="currentListeningQuestionIndex() !== idx && !listeningSubmittedMap()[idx]"
+                          [class.text-text-muted]="currentListeningQuestionIndex() !== idx && !listeningSubmittedMap()[idx]"
+                          class="w-8 h-8 rounded-full border border-border-main text-xs font-black transition-all cursor-pointer flex items-center justify-center shadow-sm select-none"
+                        >
+                          {{ idx + 1 }}
+                        </button>
+                      }
+                    </div>
+                  }
+
                   <!-- Listening comprehension quiz (self check) -->
                   <div class="p-4 bg-bg-input/30 border border-border-main rounded-2xl space-y-4 text-left">
-                    <h4 class="text-xs font-bold text-text-main">Question: What does the speaker recommend doing to consolidate new vocabulary?</h4>
+                    <h4 class="text-xs font-bold text-text-main">
+                      Question {{ quizQuestions.length > 1 ? (currentListeningQuestionIndex() + 1) + '/' + quizQuestions.length : '' }}:
+                      {{ quizQuestions.length > 0 && quizQuestions[currentListeningQuestionIndex()] ? quizQuestions[currentListeningQuestionIndex()].questionText : 'What does the speaker recommend doing to consolidate new vocabulary?' }}
+                    </h4>
                     
                     <div class="space-y-2">
-                      <button
-                        (click)="selectListeningAnswer('A')"
-                        [class.border-brand-primary]="selectedListeningAnswer() === 'A'"
-                        [class.bg-bg-input]="selectedListeningAnswer() === 'A'"
-                        class="w-full p-3 rounded-xl border border-border-main hover:border-brand-primary/40 bg-bg-card text-text-main text-left text-xs font-semibold transition-all cursor-pointer flex justify-between items-center"
-                      >
-                        <span>A. Doing elaborate research on general grammar rules</span>
-                      </button>
-                      <button
-                        (click)="selectListeningAnswer('B')"
-                        [class.border-brand-primary]="selectedListeningAnswer() === 'B'"
-                        [class.bg-bg-input]="selectedListeningAnswer() === 'B'"
-                        class="w-full p-3 rounded-xl border border-border-main hover:border-brand-primary/40 bg-bg-card text-text-main text-left text-xs font-semibold transition-all cursor-pointer flex justify-between items-center"
-                      >
-                        <span>B. Practicing with flashcards on a regular schedule</span>
-                      </button>
+                      @if (quizQuestions.length > 0 && quizQuestions[currentListeningQuestionIndex()]) {
+                        @for (opt of ['A', 'B', 'C', 'D']; track opt) {
+                          @if (getOptionText(quizQuestions[currentListeningQuestionIndex()], opt)) {
+                            <button
+                              (click)="selectListeningAnswer(opt)"
+                              [class.border-brand-primary]="selectedListeningAnswers()[currentListeningQuestionIndex()] === opt"
+                              [class.bg-bg-input]="selectedListeningAnswers()[currentListeningQuestionIndex()] === opt"
+                              class="w-full p-3 rounded-xl border border-border-main hover:border-brand-primary/40 bg-bg-card text-text-main text-left text-xs font-semibold transition-all cursor-pointer flex justify-between items-center text-[11px]"
+                            >
+                              <span>{{ opt }}. {{ getOptionText(quizQuestions[currentListeningQuestionIndex()], opt) }}</span>
+                              @if (selectedListeningAnswers()[currentListeningQuestionIndex()] === opt) {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-brand-primary shrink-0"><path d="M20 6 9 17l-5-5"/></svg>
+                              }
+                            </button>
+                          }
+                        }
+                      } @else {
+                        <button
+                          (click)="selectListeningAnswer('A')"
+                          [class.border-brand-primary]="selectedListeningAnswers()[currentListeningQuestionIndex()] === 'A'"
+                          [class.bg-bg-input]="selectedListeningAnswers()[currentListeningQuestionIndex()] === 'A'"
+                          class="w-full p-3 rounded-xl border border-border-main hover:border-brand-primary/40 bg-bg-card text-text-main text-left text-xs font-semibold transition-all cursor-pointer flex justify-between items-center text-[11px]"
+                        >
+                          <span>A. Doing elaborate research on general grammar rules</span>
+                        </button>
+                        <button
+                          (click)="selectListeningAnswer('B')"
+                          [class.border-brand-primary]="selectedListeningAnswers()[currentListeningQuestionIndex()] === 'B'"
+                          [class.bg-bg-input]="selectedListeningAnswers()[currentListeningQuestionIndex()] === 'B'"
+                          class="w-full p-3 rounded-xl border border-border-main hover:border-brand-primary/40 bg-bg-card text-text-main text-left text-xs font-semibold transition-all cursor-pointer flex justify-between items-center text-[11px]"
+                        >
+                          <span>B. Practicing with flashcards on a regular schedule</span>
+                        </button>
+                      }
                     </div>
 
-                    @if (listeningSubmitted()) {
+                    @if (listeningSubmittedMap()[currentListeningQuestionIndex()]) {
                       <div
-                        [class.bg-green-500/10]="isListeningCorrect()"
-                        [class.border-green-500/20]="isListeningCorrect()"
-                        [class.text-green-500]="isListeningCorrect()"
-                        [class.bg-red-500/10]="!isListeningCorrect()"
-                        [class.border-red-500/20]="!isListeningCorrect()"
-                        [class.text-red-500]="!isListeningCorrect()"
-                        class="p-3 border rounded-xl text-xxs font-semibold leading-relaxed text-[11px]"
+                        [class.bg-green-500/10]="isListeningCorrectMap()[currentListeningQuestionIndex()]"
+                        [class.border-green-500/20]="isListeningCorrectMap()[currentListeningQuestionIndex()]"
+                        [class.text-green-500]="isListeningCorrectMap()[currentListeningQuestionIndex()]"
+                        [class.bg-red-500/10]="!isListeningCorrectMap()[currentListeningQuestionIndex()]"
+                        [class.border-red-500/20]="!isListeningCorrectMap()[currentListeningQuestionIndex()]"
+                        [class.text-red-500]="!isListeningCorrectMap()[currentListeningQuestionIndex()]"
+                        class="p-3 border rounded-xl text-xxs font-semibold leading-relaxed text-[11px] whitespace-pre-wrap"
                       >
-                        @if (isListeningCorrect()) {
-                          <span>Chính xác! Bạn đã nghe rất tốt. Lựa chọn hợp lý là ôn tập flashcards đều đặn. Nhận ngay +15 EXP!</span>
+                        @if (isListeningCorrectMap()[currentListeningQuestionIndex()]) {
+                          <span>Chính xác! Bạn đã nghe rất tốt. <br><strong>Giải thích:</strong> {{ quizQuestions[currentListeningQuestionIndex()]?.explanation || 'Lựa chọn hợp lý là ôn tập flashcards đều đặn.' }} Nhận ngay +15 EXP!</span>
                         } @else {
-                          <span>Chưa chính xác. Hãy nghe kỹ lại lời khuyên từ speaker nhé!</span>
+                          <span>Chưa chính xác. <strong>Giải thích:</strong> {{ quizQuestions[currentListeningQuestionIndex()]?.explanation || 'Hãy nghe kỹ lại lời khuyên từ speaker nhé!' }}</span>
                         }
                       </div>
                     }
@@ -441,7 +513,7 @@ import { ToastService } from '../../../services/toast.service';
                     <div class="flex gap-2 font-bold text-xs">
                       <button
                         (click)="submitListeningAnswer()"
-                        [disabled]="!selectedListeningAnswer() || listeningSubmitted()"
+                        [disabled]="!selectedListeningAnswers()[currentListeningQuestionIndex()] || listeningSubmittedMap()[currentListeningQuestionIndex()]"
                         class="flex-1 bg-brand-primary text-bg-card hover:opacity-90 py-2 rounded-xl transition-all cursor-pointer disabled:opacity-40 border-none font-black"
                       >
                         Kiểm tra câu trả lời
@@ -454,11 +526,30 @@ import { ToastService } from '../../../services/toast.service';
                       </button>
                     </div>
 
+                    @if (quizQuestions.length > 1) {
+                      <div class="flex justify-between items-center pt-2 font-bold text-xs border-t border-border-main/20">
+                        <button
+                          (click)="prevListeningQuestion()"
+                          [disabled]="currentListeningQuestionIndex() === 0"
+                          class="bg-bg-input hover:bg-bg-card border border-border-main px-4 py-2 rounded-xl text-text-muted hover:text-text-main transition-all disabled:opacity-30 cursor-pointer font-bold"
+                        >
+                          Câu trước
+                        </button>
+                        <button
+                          (click)="nextListeningQuestion()"
+                          [disabled]="currentListeningQuestionIndex() === quizQuestions.length - 1"
+                          class="bg-bg-input hover:bg-bg-card border border-border-main px-4 py-2 rounded-xl text-text-muted hover:text-text-main transition-all disabled:opacity-30 cursor-pointer font-bold"
+                        >
+                          Câu sau
+                        </button>
+                      </div>
+                    }
+
                     <div class="pt-4 border-t border-border-main/50 mt-4">
                       @if (isSingleSkillMode()) {
                         <button
-                          (click)="completeSkillAndGoBack()"
-                          [disabled]="!listeningSubmitted()"
+                          (click)="completeListeningAndGoBack()"
+                          [disabled]="!allListeningQuestionsSubmitted()"
                           class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all disabled:opacity-40 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
@@ -466,8 +557,8 @@ import { ToastService } from '../../../services/toast.service';
                         </button>
                       } @else {
                         <button
-                          (click)="activeTab.set('pronunciation'); updateLocalProgress('PRONUNCIATION')"
-                          [disabled]="!listeningSubmitted()"
+                          (click)="setActiveTab('pronunciation'); updateLocalProgress('PRONUNCIATION')"
+                          [disabled]="!allListeningQuestionsSubmitted()"
                           class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all disabled:opacity-40 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
@@ -905,7 +996,7 @@ import { ToastService } from '../../../services/toast.service';
 
               <div class="flex flex-col gap-3 max-w-sm mx-auto pt-4 font-bold text-xs">
                 <button
-                  (click)="studyMode.set('study'); activeTab.set('grammar'); studyState.set('learning')"
+                  (click)="studyMode.set('study'); setActiveTab('grammar'); studyState.set('learning')"
                   class="w-full bg-bg-input hover:bg-bg-card border border-border-main text-text-main py-3 rounded-xl transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -1042,6 +1133,8 @@ import { ToastService } from '../../../services/toast.service';
       backface-visibility: hidden;
       position: absolute;
       inset: 0;
+      border-radius: 1rem;
+      overflow: hidden;
     }
     .flip-card-back {
       transform: rotateY(180deg);
@@ -1090,6 +1183,9 @@ export class StudyComponent implements OnInit, OnDestroy {
   moduleDescription = signal<string>('Nội dung học chi tiết');
   studyMode = signal<'study' | 'test'>('study');
 
+  bodyText = signal<string>('');
+  lessonType = signal<string>('');
+
   flashcards: Flashcard[] = [];
   quizQuestions: QuizQuestion[] = [];
   
@@ -1117,9 +1213,10 @@ export class StudyComponent implements OnInit, OnDestroy {
     { height: 8 }, { height: 20 }, { height: 12 }, { height: 24 }, { height: 16 },
     { height: 6 }, { height: 15 }, { height: 28 }, { height: 10 }, { height: 18 }
   ];
-  selectedListeningAnswer = signal<string | null>(null);
-  listeningSubmitted = signal(false);
-  isListeningCorrect = signal(false);
+  currentListeningQuestionIndex = signal<number>(0);
+  selectedListeningAnswers = signal<{ [key: number]: string | null }>({});
+  listeningSubmittedMap = signal<{ [key: number]: boolean }>({});
+  isListeningCorrectMap = signal<{ [key: number]: boolean }>({});
 
   // Pronunciation Mode States
   selectedSpeakWordIndex = signal(0);
@@ -1275,11 +1372,19 @@ export class StudyComponent implements OnInit, OnDestroy {
     }, 800);
   }
 
+  setActiveTab(tab: 'grammar' | 'vocabulary' | 'listening' | 'pronunciation'): void {
+    this.activeTab.set(tab);
+    this.currentCardIndex = 0;
+    this.isFlipped = false;
+    this.loadModuleContent();
+  }
+
   loadModuleContent(): void {
     this.isLoading.set(true);
     this.errorState.set(false);
+    this.resetAllListeningStates();
 
-    this.studyService.getModuleContent(this.moduleId).subscribe({
+    this.studyService.getModuleContent(this.moduleId, this.activeTab()).subscribe({
       next: (data) => {
         this.isLoading.set(false);
         if (data && data.flashcards && data.quizQuestions) {
@@ -1287,6 +1392,22 @@ export class StudyComponent implements OnInit, OnDestroy {
           this.quizQuestions = data.quizQuestions;
           if (data.moduleTitle) this.moduleTitle.set(data.moduleTitle);
           if (data.moduleDescription) this.moduleDescription.set(data.moduleDescription);
+          if (data.bodyText) this.bodyText.set(data.bodyText);
+          if (data.lessonType) {
+            this.lessonType.set(data.lessonType);
+            const serverType = data.lessonType.toUpperCase();
+            let tabMapped: 'grammar' | 'vocabulary' | 'listening' | 'pronunciation' = 'grammar';
+            if (serverType === 'VOCABULARY') tabMapped = 'vocabulary';
+            else if (serverType === 'LISTENING') tabMapped = 'listening';
+            else if (serverType === 'READING') tabMapped = 'listening'; // reading uses listening layout
+
+            if (this.activeTab() !== tabMapped) {
+              this.activeTab.set(tabMapped);
+              this.isSingleSkillMode.set(true);
+              this.currentCardIndex = 0;
+              this.isFlipped = false;
+            }
+          }
           this.initializeMatchingData();
           this.updateCurrentNotes();
         } else {
@@ -1304,6 +1425,7 @@ export class StudyComponent implements OnInit, OnDestroy {
   loadMockContent(): void {
     this.isLoading.set(false);
     this.errorState.set(false);
+    this.resetAllListeningStates();
     this.moduleTitle.set('Module ' + this.moduleId + ': English Lesson');
     this.moduleDescription.set('Hãy hoàn thành phần học lý thuyết và làm bài test đánh giá để qua màn.');
     
@@ -1341,8 +1463,14 @@ export class StudyComponent implements OnInit, OnDestroy {
     this.updateCurrentNotes();
   }
 
+  getFilteredFlashcards(): Flashcard[] {
+    return this.flashcards.filter(fc => !(fc.word && (fc.word.toLowerCase().includes("transcript") || fc.word.toLowerCase().includes("passage") || fc.word.toLowerCase().includes("đoạn văn"))));
+  }
+
   currentCard(): Flashcard {
-    return this.flashcards[this.currentCardIndex];
+    const list = this.getFilteredFlashcards();
+    if (list.length === 0) return { id: 0, word: '', partOfSpeech: '', phonetic: '', definition: '', exampleSentence: '', exampleTranslation: '' };
+    return list[this.currentCardIndex % list.length];
   }
 
   prevCard(): void {
@@ -1354,11 +1482,52 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   nextCard(): void {
-    if (this.currentCardIndex < this.flashcards.length - 1) {
+    const list = this.getFilteredFlashcards();
+    if (this.currentCardIndex < list.length - 1) {
       this.isFlipped = false;
       this.currentCardIndex++;
       this.updateCurrentNotes();
     }
+  }
+
+  getPassageText(): string | null {
+    if (this.bodyText()) return this.bodyText();
+    const card = this.flashcards.find(fc => fc.word && (fc.word.toLowerCase().includes("transcript") || fc.word.toLowerCase().includes("passage") || fc.word.toLowerCase().includes("đoạn văn")));
+    if (card) {
+      let text = card.definition || '';
+      text = text.replace(/🎧\s*\*\*Nhấn vào liên kết để nghe:\*\*\[.*?\]\(.*?\)/gi, "");
+      text = text.replace(/Transcript:\s*/gi, "");
+      return text.trim();
+    }
+    return null;
+  }
+
+  finishStudyAndGoToTest(): void {
+    if (this.quizQuestions && this.quizQuestions.length > 0) {
+      this.studyMode.set('test');
+    } else {
+      this.completeSkillAndGoBack();
+    }
+  }
+
+  completeListeningAndGoBack(): void {
+    const correctCount = Object.values(this.isListeningCorrectMap()).filter(v => v === true).length;
+    this.isSubmittingReward.set(true);
+    this.studyService.completeModule(this.moduleId, correctCount).subscribe({
+      next: (res) => {
+        this.isSubmittingReward.set(false);
+        this.toastService.success(`🏆 Hoàn thành bài học: +${res.xpGained} EXP & +${res.coinsGained} Coins!`);
+        if (res.leveledUp) {
+          this.toastService.success(`🎉 LÊN CẤP: Cấp ${res.newLevel} (Danh hiệu: ${res.newTitle})!`, 5000);
+        }
+        this.goBack();
+      },
+      error: (err) => {
+        console.error('Error completing listening module', err);
+        this.isSubmittingReward.set(false);
+        this.goBack();
+      }
+    });
   }
 
   speakWord(event: Event, word: string): void {
@@ -1528,6 +1697,39 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   getGrammarTheory(): { title: string; sections: { heading: string; detail: string; example?: string }[] } {
+    const grammarCards = this.flashcards.filter(fc => fc.partOfSpeech && fc.partOfSpeech.toLowerCase() === 'ngữ pháp');
+    
+    if (grammarCards.length > 0) {
+      let title = this.moduleTitle();
+      const titleCard = grammarCards.find(fc => !fc.definition || fc.definition.trim() === '');
+      const firstCardIsEmpty = grammarCards[0] && (!grammarCards[0].definition || grammarCards[0].definition.trim() === '');
+      
+      if (titleCard) {
+        title = titleCard.word;
+      } else if (grammarCards[0]) {
+        title = grammarCards[0].word;
+      }
+
+      const sectionsList = grammarCards
+        .filter(fc => fc.definition && fc.definition.trim() !== '')
+        .map(fc => ({
+          heading: fc.word,
+          detail: fc.definition,
+          example: fc.exampleSentence || undefined
+        }));
+
+      const finalSections = firstCardIsEmpty ? sectionsList : grammarCards.map(fc => ({
+        heading: fc.word,
+        detail: fc.definition,
+        example: fc.exampleSentence || undefined
+      }));
+
+      return {
+        title: 'Lý thuyết Ngữ pháp: ' + title,
+        sections: finalSections
+      };
+    }
+
     if (this.moduleId === 1) {
       return {
         title: 'Lý thuyết Ngữ pháp: Các từ loại trong Tiếng Anh (Parts of Speech)',
@@ -1678,6 +1880,14 @@ export class StudyComponent implements OnInit, OnDestroy {
     }
   }
 
+  getOptionText(q: QuizQuestion, opt: string): string {
+    if (opt === 'A') return q.optionA;
+    if (opt === 'B') return q.optionB;
+    if (opt === 'C') return q.optionC;
+    if (opt === 'D') return q.optionD;
+    return '';
+  }
+
   playListeningAudio(): void {
     this.isListeningAudioPlaying.set(true);
     const intId = setInterval(() => {
@@ -1688,7 +1898,7 @@ export class StudyComponent implements OnInit, OnDestroy {
 
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const text = "We must take a pragmatic approach to language learning. Daily flashcards help to consolidate our vocabulary. It is the most effective way to avoid forgetting new words.";
+      let text = this.getPassageText() || "We must take a pragmatic approach to language learning. Daily flashcards help to consolidate our vocabulary. It is the most effective way to avoid forgetting new words.";
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.85;
@@ -1706,21 +1916,60 @@ export class StudyComponent implements OnInit, OnDestroy {
   }
 
   selectListeningAnswer(ans: string): void {
-    if (this.listeningSubmitted()) return;
-    this.selectedListeningAnswer.set(ans);
+    const idx = this.currentListeningQuestionIndex();
+    if (this.listeningSubmittedMap()[idx]) return;
+    this.selectedListeningAnswers.update(m => ({ ...m, [idx]: ans }));
   }
 
   submitListeningAnswer(): void {
-    if (!this.selectedListeningAnswer()) return;
-    this.listeningSubmitted.set(true);
-    this.isListeningCorrect.set(this.selectedListeningAnswer() === 'B');
+    const idx = this.currentListeningQuestionIndex();
+    const ans = this.selectedListeningAnswers()[idx];
+    if (!ans) return;
+
+    this.listeningSubmittedMap.update(m => ({ ...m, [idx]: true }));
+    
+    if (this.quizQuestions.length > 0 && this.quizQuestions[idx]) {
+      const q = this.quizQuestions[idx];
+      const correctAns = q.correctAnswer || '';
+      const isCorrect = ans.trim().toUpperCase() === correctAns.trim().toUpperCase();
+      this.isListeningCorrectMap.update(m => ({ ...m, [idx]: isCorrect }));
+    } else {
+      this.isListeningCorrectMap.update(m => ({ ...m, [idx]: ans === 'B' }));
+    }
   }
 
   resetListening(): void {
-    this.stopListeningAudio();
-    this.selectedListeningAnswer.set(null);
-    this.listeningSubmitted.set(false);
-    this.isListeningCorrect.set(false);
+    const idx = this.currentListeningQuestionIndex();
+    this.selectedListeningAnswers.update(m => ({ ...m, [idx]: null }));
+    this.listeningSubmittedMap.update(m => ({ ...m, [idx]: false }));
+    this.isListeningCorrectMap.update(m => ({ ...m, [idx]: false }));
+  }
+
+  prevListeningQuestion(): void {
+    if (this.currentListeningQuestionIndex() > 0) {
+      this.currentListeningQuestionIndex.update(i => i - 1);
+    }
+  }
+
+  nextListeningQuestion(): void {
+    if (this.currentListeningQuestionIndex() < this.quizQuestions.length - 1) {
+      this.currentListeningQuestionIndex.update(i => i + 1);
+    }
+  }
+
+  allListeningQuestionsSubmitted(): boolean {
+    if (this.quizQuestions.length === 0) return true;
+    for (let i = 0; i < this.quizQuestions.length; i++) {
+      if (!this.listeningSubmittedMap()[i]) return false;
+    }
+    return true;
+  }
+
+  resetAllListeningStates(): void {
+    this.currentListeningQuestionIndex.set(0);
+    this.selectedListeningAnswers.set({});
+    this.listeningSubmittedMap.set({});
+    this.isListeningCorrectMap.set({});
   }
 
   // Pronunciation Tab Controller
