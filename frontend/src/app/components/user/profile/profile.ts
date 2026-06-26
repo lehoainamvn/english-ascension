@@ -356,39 +356,108 @@ import { API_BASE_URL } from '../../../api-config';
                       <p class="text-text-muted text-xs italic">"{{ roadmap()?.overallEvaluation }}"</p>
                     </div>
 
+                    <!-- Detailed skill breakdown -->
+                    <div class="space-y-2">
+                      <h4 class="text-xxs font-black text-text-muted uppercase tracking-wider mb-1">Chi tiết Tiến Độ Kỹ Năng:</h4>
+                      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        @for (stat of categoryStats(); track stat.code) {
+                          <div class="bg-bg-input/20 border border-border-main/30 rounded-xl p-3 flex flex-col justify-between space-y-2 shadow-sm">
+                            <div class="flex justify-between items-start">
+                              <span class="font-black text-[10px] text-text-main">{{ stat.name }}</span>
+                              @if (stat.code === 'VOCABULARY') {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-blue-500 shrink-0"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                              } @else if (stat.code === 'GRAMMAR') {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-500 shrink-0"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                              } @else if (stat.code === 'LISTENING') {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-purple-500 shrink-0"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3Z"/></svg>
+                              } @else if (stat.code === 'READING') {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-amber-500 shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                              }
+                            </div>
+                            
+                            <div class="space-y-1">
+                              <div class="flex justify-between items-center text-[9px] font-bold">
+                                <span class="text-text-muted">{{ stat.completed }}/{{ stat.total }} bài</span>
+                                <span class="font-black" [class]="stat.colorClass">{{ stat.percent }}%</span>
+                              </div>
+                              <div class="w-full h-1.5 bg-bg-input rounded-full overflow-hidden border border-border-main/20 p-[1px]">
+                                <div
+                                  [style.width.%]="stat.percent"
+                                  class="h-full bg-gradient-to-r rounded-full transition-all duration-500"
+                                  [class]="stat.barClass"
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+
                     <!-- Compact Modules progress list with scroll -->
                     <div class="space-y-2">
-                      <h4 class="text-xxs font-black text-text-muted uppercase tracking-wider mb-2.5">Danh sách chương học:</h4>
+                      <h4 class="text-xxs font-black text-text-muted uppercase tracking-wider mb-2.5">Danh sách chương học (Bấm vào để học/ôn tập):</h4>
                       
                       <div class="space-y-2 max-h-[250px] overflow-y-auto pr-1">
                         @for (mod of roadmap()?.modules; track mod.id) {
                           <div
-                            class="flex items-center justify-between p-2.5 bg-bg-input/20 border border-border-main/30 rounded-xl text-xxs group hover:border-brand-primary/30 transition-colors"
+                            [routerLink]="mod.status !== 'LOCKED' ? ['/study', mod.id] : null"
+                            [class.cursor-pointer]="mod.status !== 'LOCKED'"
+                            [class.hover:border-brand-primary/40]="mod.status !== 'LOCKED'"
+                            [class.hover:bg-bg-input/30]="mod.status !== 'LOCKED'"
+                            [class.hover:shadow-sm]="mod.status !== 'LOCKED'"
+                            [class.opacity-60]="mod.status === 'LOCKED'"
+                            class="flex items-center justify-between p-2.5 bg-bg-input/20 border border-border-main/30 rounded-xl text-xxs group transition-all duration-200"
                           >
                             <div class="flex items-center gap-2.5 min-w-0">
                               <!-- Status Indicator Icon -->
                               @if (mod.status === 'COMPLETED') {
-                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-green-500/20 text-green-500 font-bold">✓</span>
+                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-green-500/20 text-green-500 font-bold shrink-0">✓</span>
                               } @else if (mod.status === 'IN_PROGRESS') {
-                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-primary/20 text-brand-primary font-bold animate-pulse">▶</span>
+                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-primary/20 text-brand-primary font-bold animate-pulse shrink-0">▶</span>
                               } @else {
-                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-bg-input text-text-muted font-semibold text-[8px]">🔒</span>
+                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-bg-input text-text-muted font-semibold text-[8px] shrink-0">🔒</span>
                               }
                               
                               <div class="min-w-0">
-                                <p class="font-extrabold text-text-main truncate">Chương {{ mod.orderIndex }}: {{ mod.title }}</p>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                  <p class="font-extrabold text-text-main truncate">Chương {{ mod.orderIndex }}: {{ mod.title }}</p>
+                                  <span 
+                                    class="text-[7.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0 scale-90"
+                                    [class.bg-blue-500/10]="mod.category === 'VOCABULARY'"
+                                    [class.text-blue-500]="mod.category === 'VOCABULARY'"
+                                    [class.border-blue-500/20]="mod.category === 'VOCABULARY'"
+                                    [class.bg-emerald-500/10]="mod.category === 'GRAMMAR'"
+                                    [class.text-emerald-500]="mod.category === 'GRAMMAR'"
+                                    [class.border-emerald-500/20]="mod.category === 'GRAMMAR'"
+                                    [class.bg-purple-500/10]="mod.category === 'LISTENING'"
+                                    [class.text-purple-500]="mod.category === 'LISTENING'"
+                                    [class.border-purple-500/20]="mod.category === 'LISTENING'"
+                                    [class.bg-amber-500/10]="mod.category === 'READING'"
+                                    [class.text-amber-500]="mod.category === 'READING'"
+                                    [class.border-amber-500/20]="mod.category === 'READING'"
+                                  >
+                                    {{ mod.category === 'VOCABULARY' ? 'Từ vựng' : mod.category === 'GRAMMAR' ? 'Ngữ pháp' : mod.category === 'LISTENING' ? 'Nghe hiểu' : 'Đọc hiểu' }}
+                                  </span>
+                                </div>
                                 <p class="text-[9px] text-text-muted truncate mt-0.5">{{ mod.description }}</p>
                               </div>
                             </div>
                             
-                            <span
-                              [class.text-green-500]="mod.status === 'COMPLETED'"
-                              [class.text-brand-primary]="mod.status === 'IN_PROGRESS'"
-                              [class.text-text-muted]="mod.status === 'LOCKED'"
-                              class="font-black text-[9px] uppercase tracking-wider shrink-0 bg-bg-input/40 px-2 py-0.5 rounded border border-border-main/40"
-                            >
-                              {{ mod.status === 'COMPLETED' ? 'Đã xong' : mod.status === 'IN_PROGRESS' ? 'Đang học' : 'Khóa' }}
-                            </span>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                              <span
+                                [class.text-green-500]="mod.status === 'COMPLETED'"
+                                [class.text-brand-primary]="mod.status === 'IN_PROGRESS'"
+                                [class.text-text-muted]="mod.status === 'LOCKED'"
+                                class="font-black text-[9px] uppercase tracking-wider bg-bg-input/40 px-2 py-0.5 rounded border border-border-main/40"
+                              >
+                                {{ mod.status === 'COMPLETED' ? 'Đã xong' : mod.status === 'IN_PROGRESS' ? 'Đang học' : 'Khóa' }}
+                              </span>
+                              @if (mod.status !== 'LOCKED') {
+                                <span class="text-brand-primary text-xs font-black group-hover:translate-x-0.5 transition-transform duration-200">
+                                  &rarr;
+                                </span>
+                              }
+                            </div>
                           </div>
                         }
                       </div>
@@ -669,6 +738,50 @@ export class ProfileComponent implements OnInit {
     { name: 'T7', active: false },
     { name: 'CN', active: false }
   ]);
+
+  categoryStats = computed(() => {
+    const rm = this.roadmap();
+    if (!rm || !rm.modules) return [];
+    
+    const categories = ['VOCABULARY', 'GRAMMAR', 'LISTENING', 'READING'];
+    const names: Record<string, string> = {
+      VOCABULARY: 'Từ Vựng',
+      GRAMMAR: 'Ngữ Pháp',
+      LISTENING: 'Luyện Nghe',
+      READING: 'Luyện Đọc'
+    };
+    
+    return categories.map(cat => {
+      const modulesOfCat = rm.modules.filter((m: any) => m.category === cat);
+      const total = modulesOfCat.length;
+      const completed = modulesOfCat.filter((m: any) => m.status === 'COMPLETED').length;
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+      
+      // Determine colors and icons
+      let colorClass = 'text-blue-500';
+      let barClass = 'from-blue-500 to-indigo-500';
+      if (cat === 'GRAMMAR') {
+        colorClass = 'text-emerald-500';
+        barClass = 'from-emerald-500 to-teal-500';
+      } else if (cat === 'LISTENING') {
+        colorClass = 'text-purple-500';
+        barClass = 'from-purple-500 to-pink-500';
+      } else if (cat === 'READING') {
+        colorClass = 'text-amber-500';
+        barClass = 'from-amber-500 to-orange-500';
+      }
+      
+      return {
+        code: cat,
+        name: names[cat] || cat,
+        completed,
+        total,
+        percent,
+        colorClass,
+        barClass
+      };
+    });
+  });
 
   ngOnInit(): void {
     this.loadData();

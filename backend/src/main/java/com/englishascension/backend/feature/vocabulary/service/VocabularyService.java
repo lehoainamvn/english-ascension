@@ -64,7 +64,11 @@ public class VocabularyService {
     public List<Map<String, Object>> getTopics() {
         User user = getCurrentUser();
 
-        List<LearningModule> topics            = topicRepository.findByCategoryIsNotNull();
+        List<LearningModule> topics            = new ArrayList<>(topicRepository.findByCategoryIsNotNull());
+        // Filter out non-vocabulary modules
+        topics.removeIf(t -> "GRAMMAR".equalsIgnoreCase(t.getCategory())
+                || "READING".equalsIgnoreCase(t.getCategory())
+                || "LISTENING".equalsIgnoreCase(t.getCategory()));
         List<UserProgress>   topicProgressList = progressRepository.findByUserIdAndResourceType(user.getId(), "MODULE");
         List<UserProgress>   wordProgressList  = progressRepository.findByUserIdAndResourceType(user.getId(), "FLASHCARD");
 
