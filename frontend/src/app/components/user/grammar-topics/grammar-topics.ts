@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -46,20 +46,56 @@ import { GrammarService, GrammarLesson } from '../../../services/grammar.service
           </button>
         </div>
 
-        <!-- Search bar & Stats -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
-          <div class="flex items-center w-full max-w-md bg-bg-card border border-border-main rounded-2xl px-4 py-2.5 shadow-sm">
+        <!-- Filters Bar -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center max-w-6xl mx-auto">
+          <!-- Search Input -->
+          <div class="flex items-center flex-1 max-w-md bg-bg-card border border-border-main rounded-2xl px-4 py-2.5 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search text-text-muted shrink-0 mr-2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input
               type="text"
-              [(ngModel)]="searchQuery"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
               placeholder="Tìm kiếm bài học hoặc chủ đề..."
               class="w-full bg-transparent text-text-main text-xs placeholder-slate-400 focus:outline-none"
             />
           </div>
 
-          <div class="text-[11px] font-bold text-text-muted shrink-0 self-end">
-            Đã hoàn thành: <span class="text-brand-primary font-black">{{ completedCount() }}</span> / {{ lessons().length }} chủ đề
+          <div class="flex gap-3 shrink-0 items-center">
+            <!-- Level Filter Dropdown -->
+            <div class="flex items-center gap-2 bg-bg-card border border-border-main rounded-2xl px-3 py-2 shadow-sm">
+              <span class="text-[10px] text-text-muted font-bold whitespace-nowrap">Cấp độ:</span>
+              <select
+                [ngModel]="levelFilter()"
+                (ngModelChange)="levelFilter.set($event)"
+                class="bg-transparent border-none text-text-main text-xs font-bold focus:outline-none cursor-pointer"
+              >
+                <option value="ALL">Tất cả cấp độ</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="C1">C1</option>
+              </select>
+            </div>
+
+            <!-- Status Filter Dropdown -->
+            <div class="flex items-center gap-2 bg-bg-card border border-border-main rounded-2xl px-3 py-2 shadow-sm">
+              <span class="text-[10px] text-text-muted font-bold whitespace-nowrap">Trạng thái:</span>
+              <select
+                [ngModel]="statusFilter()"
+                (ngModelChange)="statusFilter.set($event)"
+                class="bg-transparent border-none text-text-main text-xs font-bold focus:outline-none cursor-pointer"
+              >
+                <option value="ALL">Tất cả</option>
+                <option value="NOT_STARTED">Chưa học</option>
+                <option value="IN_PROGRESS">Đang học</option>
+                <option value="COMPLETED">Đã hoàn thành</option>
+              </select>
+            </div>
+
+            <div class="text-[11px] font-bold text-text-muted shrink-0 hidden md:block ml-2">
+              Đã hoàn thành: <span class="text-brand-primary font-black">{{ completedCount() }}</span> / {{ lessons().length }} chủ đề
+            </div>
           </div>
         </div>
 
@@ -74,7 +110,7 @@ import { GrammarService, GrammarLesson } from '../../../services/grammar.service
           </div>
         } @else {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @for (card of filteredLessons(); track card.id) {
+            @for (card of paginatedLessons(); track card.id) {
               <div 
                 [routerLink]="['/grammar-study', card.id]"
                 class="bg-bg-card border border-border-main rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-brand-primary/30 transition-all duration-300 flex flex-col justify-between group min-h-[150px] cursor-pointer"
@@ -125,6 +161,46 @@ import { GrammarService, GrammarLesson } from '../../../services/grammar.service
               </div>
             }
           </div>
+
+          <!-- Pagination Controls -->
+          @if (totalPages() > 1) {
+            <div class="flex items-center justify-center gap-2 pt-8">
+              <button
+                (click)="goToPage(currentPage() - 1)"
+                [disabled]="currentPage() === 1"
+                class="p-2 rounded-xl bg-bg-card border border-border-main text-text-muted hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed hover:border-brand-primary/30 transition-all cursor-pointer flex items-center justify-center shadow-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+
+              @for (page of pageNumbers(); track $index) {
+                @if (page === '...') {
+                  <span class="w-9 h-9 font-bold text-xs text-text-muted flex items-center justify-center">...</span>
+                } @else {
+                  <button
+                    (click)="goToPage(page)"
+                    [class.bg-brand-primary]="currentPage() === page"
+                    [class.text-bg-card]="currentPage() === page"
+                    [class.border-brand-primary]="currentPage() === page"
+                    [class.bg-bg-card]="currentPage() !== page"
+                    [class.text-text-muted]="currentPage() !== page"
+                    [class.hover:text-text-main]="currentPage() !== page"
+                    class="w-9 h-9 rounded-xl border border-border-main font-bold text-xs transition-all cursor-pointer shadow-sm flex items-center justify-center hover:border-brand-primary/30"
+                  >
+                    {{ page }}
+                  </button>
+                }
+              }
+
+              <button
+                (click)="goToPage(currentPage() + 1)"
+                [disabled]="currentPage() === totalPages()"
+                class="p-2 rounded-xl bg-bg-card border border-border-main text-text-muted hover:text-text-main disabled:opacity-50 disabled:cursor-not-allowed hover:border-brand-primary/30 transition-all cursor-pointer flex items-center justify-center shadow-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+          }
         }
 
       </div>
@@ -144,9 +220,24 @@ export class GrammarTopicsComponent implements OnInit {
   private readonly grammarService = inject(GrammarService);
   private readonly router = inject(Router);
 
-  searchQuery = '';
+  searchQuery = signal<string>('');
+  statusFilter = signal<string>('ALL');
+  levelFilter = signal<string>('ALL');
   lessons = signal<GrammarLesson[]>([]);
   isLoading = signal(true);
+
+  // Pagination
+  pageSize = 9;
+  currentPage = signal<number>(1);
+
+  constructor() {
+    effect(() => {
+      this.searchQuery();
+      this.levelFilter();
+      this.statusFilter();
+      untracked(() => this.currentPage.set(1));
+    });
+  }
 
   ngOnInit() {
     this.loadLessons();
@@ -167,13 +258,66 @@ export class GrammarTopicsComponent implements OnInit {
   }
 
   filteredLessons = computed(() => {
-    const query = this.searchQuery.toLowerCase().trim();
-    if (!query) return this.lessons();
-    return this.lessons().filter(l => 
-      l.title.toLowerCase().includes(query) || 
-      l.vietnameseTitle.toLowerCase().includes(query)
-    );
+    let list = this.lessons();
+    
+    // Search query filter
+    const query = this.searchQuery().toLowerCase().trim();
+    if (query) {
+      list = list.filter(l => 
+        l.title.toLowerCase().includes(query) || 
+        l.vietnameseTitle.toLowerCase().includes(query)
+      );
+    }
+
+    // Level filter
+    const level = this.levelFilter();
+    if (level !== 'ALL') {
+      list = list.filter(l => l.vietnameseTitle.toUpperCase().includes(level));
+    }
+
+    // Status filter
+    const status = this.statusFilter();
+    if (status === 'NOT_STARTED') {
+      list = list.filter(l => !l.lessonCompleted && !l.practiceCompleted);
+    } else if (status === 'IN_PROGRESS') {
+      list = list.filter(l => l.lessonCompleted && !l.practiceCompleted);
+    } else if (status === 'COMPLETED') {
+      list = list.filter(l => l.practiceCompleted);
+    }
+
+    return list;
   });
+
+  paginatedLessons = computed(() => {
+    const list = this.filteredLessons();
+    const startIndex = (this.currentPage() - 1) * this.pageSize;
+    return list.slice(startIndex, startIndex + this.pageSize);
+  });
+
+  totalPages = computed(() => {
+    return Math.ceil(this.filteredLessons().length / this.pageSize);
+  });
+
+  pageNumbers = computed<(number | string)[]>(() => {
+    const current = this.currentPage();
+    const max = this.totalPages();
+    if (max <= 7) {
+      return Array.from({ length: max }, (_, i) => i + 1);
+    }
+    if (current <= 4) {
+      return [1, 2, 3, 4, 5, '...', max];
+    }
+    if (current >= max - 3) {
+      return [1, '...', max - 4, max - 3, max - 2, max - 1, max];
+    }
+    return [1, '...', current - 1, current, current + 1, '...', max];
+  });
+
+  goToPage(page: number | string) {
+    if (typeof page === 'number' && page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
 
   completedCount = computed(() => {
     return this.lessons().filter(l => l.practiceCompleted).length;

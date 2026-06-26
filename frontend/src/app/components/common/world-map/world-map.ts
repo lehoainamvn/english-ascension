@@ -675,10 +675,12 @@ export class WorldMapComponent implements OnInit {
 
       // Add a Header divider for every 5 lessons to visually structure the map
       if (idx % 5 === 0) {
+        const startNum = idx + 1;
+        const endNum = Math.min(idx + 5, roadmap.modules.length);
         mapItems.push({
           type: 'HEADER',
           chapterNum: Math.floor(idx / 5) + 1,
-          title: `Chặng ${Math.floor(idx / 5) + 1}`,
+          title: `Bài học ${startNum} - ${endNum}`,
           description: `Rèn luyện kỹ năng và nâng cao kiến thức`
         });
       }
