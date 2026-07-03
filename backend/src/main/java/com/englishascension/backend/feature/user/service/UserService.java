@@ -1,20 +1,20 @@
 package com.englishascension.backend.feature.user.service;
 
 import com.englishascension.backend.feature.user.entity.User;
+import com.englishascension.backend.feature.user.entity.UserGameStats;
 import com.englishascension.backend.feature.user.repository.UserRepository;
 import com.englishascension.backend.feature.user.entity.Role;
 import com.englishascension.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * Business logic for user management.
- */
 @Service
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -23,7 +23,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    /** Returns the authenticated user from SecurityContext. */
     public User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
@@ -42,10 +41,21 @@ public class UserService {
     public User updateUser(Long id, Map<String, Object> fields) {
         User user = getUserById(id);
 
-        if (fields.containsKey("exp"))            user.setExp((Integer) fields.get("exp"));
-        if (fields.containsKey("level"))          user.setLevel((Integer) fields.get("level"));
-        if (fields.containsKey("coins"))          user.setCoins((Integer) fields.get("coins"));
-        if (fields.containsKey("characterTitle")) user.setCharacterTitle((String) fields.get("characterTitle"));
+        if (fields.containsKey("avatar")) {
+            user.setAvatar((String) fields.get("avatar"));
+        }
+
+        // Cập nhật stats
+        if (fields.containsKey("exp") || fields.containsKey("level") || fields.containsKey("streak")) {
+            UserGameStats stats = user.getUserGameStats();
+            if (stats == null) {
+                stats = UserGameStats.builder().user(user).build();
+                user.setUserGameStats(stats);
+            }
+            if (fields.containsKey("exp"))    stats.setExp((Integer) fields.get("exp"));
+            if (fields.containsKey("level"))  stats.setLevel((Integer) fields.get("level"));
+            if (fields.containsKey("streak")) stats.setStreak((Integer) fields.get("streak"));
+        }
 
         if (fields.containsKey("role")) {
             String roleStr = (String) fields.get("role");

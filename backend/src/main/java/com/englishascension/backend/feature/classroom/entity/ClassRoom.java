@@ -28,7 +28,7 @@ public class ClassRoom {
     @Builder.Default private List<ClassMember> members = new ArrayList<>();
 
     @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default private List<ClassQuiz> quizzes = new ArrayList<>();
+    @Builder.Default private List<ClassAssignment> assignments = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false) private LocalDateTime createdAt;
     @Column(name = "updated_at") private LocalDateTime updatedAt;

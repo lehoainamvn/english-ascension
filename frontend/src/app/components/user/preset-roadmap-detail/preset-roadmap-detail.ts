@@ -130,6 +130,7 @@ import { WorldMapComponent } from '../../common/world-map/world-map';
               [presetRoadmap]="roadmap()"
               [enrolled]="enrolled()"
               (enrollToggled)="enrolled.set(true)"
+              (backClick)="goBack()"
             ></app-world-map>
           </div>
 
@@ -250,7 +251,7 @@ export class PresetRoadmapDetailComponent implements OnInit {
       if (typeof window !== 'undefined' && window.localStorage) {
         currentProgress = localStorage.getItem(progressKey) || 'GRAMMAR';
       }
-      
+
       const queryParams: any = {};
       if (currentProgress === 'TEST') {
         queryParams.mode = 'test';

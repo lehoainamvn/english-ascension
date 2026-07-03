@@ -36,7 +36,7 @@ export interface WorldMapItem {
 
       <!-- Player Stats Bar -->
       @if (playerInfo() && !embedded) {
-        <div class="max-w-2xl w-full mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 bg-bg-card border border-border-main rounded-xl p-3 text-xs backdrop-blur-md transition-colors duration-300">
+        <div class="max-w-2xl w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-3 mb-6 bg-bg-card border border-border-main rounded-xl p-3 text-xs backdrop-blur-md transition-colors duration-300">
           <div class="flex items-center gap-2.5 pl-2">
             <div class="w-8 h-8 rounded-lg border border-border-main bg-bg-input overflow-hidden shrink-0">
               <app-character-avatar [character]="character()"></app-character-avatar>
@@ -56,13 +56,6 @@ export interface WorldMapItem {
                 [style.width.%]="(playerInfo()?.exp! / (playerInfo()?.level! * 100)) * 100"
                 class="h-full bg-gradient-to-r from-yellow-500 to-amber-500"
               ></div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 px-2 border-l border-border-main/50 justify-center md:justify-start">
-            <span class="text-base">🪙</span>
-            <div>
-              <p class="font-bold text-text-main">{{ playerInfo()?.coins }} Xu</p>
-              <p class="text-[8px] text-text-muted uppercase tracking-wider font-semibold">Tài sản</p>
             </div>
           </div>
           <div class="flex items-center gap-2 px-2 border-l border-border-main/50 justify-center md:justify-start">
@@ -161,11 +154,10 @@ export interface WorldMapItem {
                 <path
                   [attr.d]="getPathDActive()"
                   fill="none"
-                  stroke="var(--brand-accent)"
+                  class="stroke-neutral-800 dark:stroke-neutral-200 opacity-80"
                   stroke-width="3"
                   stroke-dasharray="6,6"
                   stroke-linecap="round"
-                  class="opacity-80"
                 />
               </svg>
 
@@ -206,37 +198,51 @@ export interface WorldMapItem {
                   <div
                     [style.top.px]="item.top"
                     [style.left.px]="60 + getDx(item.nodeIndex!)"
-                    class="absolute w-[240px] h-[86px] rounded-2xl flex items-center gap-3 px-3.5 py-2.5 transition-all duration-300 select-none"
+                    class="absolute w-[240px] h-[86px] rounded-[16px] flex items-center gap-3 px-3.5 py-2.5 transition-all duration-300 select-none border"
                     [class]="getSubNodeStatus(item.module, item.nodeType!) === 'COMPLETED'
-                      ? 'bg-bg-card border-2 border-green-500 shadow-[0_4px_0_rgba(34,197,94,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_0_rgba(34,197,94,0.25)] cursor-pointer'
+                      ? 'bg-bg-card border-neutral-300 dark:border-neutral-700 shadow-[0_2px_8px_rgba(0,0,0,0.05)] cursor-pointer hover:border-neutral-400'
                       : getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS'
-                      ? 'bg-bg-card border-2 border-brand-accent shadow-[0_4px_12px_rgba(59,130,246,0.18)] active-glow cursor-pointer'
-                      : 'bg-bg-card border-2 border-border-main/80 opacity-65 cursor-not-allowed'"
+                      ? 'bg-[#0F1729] dark:bg-white text-white dark:text-black border-transparent shadow-[0_4px_12px_rgba(0,0,0,0.1)] active-glow cursor-pointer'
+                      : 'bg-bg-card border-border-main/50 opacity-50 cursor-not-allowed'"
                     (click)="getSubNodeStatus(item.module, item.nodeType!) !== 'LOCKED' && clickNode(item.module, item.nodeType!, item.centerX!, item.top!, $event)"
                   >
                     <!-- Node Left Icon in dashed circle -->
                     <div 
                       class="w-12 h-12 rounded-full border-2 border-dashed flex items-center justify-center text-xl shrink-0 transition-colors"
                       [class]="getSubNodeStatus(item.module, item.nodeType!) === 'COMPLETED'
-                        ? 'border-green-500/50 bg-green-50/50 dark:bg-green-950/20'
+                        ? 'border-neutral-300 dark:border-neutral-700 bg-bg-input'
                         : getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS'
-                        ? 'border-brand-accent/50 bg-brand-accent/5 dark:bg-brand-accent/15'
+                        ? 'border-white/20 dark:border-black/10 bg-white/10 dark:bg-black/5'
                         : 'border-border-main bg-bg-main'"
                     >
                       @if (item.nodeType === 'THEORY_GRAMMAR') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open text-blue-500 shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                          [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS' ? 'text-white dark:text-black' : 'text-neutral-500 dark:text-neutral-400'"
+                          class="shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                       } @else if (item.nodeType === 'THEORY_VOCABULARY') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers text-emerald-500 shrink-0"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                          [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS' ? 'text-white dark:text-black' : 'text-neutral-500 dark:text-neutral-400'"
+                          class="shrink-0"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
                       } @else if (item.nodeType === 'THEORY_LISTENING') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headphones text-purple-500 shrink-0"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                          [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS' ? 'text-white dark:text-black' : 'text-neutral-500 dark:text-neutral-400'"
+                          class="shrink-0"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
                       } @else if (item.nodeType === 'THEORY_READING') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open text-orange-500 shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                          [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS' ? 'text-white dark:text-black' : 'text-neutral-500 dark:text-neutral-400'"
+                          class="shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                       } @else if (item.nodeType === 'THEORY_PRONUNCIATION') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-orange-500 shrink-0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                          [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS' ? 'text-white dark:text-black' : 'text-neutral-500 dark:text-neutral-400'"
+                          class="shrink-0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
                       } @else if (item.nodeType === 'BATTLE') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-swords text-rose-500 shrink-0"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="9.5 6.5 21 18 21 21 18 21 6.5 9.5"/><line x1="11" y1="5" x2="5" y2="11"/><line x1="8" y1="8" x2="4" y2="4"/><line x1="5" x2="3" y1="3" y2="5"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                          [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS' ? 'text-white dark:text-black' : 'text-neutral-500 dark:text-neutral-400'"
+                          class="shrink-0"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="9.5 6.5 21 18 21 21 18 21 6.5 9.5"/><line x1="11" y1="5" x2="5" y2="11"/><line x1="8" y1="8" x2="4" y2="4"/><line x1="5" x2="3" y1="3" y2="5"/></svg>
                       } @else if (item.nodeType === 'QUIZ') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy text-yellow-500 shrink-0"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                          [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS' ? 'text-white dark:text-black' : 'text-neutral-500 dark:text-neutral-400'"
+                          class="shrink-0"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
                       }
                     </div>
 
@@ -244,27 +250,39 @@ export interface WorldMapItem {
                     <div class="flex-1 min-w-0 pr-1">
                       <h3 
                         class="text-[11px] font-black leading-tight truncate"
-                        [class]="getSubNodeStatus(item.module, item.nodeType!) === 'LOCKED' ? 'text-text-muted' : 'text-text-main'"
+                        [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS'
+                          ? 'text-white dark:text-black'
+                          : getSubNodeStatus(item.module, item.nodeType!) === 'LOCKED'
+                          ? 'text-text-muted/60'
+                          : 'text-text-main'"
                         [title]="item.module.title"
                       >
                         {{ item.module.title }}
                       </h3>
                       <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="text-[8px] font-extrabold px-1 py-0.5 rounded bg-brand-primary/10 text-brand-primary shrink-0">
+                        <span 
+                          class="text-[8px] font-extrabold px-1 py-0.5 rounded shrink-0 border"
+                          [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS'
+                            ? 'bg-white/20 border-white/20 text-white dark:text-black dark:bg-black/10 dark:border-black/10'
+                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700'"
+                        >
                           {{ getEstimatedToeic(item.module) }}
                         </span>
-                        <p class="text-[9px] text-text-muted leading-normal truncate flex-1">
+                        <p class="text-[9px] leading-normal truncate flex-1"
+                           [class]="getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS'
+                             ? 'text-neutral-200 dark:text-neutral-600'
+                             : 'text-text-muted'">
                           {{ item.module.description || getNodeDesc(item.nodeType!) }}
                         </p>
                       </div>
                     </div>
 
                     <!-- Node Status Indicator -->
-                    <div class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full text-text-main">
+                    <div class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full">
                       @if (getSubNodeStatus(item.module, item.nodeType!) === 'COMPLETED') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-500"><polyline points="20 6 9 17 4 12"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-neutral-500 dark:text-neutral-400"><polyline points="20 6 9 17 4 12"/></svg>
                       } @else if (getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS') {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target text-brand-accent animate-pulse"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                        <div class="w-2.5 h-2.5 rounded-full bg-white dark:bg-black"></div>
                       } @else {
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock text-text-muted opacity-60"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                       }
@@ -398,17 +416,21 @@ export interface WorldMapItem {
                   <div class="relative group">
                     <!-- Timeline Dot -->
                     <div 
-                      [class.bg-green-500]="mod.status === 'COMPLETED'"
-                      [class.bg-brand-primary]="mod.status === 'IN_PROGRESS'"
+                      [class.bg-neutral-400]="mod.status === 'COMPLETED'"
+                      [class.bg-black]="mod.status === 'IN_PROGRESS'"
+                      [class.dark:bg-white]="mod.status === 'IN_PROGRESS'"
                       [class.bg-bg-input]="mod.status === 'LOCKED'"
-                      [class.border-brand-primary]="mod.status === 'IN_PROGRESS'"
+                      [class.border-black]="mod.status === 'IN_PROGRESS'"
+                      [class.dark:border-white]="mod.status === 'IN_PROGRESS'"
                       class="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full border-2 border-bg-card transition-all"
                     ></div>
 
                     <!-- Module Info Card -->
                     <div 
-                      [class.border-brand-primary/20]="mod.status === 'IN_PROGRESS'"
-                      [class.bg-brand-primary/5]="mod.status === 'IN_PROGRESS'"
+                      [class.border-black/20]="mod.status === 'IN_PROGRESS'"
+                      [class.dark:border-white/20]="mod.status === 'IN_PROGRESS'"
+                      [class.bg-black/5]="mod.status === 'IN_PROGRESS'"
+                      [class.dark:bg-white/5]="mod.status === 'IN_PROGRESS'"
                       class="bg-bg-input/20 border border-border-main/50 rounded-xl p-3.5 space-y-2 transition-all hover:border-border-main"
                     >
                       <div class="flex justify-between items-start gap-2">
@@ -418,9 +440,9 @@ export interface WorldMapItem {
                         
                         <!-- Status tag -->
                         @if (mod.status === 'COMPLETED') {
-                          <span class="text-[8px] bg-green-500/10 text-green-500 border border-green-500/20 px-1.5 py-0.5 rounded font-black uppercase shrink-0">Đã xong</span>
+                          <span class="text-[8px] bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 px-1.5 py-0.5 rounded font-black uppercase shrink-0">Đã xong</span>
                         } @else if (mod.status === 'IN_PROGRESS') {
-                          <span class="text-[8px] bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-1.5 py-0.5 rounded font-black uppercase shrink-0 animate-pulse">Học tiếp</span>
+                          <span class="text-[8px] bg-black dark:bg-white text-white dark:text-black px-1.5 py-0.5 rounded font-black uppercase shrink-0 animate-pulse">Học tiếp</span>
                         } @else {
                           <span class="text-[8px] bg-bg-input text-text-muted border border-border-main px-1.5 py-0.5 rounded font-black uppercase shrink-0">Khóa</span>
                         }
@@ -597,6 +619,15 @@ export class WorldMapComponent implements OnInit {
       const mapItems: WorldMapItem[] = [];
       let nodeCount = 0;
 
+      // Map module category → node type (1 node per module based on its skill)
+      const categoryToNodeType: Record<string, 'THEORY_GRAMMAR' | 'THEORY_VOCABULARY' | 'THEORY_LISTENING' | 'THEORY_READING' | 'THEORY_PRONUNCIATION'> = {
+        'VOCABULARY': 'THEORY_VOCABULARY',
+        'GRAMMAR': 'THEORY_GRAMMAR',
+        'READING': 'THEORY_READING',
+        'LISTENING': 'THEORY_LISTENING',
+        'PRONUNCIATION': 'THEORY_PRONUNCIATION',
+      };
+
       for (let i = 0; i < roadmap.modules.length; i++) {
         const mod = roadmap.modules[i];
         const partNum = i + 1;
@@ -608,31 +639,16 @@ export class WorldMapComponent implements OnInit {
           description: mod.description
         });
 
-        const subTypes: ('THEORY_GRAMMAR' | 'THEORY_VOCABULARY' | 'THEORY_LISTENING' | 'THEORY_PRONUNCIATION' | 'QUIZ')[] = [
-          'THEORY_GRAMMAR',
-          'THEORY_VOCABULARY',
-          'THEORY_LISTENING',
-          'THEORY_PRONUNCIATION',
-          'QUIZ'
-        ];
+        // Only 1 node per module, matched to the module's own category
+        const cat = (mod.category || 'VOCABULARY').toUpperCase();
+        const nodeType = categoryToNodeType[cat] || 'THEORY_VOCABULARY';
 
-        const subLabels = [
-          'Lý thuyết ngữ pháp',
-          'Học từ vựng flashcard',
-          'Luyện nghe hiểu hội thoại',
-          'Luyện phát âm AI',
-          'Bài test qua màn'
-        ];
-
-        for (let j = 0; j < subTypes.length; j++) {
-          mapItems.push({
-            type: 'NODE',
-            module: mod,
-            nodeIndex: nodeCount++,
-            nodeType: subTypes[j],
-            title: subLabels[j]
-          });
-        }
+        mapItems.push({
+          type: 'NODE',
+          module: mod,
+          nodeIndex: nodeCount++,
+          nodeType,
+        });
       }
 
       let currentY = 15;
@@ -737,11 +753,11 @@ export class WorldMapComponent implements OnInit {
   scrollToActiveNode(): void {
     setTimeout(() => {
       if (!this.scrollContainer) return;
-      
+
       const activeNode = this.items().find(
         item => item.type === 'NODE' && this.getSubNodeStatus(item.module, item.nodeType!) === 'IN_PROGRESS'
       );
-      
+
       if (activeNode && activeNode.top != null) {
         const containerHeight = this.scrollContainer.nativeElement.clientHeight || 580;
         const targetScroll = activeNode.top - (containerHeight / 2) + 43;
@@ -786,36 +802,12 @@ export class WorldMapComponent implements OnInit {
 
   getSubNodeStatus(module: any, nodeType: string): 'COMPLETED' | 'IN_PROGRESS' | 'LOCKED' {
     if (this.isPreset) {
+      // For preset roadmap (1 node per module), map module status directly
       if (module.status === 'COMPLETED') return 'COMPLETED';
-      if (module.status === 'LOCKED') return 'LOCKED';
-      
-      const progressKey = `progress_module_${module.id}`;
-      let currentProgress = 'GRAMMAR';
-      if (typeof window !== 'undefined' && window.localStorage) {
-        currentProgress = localStorage.getItem(progressKey) || 'GRAMMAR';
-      }
-      
-      const order = ['THEORY_GRAMMAR', 'THEORY_VOCABULARY', 'THEORY_LISTENING', 'THEORY_PRONUNCIATION', 'QUIZ'];
-      const progressMap: Record<string, string> = {
-        'GRAMMAR': 'THEORY_GRAMMAR',
-        'VOCABULARY': 'THEORY_VOCABULARY',
-        'LISTENING': 'THEORY_LISTENING',
-        'PRONUNCIATION': 'THEORY_PRONUNCIATION',
-        'TEST': 'QUIZ'
-      };
-      const currentProgressType = progressMap[currentProgress] || 'THEORY_GRAMMAR';
-      
-      const orderIdx = order.indexOf(currentProgressType);
-      const itemIdx = order.indexOf(nodeType);
-      
-      if (itemIdx < orderIdx) {
-        return 'COMPLETED';
-      } else if (itemIdx === orderIdx) {
-        return 'IN_PROGRESS';
-      } else {
-        return 'LOCKED';
-      }
+      if (module.status === 'IN_PROGRESS') return 'IN_PROGRESS';
+      return 'LOCKED';
     }
+    // For AI roadmap, use lesson-level status from backend
     return module?.status || 'LOCKED';
   }
 
@@ -870,27 +862,27 @@ export class WorldMapComponent implements OnInit {
   }
 
   getNodeEmoji(type: string): string {
-    const map: any = { 
-      THEORY_GRAMMAR: '📘', 
-      THEORY_VOCABULARY: '📚', 
-      THEORY_LISTENING: '🎧', 
+    const map: any = {
+      THEORY_GRAMMAR: '📘',
+      THEORY_VOCABULARY: '📚',
+      THEORY_LISTENING: '🎧',
       THEORY_READING: '📖',
-      THEORY_PRONUNCIATION: '🗣️', 
-      BATTLE: '⚔️', 
-      QUIZ: '🏆' 
+      THEORY_PRONUNCIATION: '🗣️',
+      BATTLE: '⚔️',
+      QUIZ: '🏆'
     };
     return map[type] ?? '📘';
   }
 
   getNodeTitle(type: string): string {
-    const map: any = { 
-      THEORY_GRAMMAR: 'Lý thuyết ngữ pháp', 
-      THEORY_VOCABULARY: 'Từ vựng flashcard', 
-      THEORY_LISTENING: 'Luyện nghe hiểu', 
+    const map: any = {
+      THEORY_GRAMMAR: 'Lý thuyết ngữ pháp',
+      THEORY_VOCABULARY: 'Từ vựng flashcard',
+      THEORY_LISTENING: 'Luyện nghe hiểu',
       THEORY_READING: 'Luyện đọc hiểu',
-      THEORY_PRONUNCIATION: 'Luyện phát âm AI', 
-      BATTLE: 'Quyết đấu Từ vựng', 
-      QUIZ: 'Bài Kiểm Tra Chặng' 
+      THEORY_PRONUNCIATION: 'Luyện phát âm AI',
+      BATTLE: 'Quyết đấu Từ vựng',
+      QUIZ: 'Bài Kiểm Tra Chặng'
     };
     return map[type] ?? '';
   }
@@ -923,34 +915,29 @@ export class WorldMapComponent implements OnInit {
 
   clickNode(mod: any, type: string, x: number, y: number, event: MouseEvent): void {
     event.stopPropagation();
-    
+
+    // Map nodeType → tab param used by study component
+    const nodeTypeToTab: Record<string, string> = {
+      'THEORY_GRAMMAR': 'grammar',
+      'THEORY_VOCABULARY': 'vocabulary',
+      'THEORY_LISTENING': 'listening',
+      'THEORY_READING': 'listening',    // Reading uses the same layout as Listening
+      'THEORY_PRONUNCIATION': 'pronunciation',
+      'QUIZ': 'test',
+    };
+
     let estimatedToeic = this.getEstimatedToeic(mod);
-    let title = this.isPreset ? this.getNodeTitle(type) : mod.title;
-    let description = this.isPreset ? this.getNodeDesc(type) : (mod.description || this.getNodeDesc(type));
+    let title = mod.title || this.getNodeTitle(type);
+    let description = mod.description || this.getNodeDesc(type);
     let link = ['/study', mod.id];
     let queryParams: any = { mode: 'study' };
 
-    if (this.isPreset) {
-      const typeMapRev: Record<string, string> = {
-        'THEORY_GRAMMAR': 'GRAMMAR',
-        'THEORY_VOCABULARY': 'VOCABULARY',
-        'THEORY_LISTENING': 'LISTENING',
-        'THEORY_PRONUNCIATION': 'PRONUNCIATION',
-        'QUIZ': 'TEST'
-      };
-      const subType = typeMapRev[type] || 'GRAMMAR';
-      if (subType === 'TEST') {
-        queryParams.mode = 'test';
-      } else {
-        queryParams.tab = subType.toLowerCase();
-        queryParams.mode = 'study';
-      }
-
-      const order = ['GRAMMAR', 'VOCABULARY', 'LISTENING', 'PRONUNCIATION', 'TEST'];
-      const idx = order.indexOf(subType);
-      if (idx !== -1 && idx < order.length - 1) {
-        queryParams.next = order[idx + 1];
-      }
+    const tab = nodeTypeToTab[type] || 'grammar';
+    if (tab === 'test') {
+      queryParams.mode = 'test';
+    } else {
+      queryParams.tab = tab;
+      queryParams.mode = 'study';
     }
 
     const subNodeStatus = this.getSubNodeStatus(mod, type);

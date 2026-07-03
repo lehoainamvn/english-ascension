@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { GrammarService, GrammarLesson, GrammarQuestion, RewardResult } from '../../../services/grammar.service';
 import { UserWordService, UserWord } from '../../../services/user-word.service';
 import { ToastService } from '../../../services/toast.service';
+import { TtsService } from '../../../services/tts.service';
 
 
 @Component({
@@ -26,8 +27,8 @@ import { ToastService } from '../../../services/toast.service';
             <h2 class="text-lg font-black tracking-tight bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent uppercase">
               HỌC NGỮ PHÁP
             </h2>
-            <span class="text-[9px] bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded font-extrabold uppercase tracking-wider">
-              TOEIC
+            <span class="text-[9px] bg-bg-input text-text-muted border border-border-main/50 px-2 py-0.5 rounded font-extrabold uppercase tracking-wider">
+              Level {{ lesson()?.level || 'A1' }}
             </span>
           </div>
           <div class="flex items-center gap-3">
@@ -132,7 +133,6 @@ import { ToastService } from '../../../services/toast.service';
                     class="w-full sm:w-auto bg-brand-primary hover:opacity-90 text-bg-main font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm shrink-0 flex items-center gap-1.5"
                   >
                     Đã học xong
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gift"><polyline points="20 12 20 22 4 22 4 12"/><rect width="22" height="5" x="1" y="7" rx="2" ry="2"/><line x1="12" x2="12" y1="22" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
                   </button>
                 } @else {
                   <div class="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto items-stretch sm:items-center shrink-0">
@@ -187,9 +187,16 @@ import { ToastService } from '../../../services/toast.service';
                   @for (q of questions; track q.id; let i = $index) {
                     <div class="p-4 bg-bg-input/60 border border-border-main rounded-xl space-y-4 relative">
                       <div class="flex justify-between items-start pr-8">
-                        <h4 class="text-xs font-bold text-text-main leading-relaxed">
+                        <h4 class="text-xs font-bold text-text-main leading-relaxed flex-1">
                           Câu {{ i + 1 }}: {{ q.questionText }}
                         </h4>
+                        <button
+                          (click)="tts.speak(q.questionText)"
+                          class="shrink-0 w-7 h-7 rounded-lg bg-bg-input border border-border-main hover:bg-brand-primary hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                          title="Nghe câu hỏi"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                        </button>
                         <button
                           (click)="toggleSaveGrammarQuestion($event, q)"
                           class="absolute top-4 right-4 w-7 h-7 rounded-full bg-bg-card hover:bg-bg-input/60 border border-border-main flex items-center justify-center transition-all cursor-pointer shadow-sm"
@@ -287,8 +294,7 @@ import { ToastService } from '../../../services/toast.service';
                     [disabled]="!allQuestionsAnswered()"
                     class="w-full bg-brand-primary text-bg-main font-bold py-3.5 rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 cursor-pointer text-xs flex items-center justify-center gap-2"
                   >
-                    Nộp bài & Xem kết quả
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-checks"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                    Nộp bài
                   </button>
                 </div>
               </div>
@@ -515,6 +521,7 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly userWordService = inject(UserWordService);
   private readonly toastService = inject(ToastService);
+  readonly tts = inject(TtsService);
 
   isRoadmap = false;
   roadmapId: number | null = null;
@@ -575,8 +582,27 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
 
         // Fetch questions
         this.grammarService.getQuestions(this.lessonId).subscribe({
-          next: (questions) => {
-            this.questions = questions;
+          next: (questions: any[]) => {
+            this.questions = questions.map((q: any) => {
+              const optA = q.options?.find((o: any) => o.optionKey === 'A')?.optionValue || '';
+              const optB = q.options?.find((o: any) => o.optionKey === 'B')?.optionValue || '';
+              const optC = q.options?.find((o: any) => o.optionKey === 'C')?.optionValue || '';
+              const optD = q.options?.find((o: any) => o.optionKey === 'D')?.optionValue || '';
+              
+              const correctOpt = q.options?.find((o: any) => o.correct === true || o.isCorrect === true)?.optionKey || 'A';
+              
+              return {
+                id: q.id,
+                questionText: q.questionText,
+                type: 'MULTIPLE_CHOICE',
+                optionA: optA,
+                optionB: optB,
+                optionC: optC,
+                optionD: optD,
+                correctAnswer: correctOpt,
+                explanation: q.explanation || ''
+              };
+            });
             this.isLoading.set(false);
           },
           error: (err) => {
@@ -615,7 +641,7 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
     if (this.lessonCompleted()) {
       this.activeTab.set('practice');
     } else {
-      alert('Vui lòng hoàn thành phần đọc lý thuyết bài học và nhận thưởng trước để mở khóa luyện tập.');
+      this.toastService.warning('Vui lòng hoàn thành phần đọc lý thuyết bài học và nhận thưởng trước để mở khóa luyện tập.');
     }
   }
 
@@ -857,5 +883,10 @@ export class GrammarStudyComponent implements OnInit, OnDestroy {
         }
       });
     }, 800);
+  }
+
+  /** Phát âm đoạn văn bản tiếng Anh — dùng Web Speech API */
+  speakText(text: string): void {
+    this.tts.speak(text);
   }
 }

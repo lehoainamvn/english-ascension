@@ -7,6 +7,7 @@ export interface GrammarLesson {
   id: number;
   title: string;
   vietnameseTitle: string;
+  level: any;
   questionsCount: number;
   theoryContent?: string;
   xpRewardLesson: number;

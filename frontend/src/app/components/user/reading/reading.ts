@@ -18,16 +18,7 @@ import { ReadingService, ReadingArticle } from '../../../services/reading.servic
         
         <!-- Header -->
         <div class="text-center space-y-2 max-w-2xl mx-auto">
-          <div class="flex items-center justify-center gap-2 select-none shrink-0 font-bold text-xs">
-            <span class="bg-brand-primary text-bg-card px-3 py-1 rounded-xl shadow-sm flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Học
-            </span>
-            <span class="bg-bg-input text-text-muted border border-border-main px-3 py-1 rounded-xl flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart shrink-0"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
-              Tiến độ
-            </span>
-          </div>
+          <!-- Removed progress tabs -->
           <h1 class="text-2xl md:text-4xl font-black tracking-tight text-text-main mt-4">
             Luyện đọc <span class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent">TOEIC Part 7 song ngữ</span>
           </h1>
@@ -60,8 +51,11 @@ import { ReadingService, ReadingArticle } from '../../../services/reading.servic
                 class="bg-transparent border-none text-text-main text-xs font-bold focus:outline-none cursor-pointer"
               >
                 <option value="ALL">Tất cả cấp độ</option>
-                <option value="1">Level 1</option>
-                <option value="2">Level 2</option>
+                <option value="A1">Level A1</option>
+                <option value="A2">Level A2</option>
+                <option value="B1">Level B1</option>
+                <option value="B2">Level B2</option>
+                <option value="C1">Level C1</option>
               </select>
             </div>
 
@@ -75,9 +69,22 @@ import { ReadingService, ReadingArticle } from '../../../services/reading.servic
               >
                 <option value="ALL">Tất cả</option>
                 <option value="NOT_STARTED">Chưa học</option>
-                <option value="COMPLETED">Đã hoàn thành</option>
+                <option value="IN_PROGRESS">Đang học</option>
+                <option value="COMPLETED">Đã học</option>
               </select>
             </div>
+          </div>
+        </div>
+
+        <!-- Result count -->
+        <div class="flex justify-between items-center text-[11px] text-text-muted font-bold -mt-4">
+          <div>
+            Hiển thị {{ filteredArticles().length }} chủ đề
+            @if (levelFilter() !== 'ALL') { · cấp <strong>{{ levelFilter() }}</strong> }
+            @if (searchQuery()) { · tìm "<strong>{{ searchQuery() }}</strong>" }
+          </div>
+          <div>
+            Đã hoàn thành: <span class="text-brand-primary">{{ getCompletedArticlesCount() }}</span> / {{ articles().length }} chủ đề
           </div>
         </div>
 
@@ -100,20 +107,25 @@ import { ReadingService, ReadingArticle } from '../../../services/reading.servic
                 <!-- Top Header -->
                 <div class="space-y-3">
                   <div class="flex justify-between items-center">
-                    <span 
-                      [class.bg-green-500/10]="topic.level === 1"
-                      [class.text-green-500]="topic.level === 1"
-                      [class.bg-brand-secondary/10]="topic.level === 2"
-                      [class.text-brand-secondary]="topic.level === 2"
-                      class="text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide"
-                    >
+                    <span class="text-[9px] font-extrabold px-2 py-0.5 rounded bg-bg-input text-text-muted border border-border-main/50 uppercase tracking-wide">
                       Level {{ topic.level }}
                     </span>
-                    @if (topic.isCompleted) {
-                      <span class="text-[9px] font-extrabold text-green-500 flex items-center gap-0.5">
-                        ✓ Đã đọc xong
-                      </span>
-                    }
+                    <span 
+                      [class.bg-green-500/10]="topic.practiceCompleted"
+                      [class.text-green-500]="topic.practiceCompleted"
+                      [class.border-green-500/20]="topic.practiceCompleted"
+                      
+                      [class.bg-amber-500/10]="topic.articleCompleted && !topic.practiceCompleted"
+                      [class.text-amber-500]="topic.articleCompleted && !topic.practiceCompleted"
+                      [class.border-amber-500/20]="topic.articleCompleted && !topic.practiceCompleted"
+                      
+                      [class.bg-bg-input]="!topic.articleCompleted && !topic.practiceCompleted"
+                      [class.text-text-muted]="!topic.articleCompleted && !topic.practiceCompleted"
+                      [class.border-border-main]="!topic.articleCompleted && !topic.practiceCompleted"
+                      class="text-[9px] font-bold px-2 py-0.5 rounded-full border shrink-0 uppercase tracking-wide"
+                    >
+                      {{ topic.practiceCompleted ? 'Đã học' : (topic.articleCompleted ? 'Đang học' : 'Chưa học') }}
+                    </span>
                   </div>
                   
                   <h2 class="text-sm font-black text-text-main group-hover:text-brand-primary transition-colors">
@@ -128,7 +140,7 @@ import { ReadingService, ReadingArticle } from '../../../services/reading.servic
                 <!-- Footer & Action -->
                 <div class="border-t border-border-main/40 pt-4 mt-6 flex justify-between items-center">
                   <span class="text-[10px] text-text-muted font-bold">
-                    {{ topic.level === 1 ? 'Cơ bản' : 'Nâng cao' }}
+                    {{ isBasicLevel(topic.level) ? 'Cơ bản' : 'Nâng cao' }}
                   </span>
 
                   <a
@@ -217,6 +229,12 @@ export class ReadingComponent implements OnInit {
 
   articles = signal<ReadingArticle[]>([]);
   isLoading = signal(true);
+
+  isBasicLevel(lvl: any): boolean {
+    if (!lvl) return true;
+    const l = String(lvl).toLowerCase().trim();
+    return l === 'a1' || l === 'a2' || l === '1' || l === 'basic';
+  }
   
   searchQuery = signal<string>('');
   statusFilter = signal<string>('ALL');
@@ -259,8 +277,7 @@ export class ReadingComponent implements OnInit {
     // Level filter
     const level = this.levelFilter();
     if (level !== 'ALL') {
-      const lvlNum = parseInt(level, 10);
-      list = list.filter(a => a.level === lvlNum);
+      list = list.filter(a => a.level && String(a.level).toUpperCase().trim() === level.toUpperCase().trim());
     }
 
     // Search filter
@@ -272,9 +289,11 @@ export class ReadingComponent implements OnInit {
     // Status filter
     const status = this.statusFilter();
     if (status === 'NOT_STARTED') {
-      list = list.filter(a => !a.isCompleted);
+      list = list.filter(a => !a.articleCompleted && !a.practiceCompleted);
+    } else if (status === 'IN_PROGRESS') {
+      list = list.filter(a => a.articleCompleted && !a.practiceCompleted);
     } else if (status === 'COMPLETED') {
-      list = list.filter(a => a.isCompleted);
+      list = list.filter(a => a.practiceCompleted);
     }
 
     return list;
@@ -309,5 +328,9 @@ export class ReadingComponent implements OnInit {
     if (typeof page === 'number' && page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
     }
+  }
+
+  getCompletedArticlesCount() {
+    return this.articles().filter(a => a.practiceCompleted).length;
   }
 }

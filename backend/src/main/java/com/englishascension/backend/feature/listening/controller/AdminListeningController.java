@@ -1,13 +1,20 @@
 package com.englishascension.backend.feature.listening.controller;
 
+import com.englishascension.backend.feature.roadmap.entity.LearningModule;
+import com.englishascension.backend.feature.roadmap.entity.Lesson;
+import com.englishascension.backend.feature.roadmap.entity.LessonContent;
+import com.englishascension.backend.feature.roadmap.entity.LessonType;
+import com.englishascension.backend.feature.roadmap.repository.LearningModuleRepository;
+import com.englishascension.backend.feature.roadmap.repository.LessonRepository;
 import com.englishascension.backend.feature.study.entity.Question;
+import com.englishascension.backend.feature.study.entity.QuestionOption;
 import com.englishascension.backend.feature.study.repository.QuestionRepository;
-import com.englishascension.backend.feature.study.entity.StudyContent;
-import com.englishascension.backend.feature.study.repository.StudyContentRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,151 +24,185 @@ import java.util.Map;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminListeningController {
 
-    private final StudyContentRepository topicRepository;
+    private final LessonRepository lessonRepository;
+    private final LearningModuleRepository moduleRepository;
     private final QuestionRepository questionRepository;
 
-    public AdminListeningController(StudyContentRepository topicRepository, QuestionRepository questionRepository) {
-        this.topicRepository = topicRepository;
+    public AdminListeningController(LessonRepository lessonRepository, 
+                                    LearningModuleRepository moduleRepository,
+                                    QuestionRepository questionRepository) {
+        this.lessonRepository = lessonRepository;
+        this.moduleRepository = moduleRepository;
         this.questionRepository = questionRepository;
     }
 
-    /** GET /api/admin/listening/topics - Danh sách các bài nghe */
+    private LearningModule getOrCreateModuleForLevel(String level) {
+        String lvl = level != null ? level.toUpperCase().trim() : "A1";
+        Long modId;
+        switch (lvl) {
+            case "A2" -> modId = 1008L;
+            case "B1" -> modId = 1012L;
+            case "B2" -> modId = 1016L;
+            case "C1" -> modId = 1020L;
+            default -> modId = 1004L;
+        }
+        return moduleRepository.findById(modId).orElse(null);
+    }
+
     @GetMapping("/topics")
-    public ResponseEntity<List<StudyContent>> getTopics() {
-        List<StudyContent> topics = topicRepository.findByType("LISTENING");
+    public ResponseEntity<List<Lesson>> getTopics() {
+        List<Lesson> topics = lessonRepository.findByType(LessonType.LISTENING);
         return ResponseEntity.ok(topics);
     }
 
-    /** POST /api/admin/listening/topics - Tạo bài luyện nghe mới */
     @PostMapping("/topics")
-    public ResponseEntity<StudyContent> createTopic(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Lesson> createTopic(@RequestBody Map<String, String> request) {
         String title = request.get("title");
-        String category = request.get("category"); // ví dụ: "Listening Test 1"
+        String category = request.get("category"); // Level: A1, A2...
         String description = request.get("description");
 
-        StudyContent topic = StudyContent.builder()
+        LearningModule module = getOrCreateModuleForLevel(category);
+        String slug = "listening-" + (category != null ? category.toLowerCase() : "a1") + "-" + title.toLowerCase().replace(" ", "-");
+
+        Lesson lesson = Lesson.builder()
                 .title(title)
-                .category(category != null ? category : "LISTENING")
-                .description(description != null ? description : "")
-                .type("LISTENING")
-                .questionsCount(0)
+                .slug(slug)
+                .module(module)
+                .type(LessonType.LISTENING)
+                .level(category != null ? category : "A1")
+                .orderIndex(1)
+                .difficultyScore(1.0)
+                .topic(title)
                 .build();
 
-        StudyContent saved = topicRepository.save(topic);
-        return ResponseEntity.ok(saved);
+        lesson = lessonRepository.save(lesson);
+
+        LessonContent content = LessonContent.builder()
+                .lesson(lesson)
+                .bodyText(description != null ? description : "")
+                .durationSeconds(900)
+                .build();
+        lesson.setLessonContent(content);
+        lessonRepository.save(lesson);
+
+        return ResponseEntity.ok(lesson);
     }
 
-    /** PUT /api/admin/listening/topics/{id} - Cập nhật bài luyện nghe */
     @PutMapping("/topics/{id}")
-    public ResponseEntity<StudyContent> updateTopic(@PathVariable Long id, @RequestBody Map<String, String> request) {
-        StudyContent topic = topicRepository.findById(id).orElse(null);
-        if (topic == null || !"LISTENING".equals(topic.getType())) {
+    public ResponseEntity<Lesson> updateTopic(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        Lesson lesson = lessonRepository.findById(id).orElse(null);
+        if (lesson == null) {
             return ResponseEntity.notFound().build();
         }
 
-        if (request.containsKey("title")) topic.setTitle(request.get("title"));
-        if (request.containsKey("category")) topic.setCategory(request.get("category"));
-        if (request.containsKey("description")) topic.setDescription(request.get("description"));
+        if (request.containsKey("title")) {
+            lesson.setTitle(request.get("title"));
+            lesson.setTopic(request.get("title"));
+        }
+        if (request.containsKey("category")) {
+            lesson.setLevel(request.get("category"));
+            lesson.setModule(getOrCreateModuleForLevel(request.get("category")));
+        }
+        if (request.containsKey("description")) {
+            LessonContent content = lesson.getLessonContent();
+            if (content == null) {
+                content = LessonContent.builder().lesson(lesson).build();
+            }
+            content.setBodyText(request.get("description"));
+            lesson.setLessonContent(content);
+        }
 
-        StudyContent updated = topicRepository.save(topic);
+        Lesson updated = lessonRepository.save(lesson);
         return ResponseEntity.ok(updated);
     }
 
-    /** DELETE /api/admin/listening/topics/{id} - Xóa bài luyện nghe và câu hỏi đi kèm */
     @DeleteMapping("/topics/{id}")
     public ResponseEntity<?> deleteTopic(@PathVariable Long id) {
-        StudyContent topic = topicRepository.findById(id).orElse(null);
-        if (topic == null || !"LISTENING".equals(topic.getType())) {
+        Lesson lesson = lessonRepository.findById(id).orElse(null);
+        if (lesson == null) {
             return ResponseEntity.notFound().build();
         }
 
-        // Xóa câu hỏi nghe liên quan
-        List<Question> questions = questionRepository.findBySourceTypeAndParentId("LISTENING", id);
-        questionRepository.deleteAll(questions);
-
-        topicRepository.delete(topic);
-        return ResponseEntity.ok(Map.of("message", "Deleted listening topic and questions successfully"));
+        lessonRepository.delete(lesson);
+        return ResponseEntity.ok(Map.of("message", "Deleted listening topic successfully"));
     }
 
-    /** GET /api/admin/listening/topics/{topicId}/questions - Lấy danh sách câu hỏi nghe của bài học */
     @GetMapping("/topics/{topicId}/questions")
-    public ResponseEntity<List<Question>> getTopicQuestions(@PathVariable Long topicId) {
-        List<Question> questions = questionRepository.findBySourceTypeAndParentId("LISTENING", topicId);
-        return ResponseEntity.ok(questions);
+    public ResponseEntity<?> getTopicQuestions(@PathVariable Long topicId) {
+        List<Question> questions = questionRepository.findByLessonId(topicId);
+        List<Map<String, Object>> response = questions.stream().map(q -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", q.getId());
+            map.put("questionText", q.getQuestionText());
+            map.put("explanation", q.getExplanation());
+            
+            map.put("optionA", "");
+            map.put("optionB", "");
+            map.put("optionC", "");
+            map.put("optionD", "");
+            String correct = "A";
+            for (QuestionOption opt : q.getOptions()) {
+                if ("A".equalsIgnoreCase(opt.getOptionKey())) map.put("optionA", opt.getOptionValue());
+                if ("B".equalsIgnoreCase(opt.getOptionKey())) map.put("optionB", opt.getOptionValue());
+                if ("C".equalsIgnoreCase(opt.getOptionKey())) map.put("optionC", opt.getOptionValue());
+                if ("D".equalsIgnoreCase(opt.getOptionKey())) map.put("optionD", opt.getOptionValue());
+                if (opt.isCorrect()) {
+                    correct = opt.getOptionKey();
+                }
+            }
+            map.put("correctAnswer", correct);
+            return map;
+        }).toList();
+        return ResponseEntity.ok(response);
     }
 
-    /** POST /api/admin/listening/topics/{topicId}/questions - Thêm câu hỏi nghe mới */
     @PostMapping("/topics/{topicId}/questions")
-    public ResponseEntity<Question> createQuestion(@PathVariable Long topicId, @RequestBody Map<String, Object> request) {
-        StudyContent topic = topicRepository.findById(topicId).orElse(null);
-        if (topic == null) {
+    public ResponseEntity<?> createQuestion(@PathVariable Long topicId, @RequestBody Map<String, Object> request) {
+        Lesson lesson = lessonRepository.findById(topicId).orElse(null);
+        if (lesson == null) {
             return ResponseEntity.notFound().build();
         }
-
-        @SuppressWarnings("unchecked")
-        List<String> options = (List<String>) request.get("options");
-        String optA = (options != null && options.size() > 0) ? options.get(0) : "";
-        String optB = (options != null && options.size() > 1) ? options.get(1) : "";
-        String optC = (options != null && options.size() > 2) ? options.get(2) : "";
-        String optD = (options != null && options.size() > 3) ? options.get(3) : "";
 
         Question question = Question.builder()
-                .parentId(topicId)
-                .sourceType("LISTENING")
-                .questionNumber(request.get("questionNumber") != null ? (Integer) request.get("questionNumber") : 1)
+                .lesson(lesson)
+                .sourceType("ROADMAP_QUIZ")
                 .questionText((String) request.get("questionText"))
-                .optionA(optA)
-                .optionB(optB)
-                .optionC(optC)
-                .optionD(optD)
-                .correctOption((String) request.get("correctOption"))
-                .correctAnswer((String) request.get("correctAnswer"))
-                .explanation((String) request.get("explanation")) // Có thể chứa dịch nghĩa/kịch bản hội thoại
-                .audioUrl((String) request.get("audioUrl")) // Đường dẫn file âm thanh/audio
-                .difficulty((String) request.get("difficulty")) // Dùng difficulty để lưu tên Section/Part (ví dụ: "Part 1: Photo Description")
+                .explanation((String) request.get("explanation"))
+                .difficulty(lesson.getLevel())
                 .build();
 
-        Question saved = questionRepository.save(question);
+        @SuppressWarnings("unchecked")
+        List<String> optionsList = (List<String>) request.get("options");
+        String correct = (String) request.get("correctAnswer");
+        if (correct == null) correct = "A";
 
-        // Cập nhật số câu hỏi trong bài
-        topic.setQuestionsCount(questionRepository.findBySourceTypeAndParentId("LISTENING", topicId).size());
-        topicRepository.save(topic);
+        List<QuestionOption> options = new ArrayList<>();
+        if (optionsList != null) {
+            if (optionsList.size() > 0) options.add(QuestionOption.builder().question(question).optionKey("A").optionValue(optionsList.get(0)).correct("A".equalsIgnoreCase(correct)).build());
+            if (optionsList.size() > 1) options.add(QuestionOption.builder().question(question).optionKey("B").optionValue(optionsList.get(1)).correct("B".equalsIgnoreCase(correct)).build());
+            if (optionsList.size() > 2) options.add(QuestionOption.builder().question(question).optionKey("C").optionValue(optionsList.get(2)).correct("C".equalsIgnoreCase(correct)).build());
+            if (optionsList.size() > 3) options.add(QuestionOption.builder().question(question).optionKey("D").optionValue(optionsList.get(3)).correct("D".equalsIgnoreCase(correct)).build());
+        }
+        question.setOptions(options);
+        questionRepository.save(question);
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(Map.of("message", "Question created successfully"));
     }
 
-    /** PUT /api/admin/listening/questions/{questionId} - Sửa câu hỏi nghe */
     @PutMapping("/questions/{questionId}")
-    public ResponseEntity<Question> updateQuestion(@PathVariable Long questionId, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> updateQuestion(@PathVariable Long questionId, @RequestBody Map<String, Object> request) {
         Question question = questionRepository.findById(questionId).orElse(null);
-        if (question == null || !"LISTENING".equals(question.getSourceType())) {
+        if (question == null) {
             return ResponseEntity.notFound().build();
         }
 
         if (request.containsKey("questionText")) question.setQuestionText((String) request.get("questionText"));
-        if (request.containsKey("correctOption")) question.setCorrectOption((String) request.get("correctOption"));
-        if (request.containsKey("correctAnswer")) question.setCorrectAnswer((String) request.get("correctAnswer"));
         if (request.containsKey("explanation")) question.setExplanation((String) request.get("explanation"));
-        if (request.containsKey("audioUrl")) question.setAudioUrl((String) request.get("audioUrl"));
-        if (request.containsKey("difficulty")) question.setDifficulty((String) request.get("difficulty"));
-        if (request.containsKey("questionNumber")) question.setQuestionNumber((Integer) request.get("questionNumber"));
-        
-        if (request.containsKey("options")) {
-            @SuppressWarnings("unchecked")
-            List<String> options = (List<String>) request.get("options");
-            if (options != null) {
-                if (options.size() > 0) question.setOptionA(options.get(0));
-                if (options.size() > 1) question.setOptionB(options.get(1));
-                if (options.size() > 2) question.setOptionC(options.get(2));
-                if (options.size() > 3) question.setOptionD(options.get(3));
-            }
-        }
 
-        Question updated = questionRepository.save(question);
-        return ResponseEntity.ok(updated);
+        questionRepository.save(question);
+        return ResponseEntity.ok(Map.of("message", "Question updated successfully"));
     }
 
-    /** DELETE /api/admin/listening/questions/{questionId} - Xóa câu hỏi nghe */
     @DeleteMapping("/questions/{questionId}")
     public ResponseEntity<?> deleteQuestion(@PathVariable Long questionId) {
         Question question = questionRepository.findById(questionId).orElse(null);
@@ -169,16 +210,7 @@ public class AdminListeningController {
             return ResponseEntity.notFound().build();
         }
 
-        Long topicId = question.getParentId();
         questionRepository.delete(question);
-
-        // Cập nhật số câu hỏi
-        StudyContent topic = topicRepository.findById(topicId).orElse(null);
-        if (topic != null) {
-            topic.setQuestionsCount(questionRepository.findBySourceTypeAndParentId("LISTENING", topicId).size());
-            topicRepository.save(topic);
-        }
-
         return ResponseEntity.ok(Map.of("message", "Question deleted successfully"));
     }
 }

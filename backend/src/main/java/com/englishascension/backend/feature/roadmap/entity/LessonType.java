@@ -4,5 +4,6 @@ public enum LessonType {
     VOCABULARY,
     GRAMMAR,
     LISTENING,
-    READING
+    READING,
+    CLASS_QUIZ
 }

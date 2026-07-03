@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlacementTestService, Question } from '../../../services/placement-test.service';
 import { AuthService } from '../../../services/auth.service';
+import { TtsService } from '../../../services/tts.service';
 
 interface UserAnswer {
   questionId: number;
@@ -148,11 +149,11 @@ interface UserAnswer {
             <div class="space-y-6 min-h-[14rem]">
               
               <!-- Listening Audio Trigger -->
-              @if (currentQuestion().type === 'LISTENING' && currentQuestion().audioUrl) {
+              @if (currentQuestion().type === 'LISTENING') {
                 <div class="p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl flex items-center justify-between gap-4">
                   <div class="flex items-center gap-3">
                     <button
-                      (click)="toggleAudio(currentQuestion().audioUrl!)"
+                      (click)="toggleAudio(currentQuestion().questionText)"
                       [class.bg-brand-primary]="!isAudioPlaying"
                       [class.bg-red-500]="isAudioPlaying"
                       class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold transition-all shadow-md active:scale-95 cursor-pointer border-none"
@@ -191,10 +192,16 @@ interface UserAnswer {
                 <h4 class="text-base font-bold text-text-main leading-relaxed mt-4">
                   {{ getReadingQuestion(currentQuestion().questionText) }}
                 </h4>
-              } @else {
+              } @else if (currentQuestion().type !== 'LISTENING') {
+                <!-- For GRAMMAR, VOCABULARY: show question text normally -->
                 <h4 class="text-lg font-bold text-text-main leading-relaxed">
                   {{ currentQuestion().questionText }}
                 </h4>
+              } @else {
+                <!-- For LISTENING: show a hint to listen and choose -->
+                <p class="text-sm text-blue-400/80 italic font-medium text-center py-2">
+                  🎧 Nhấn nút phát phía trên để nghe, sau đó chọn đáp án phù hợp.
+                </p>
               }
 
               <!-- Options Selection -->
@@ -271,8 +278,7 @@ interface UserAnswer {
                   [disabled]="!allQuestionsAnswered()"
                   class="bg-gradient-to-r from-brand-primary to-brand-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-brand-primary/15 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1.5 border-none"
                 >
-                  <span>Nộp Bài Thi</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send shrink-0"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  <span>Nộp bài</span>
                 </button>
               }
             </div>
@@ -366,7 +372,7 @@ interface UserAnswer {
             <!-- Generated Modules list -->
             <div class="text-left space-y-3">
               <h4 class="text-xs font-black text-text-muted uppercase tracking-wider mb-2">Lộ trình học AI được thiết lập:</h4>
-              <div class="space-y-2.5">
+              <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
                 @for (mod of roadmapResult().modules; track mod.id; let idx = $index) {
                   <div class="p-3.5 bg-bg-card border border-border-main rounded-xl flex items-start gap-3 shadow-sm hover:border-brand-primary/20 transition-all">
                     <span class="w-6 h-6 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-black flex items-center justify-center shrink-0">
@@ -403,6 +409,7 @@ export class PlacementTestComponent implements OnInit, OnDestroy {
   private readonly placementService = inject(PlacementTestService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  readonly tts = inject(TtsService);
 
   // States: 'welcome' | 'running' | 'evaluating' | 'error' | 'results'
   testState = signal<'welcome' | 'running' | 'evaluating' | 'error' | 'results'>('welcome');
@@ -414,7 +421,6 @@ export class PlacementTestComponent implements OnInit, OnDestroy {
   selectedGoal = 'TOEIC 550';
 
   // Audio system
-  audio = new Audio();
   isAudioPlaying = false;
 
   ngOnInit(): void {
@@ -508,25 +514,26 @@ export class PlacementTestComponent implements OnInit, OnDestroy {
   }
 
   // Audio system controls
-  toggleAudio(url: string): void {
+  toggleAudio(text: string): void {
     if (this.isAudioPlaying) {
       this.stopAudio();
     } else {
-      this.audio.src = url;
-      this.audio.load();
+      // Loại bỏ tiền tố [Audio Question] để giọng đọc tự nhiên
+      const cleanText = text.replace(/\[Audio Question\]/gi, '').trim();
+      this.tts.speak(cleanText);
       this.isAudioPlaying = true;
-      this.audio.play().catch(e => {
-        console.error('Audio play error', e);
-        this.isAudioPlaying = false;
-      });
-      this.audio.onended = () => {
-        this.isAudioPlaying = false;
-      };
+      
+      const checkEnd = setInterval(() => {
+        if (!window.speechSynthesis.speaking) {
+          clearInterval(checkEnd);
+          this.isAudioPlaying = false;
+        }
+      }, 300);
     }
   }
 
   stopAudio(): void {
-    this.audio.pause();
+    this.tts.stop();
     this.isAudioPlaying = false;
   }
 

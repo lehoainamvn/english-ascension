@@ -6,8 +6,10 @@ export interface ReadingArticle {
   id: number;
   title: string;
   category?: string;
-  level: number;
+  level: any;
   questionsCount: number;
+  articleCompleted: boolean;
+  practiceCompleted: boolean;
   isCompleted: boolean;
 }
 
@@ -32,7 +34,7 @@ export interface ReadingArticleDetails {
   category?: string;
   content: string;
   vietnameseContent: string;
-  level: number;
+  level: any;
   questionsCount: number;
   vocabularyJson: string;
   isCompleted: boolean;

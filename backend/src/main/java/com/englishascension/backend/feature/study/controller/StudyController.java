@@ -26,32 +26,32 @@ public class StudyController {
 
     @GetMapping("/modules/{moduleId}/content")
     public ResponseEntity<Map<String, Object>> getModuleContent(
-            @PathVariable Long moduleId,
+            @PathVariable String moduleId,
             @RequestParam(required = false) String category) {
         return ResponseEntity.ok(studyService.getModuleContent(moduleId, category));
     }
 
     @PostMapping("/modules/{moduleId}/complete-step")
     public ResponseEntity<RewardResult> completeStep(
-            @PathVariable Long moduleId,
+            @PathVariable String moduleId,
             @RequestBody(required = false) Map<String, String> request) {
         return ResponseEntity.ok(studyService.completeStep(moduleId));
     }
 
     @PostMapping("/modules/{moduleId}/complete")
     public ResponseEntity<Map<String, Object>> completeModule(
-            @PathVariable Long moduleId,
+            @PathVariable String moduleId,
             @RequestBody Map<String, Object> requestBody) {
         return ResponseEntity.ok(studyService.completeModule(moduleId, requestBody));
     }
 
     @GetMapping("/modules/{moduleId}/battle-words")
-    public ResponseEntity<List<Map<String, Object>>> getBattleWords(@PathVariable Long moduleId) {
+    public ResponseEntity<List<Map<String, Object>>> getBattleWords(@PathVariable String moduleId) {
         return ResponseEntity.ok(studyService.getBattleWords(moduleId));
     }
 
     @PostMapping("/modules/{moduleId}/battle-complete")
-    public ResponseEntity<RewardResult> completeWordBattle(@PathVariable Long moduleId) {
+    public ResponseEntity<RewardResult> completeWordBattle(@PathVariable String moduleId) {
         return ResponseEntity.ok(studyService.completeBattle(moduleId));
     }
 

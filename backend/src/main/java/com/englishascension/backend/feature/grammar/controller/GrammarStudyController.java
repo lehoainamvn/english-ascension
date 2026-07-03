@@ -1,7 +1,8 @@
 package com.englishascension.backend.feature.grammar.controller;
 
-import com.englishascension.backend.feature.grammar.service.GrammarService;
+import com.englishascension.backend.feature.grammar.dto.GrammarLessonResponse;
 import com.englishascension.backend.feature.study.entity.Question;
+import com.englishascension.backend.feature.grammar.service.GrammarService;
 import com.englishascension.backend.shared.reward.RewardResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,10 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Grammar study REST controller – HTTP layer only.
- * All business logic is delegated to {@link GrammarService}.
- */
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/grammar")
@@ -25,12 +22,12 @@ public class GrammarStudyController {
     }
 
     @GetMapping("/lessons")
-    public ResponseEntity<List<Map<String, Object>>> getLessons() {
+    public ResponseEntity<List<GrammarLessonResponse>> getLessons() {
         return ResponseEntity.ok(grammarService.getLessons());
     }
 
     @GetMapping("/lessons/{lessonId}")
-    public ResponseEntity<Map<String, Object>> getLesson(@PathVariable Long lessonId) {
+    public ResponseEntity<GrammarLessonResponse> getLesson(@PathVariable Long lessonId) {
         return ResponseEntity.ok(grammarService.getLesson(lessonId));
     }
 

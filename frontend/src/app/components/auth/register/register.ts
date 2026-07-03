@@ -80,18 +80,6 @@ import { ToastService } from '../../../services/toast.service';
           </div>
 
           <!-- Alert Messages -->
-          @if (errorMessage()) {
-            <div class="mb-5 bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-              <span>{{ errorMessage() }}</span>
-            </div>
-          }
-          @if (successMessage()) {
-            <div class="mb-5 bg-emerald-500/10 border border-border-main border-l-4 border-l-emerald-500 text-emerald-600 dark:text-emerald-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-500 shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 15.01 9 12.01"/></svg>
-              <span>{{ successMessage() }}</span>
-            </div>
-          }
 
           <!-- Social Logins (Google only) -->
           <div class="space-y-2.5">
@@ -202,8 +190,10 @@ export class RegisterComponent implements OnInit {
   confirmPassword = '';
 
   isLoading = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
+
+  // Share initialization state across component instances
+  private static googleInitialized = false;
+  private googleInitInterval: any = null;
 
   ngOnInit(): void {
     this.checkAndInitGoogle();
@@ -211,19 +201,26 @@ export class RegisterComponent implements OnInit {
 
   private checkAndInitGoogle(): void {
     if (typeof window === 'undefined') return;
+    if (RegisterComponent.googleInitialized) {
+      setTimeout(() => this.initGoogleSignIn(), 100);
+      return;
+    }
 
     let attempts = 0;
-    const interval = setInterval(() => {
+    this.googleInitInterval = setInterval(() => {
       attempts++;
       // @ts-ignore
       const googleDefined = typeof google !== 'undefined' && google.accounts && google.accounts.id;
       const elementExists = document.getElementById('googleBtn') !== null;
 
       if (googleDefined && elementExists) {
-        clearInterval(interval);
+        clearInterval(this.googleInitInterval);
+        this.googleInitInterval = null;
+        RegisterComponent.googleInitialized = true;
         this.initGoogleSignIn();
       } else if (attempts > 30) { // Stop after 15 seconds
-        clearInterval(interval);
+        clearInterval(this.googleInitInterval);
+        this.googleInitInterval = null;
         console.warn('Google Sign-In API or button container not found after 15 seconds.');
       }
     }, 500);
@@ -249,20 +246,15 @@ export class RegisterComponent implements OnInit {
   handleGoogleCredentialResponse(response: any): void {
     if (response && response.credential) {
       this.isLoading.set(true);
-      this.errorMessage.set('');
       this.authService.googleLogin(response.credential).subscribe({
         next: (res) => {
           this.isLoading.set(false);
           this.toastService.success('Đăng nhập thành công! Chào mừng quay trở lại.');
-          if (res && !res.hasCharacter) {
-            this.router.navigate(['/character-customization']);
-          } else {
-            this.router.navigate(['/dashboard']);
-          }
+          this.router.navigate(['/dashboard']);
         },
         error: (err) => {
           this.isLoading.set(false);
-          this.errorMessage.set(err.error?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
+          this.toastService.error(err.error?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
         }
       });
     }
@@ -272,21 +264,18 @@ export class RegisterComponent implements OnInit {
     if (!this.email || !this.password || this.password !== this.confirmPassword) return;
 
     this.isLoading.set(true);
-    this.errorMessage.set('');
-    this.successMessage.set('');
 
     this.authService.register(this.email, this.password).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.toastService.success('Đăng ký tài khoản thành công! Đang chuyển hướng...');
-        this.successMessage.set('Đăng ký tài khoản thành công! Đang chuyển hướng sang trang đăng nhập...');
+        this.toastService.success('Đăng ký tài khoản thành công! Đang chuyển hướng sang trang đăng nhập...');
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 2000);
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Email này đã tồn tại hoặc đã xảy ra lỗi. Vui lòng kiểm tra lại.');
+        this.toastService.error(err.error?.message || 'Email này đã tồn tại hoặc đã xảy ra lỗi. Vui lòng kiểm tra lại.');
       }
     });
   }

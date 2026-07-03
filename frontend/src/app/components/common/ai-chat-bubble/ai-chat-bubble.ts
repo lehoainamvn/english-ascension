@@ -237,21 +237,21 @@ interface ChatMsg {
       </div>
     }
 
-    <!-- Selection Tooltip Button -->
-    @if (showTooltip()) {
-      <button
-        (click)="askAboutSelection($event)"
-        [style.left.px]="tooltipPos().x"
-        [style.top.px]="tooltipPos().y"
-        class="fixed z-[10000] bg-text-main text-bg-main text-[11px] font-black px-3 py-2 rounded-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 border border-border-main/20 cursor-pointer"
-        style="transform: translate(-50%, -100%); pointer-events: auto;"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary animate-pulse">
-          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/>
-        </svg>
-        Hỏi Merlin AI
-      </button>
-    }
+      <!-- Selection Tooltip Button -->
+      @if (showTooltip()) {
+        <button
+          (click)="askAboutSelection($event)"
+          [style.left.px]="tooltipPos().x"
+          [style.top.px]="tooltipPos().y"
+          class="fixed z-[10000] bg-text-main text-bg-main text-[11px] font-black px-3 py-2 rounded-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 border border-border-main/20 cursor-pointer"
+          style="transform: translate(-50%, -100%); pointer-events: auto;"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary animate-pulse">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/>
+          </svg>
+          Hỏi Merlin AI
+        </button>
+      }
   `,
   styles: [`
     @keyframes slideUp {
@@ -292,6 +292,11 @@ interface ChatMsg {
 })
 export class AiChatBubbleComponent implements OnInit, AfterViewChecked {
   private readonly studyAiService = inject(StudyAiService);
+
+  isDocumentLearningPage(): boolean {
+    if (typeof window === 'undefined') return false;
+    return window.location.pathname.includes('/document-learning');
+  }
 
   @ViewChild('chatBox') private chatBox!: ElementRef;
 

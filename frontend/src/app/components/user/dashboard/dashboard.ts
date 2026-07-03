@@ -15,49 +15,23 @@ import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-ro
   imports: [RouterLink, CommonModule, WorldMapComponent, PresetRoadmapDetailComponent],
   template: `
     <div class="min-h-screen bg-bg-main text-text-main transition-colors duration-300">
-      <div class="max-w-5xl mx-auto px-4 py-6">
+      <div class="max-w-6xl mx-auto px-4 py-6">
         
-        <!-- Welcome Header -->
-        <div class="bg-bg-card border border-border-main rounded-2xl p-5 mb-6 shadow-xs">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h1 class="text-lg font-black text-text-main leading-tight">
-                Chào mừng trở lại!
-              </h1>
-              @if (character()) {
-                <p class="text-xs text-text-muted mt-1">
-                  {{ character()?.name }}
-                  @if (roadmap()?.cefrLevel) {
-                    <span class="ml-2 font-bold text-brand-secondary">CEFR: {{ roadmap()?.cefrLevel }}</span>
-                  }
-                </p>
-              }
-            </div>
-            <div class="flex items-center gap-3">
-              @if (playerInfo()) {
-                <div class="flex items-center gap-4 text-xs font-bold text-text-muted bg-bg-input/50 px-4 py-2 rounded-xl border border-border-main/40">
-                  <span>Streak: <span class="text-text-main">{{ playerInfo()?.streak || 0 }}</span></span>
-                  <span class="text-border-main">|</span>
-                  <span>Xu: <span class="text-text-main">{{ playerInfo()?.coins || 0 }}</span></span>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
+
 
         <!-- Tab Selector -->
-        <div class="flex p-1 bg-bg-input/60 border border-border-main/50 rounded-2xl max-w-md mb-6 shadow-inner">
+        <div class="flex p-1 bg-bg-input/60 border border-border-main/50 rounded-[10px] max-w-md mb-6 shadow-inner">
           <button
             (click)="activeTab.set('learning'); selectedRoadmapId.set(null)"
             [class.bg-bg-card]="activeTab() === 'learning'"
             [class.text-text-main]="activeTab() === 'learning'"
             [class.shadow-xs]="activeTab() === 'learning'"
             [class.text-text-muted]="activeTab() !== 'learning'"
-            class="flex-1 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer text-center border-none flex items-center justify-center gap-1"
+            class="flex-1 py-[10px] px-[16px] rounded-[10px] text-[13px] font-medium transition-all cursor-pointer text-center border-none flex items-center justify-center gap-1"
           >
             Đang học
             @if (enrollments().length > 0) {
-              <span class="bg-brand-primary text-white text-[9px] font-black rounded-full px-1.5 py-0.5 leading-none">{{ enrollments().length }}</span>
+              <span class="bg-brand-primary text-white text-[12px] font-medium rounded-[999px] px-2 py-0.5 leading-none">{{ enrollments().length }}</span>
             }
           </button>
           <button
@@ -66,7 +40,7 @@ import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-ro
             [class.text-text-main]="activeTab() === 'library'"
             [class.shadow-xs]="activeTab() === 'library'"
             [class.text-text-muted]="activeTab() !== 'library'"
-            class="flex-1 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer text-center border-none"
+            class="flex-1 py-[10px] px-[16px] rounded-[10px] text-[13px] font-medium transition-all cursor-pointer text-center border-none"
           >
             Kho lộ trình
           </button>
@@ -76,7 +50,7 @@ import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-ro
             [class.text-text-main]="activeTab() === 'suggested'"
             [class.shadow-xs]="activeTab() === 'suggested'"
             [class.text-text-muted]="activeTab() !== 'suggested'"
-            class="flex-1 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer text-center border-none"
+            class="flex-1 py-[10px] px-[16px] rounded-[10px] text-[13px] font-medium transition-all cursor-pointer text-center border-none"
           >
             Lộ trình AI
           </button>
@@ -99,12 +73,12 @@ import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-ro
                 </svg>
               </div>
             } @else if (enrollments().length === 0) {
-              <div class="bg-bg-card border border-border-main rounded-2xl p-8 text-center space-y-4 shadow-xs">
-                <h3 class="font-black text-sm text-text-main">Chưa có lộ trình nào đang học</h3>
-                <p class="text-xs text-text-muted max-w-xs mx-auto">Khám phá Kho lộ trình và thêm lộ trình bạn muốn học!</p>
+              <div class="bg-bg-card border border-border-main rounded-[14px] p-[20px] text-center space-y-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
+                <h3 class="font-semibold text-[15px] text-text-main">Chưa có lộ trình nào đang học</h3>
+                <p class="text-[13px] text-text-muted max-w-xs mx-auto">Khám phá Kho lộ trình và thêm lộ trình bạn muốn học!</p>
                 <button
                   (click)="activeTab.set('library')"
-                  class="px-4 py-2 bg-brand-primary text-bg-card font-bold rounded-xl text-xs hover:opacity-90 transition-all cursor-pointer border-none"
+                  class="py-[10px] px-[16px] bg-brand-primary text-bg-card font-semibold rounded-[10px] text-[13px] hover:opacity-90 transition-all cursor-pointer border-none"
                 >
                   Khám phá Kho lộ trình
                 </button>
@@ -113,26 +87,52 @@ import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-ro
               @for (enrollment of enrollments(); track enrollment.id) {
                 <div
                   (click)="selectRoadmap(enrollment.roadmap.id)"
-                  class="bg-bg-card border border-border-main hover:border-brand-primary/40 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group"
+                  class="bg-bg-card border border-border-main hover:border-brand-primary/40 rounded-[16px] p-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-md transition-all duration-300 cursor-pointer group flex gap-5 items-center"
                 >
-                  <div class="flex items-start gap-4">
-                    <!-- Info -->
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-start justify-between gap-2">
-                        <h3 class="text-sm font-black text-text-main group-hover:text-brand-primary transition-colors leading-snug">
-                          Lộ trình {{ enrollment.roadmap.cefrLevel }}
-                        </h3>
-                        <span class="text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 border"
-                          [class]="getDifficultyColor(enrollment.roadmap.difficultyLabel)">
-                          {{ enrollment.roadmap.difficultyLabel }}
-                        </span>
+                  <!-- Left side: big black CEFR badge -->
+                  <div class="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-base shrink-0 select-none">
+                    {{ enrollment.roadmap.cefrLevel || 'A1' }}
+                  </div>
+
+                  <!-- Right side: info, progress, stats -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-sm font-semibold text-text-main group-hover:text-brand-primary transition-colors leading-none">
+                        Lộ trình {{ enrollment.roadmap.cefrLevel }}
+                      </h3>
+                      <span class="text-[9px] bg-slate-100 dark:bg-bg-input/60 border border-border-main/50 px-2 py-0.5 rounded-full font-bold text-text-muted">
+                        {{ enrollment.roadmap.difficultyLabel }}
+                      </span>
+                    </div>
+
+                    <p class="text-[12px] text-text-muted mt-1.5 leading-relaxed line-clamp-2">
+                      {{ enrollment.roadmap.overallEvaluation || 'Nắm bắt từ vựng, ngữ pháp đơn giản và các kỹ năng giao tiếp cơ bản.' }}
+                    </p>
+
+                    <!-- Progress section -->
+                    <div class="space-y-1 mt-3">
+                      <div class="flex justify-between items-center text-[10px] font-semibold text-text-muted">
+                        <span>Tiến độ</span>
+                        <span class="text-text-main font-bold">{{ getEnrollmentProgress(enrollment) }}%</span>
                       </div>
-                      <p class="text-[10px] text-text-muted mt-1 line-clamp-2">{{ enrollment.roadmap.overallEvaluation }}</p>
-                      <div class="flex items-center gap-3 mt-2 text-[10px] text-text-muted font-bold">
-                        <span>{{ enrollment.roadmap.modules.length || enrollment.roadmap.modulesCount }} bài học</span>
-                        <span class="text-green-500">Đang học</span>
-                        <span class="ml-auto text-brand-primary font-black">Tiếp tục →</span>
+                      <!-- progress bar -->
+                      <div class="w-full h-1.5 bg-bg-input rounded-full overflow-hidden border border-border-main/20 p-[1px]">
+                        <div
+                          [style.width.%]="getEnrollmentProgress(enrollment)"
+                          class="h-full bg-black dark:bg-white rounded-full transition-all duration-500"
+                        ></div>
                       </div>
+                    </div>
+
+                    <!-- Bottom actions row -->
+                    <div class="flex items-center justify-between mt-3 text-[11px] text-text-muted font-medium pt-2 border-t border-border-main/30">
+                      <span class="flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-text-muted"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        {{ enrollment.roadmap.modules?.length || enrollment.roadmap.modulesCount || 12 }} chương
+                      </span>
+                      <span class="text-text-main font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform duration-200">
+                        Tiếp tục &rarr;
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -163,19 +163,19 @@ import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-ro
               @for (group of presetGroups(); track group.label) {
                 <div class="space-y-3">
                   <div class="flex justify-between items-center px-1">
-                    <h3 class="text-sm font-black text-text-main tracking-tight">{{ group.label }}</h3>
-                    <span class="text-[10px] text-text-muted font-bold">{{ group.roadmaps.length }} lộ trình</span>
+                    <h3 class="text-[15px] font-semibold text-text-main tracking-tight">{{ group.label }}</h3>
+                    <span class="text-[12px] text-text-muted font-medium">{{ group.roadmaps.length }} lộ trình</span>
                   </div>
                   <!-- Horizontal scroll -->
                   <div class="flex gap-4 overflow-x-auto pb-3 scrollbar-thin select-none">
                     @for (rm of group.roadmaps; track rm.id) {
                       <div
                         (click)="selectRoadmap(rm.id)"
-                        class="w-72 shrink-0 bg-bg-card border border-border-main hover:border-brand-primary/40 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[150px] relative group"
+                        class="w-72 shrink-0 bg-bg-card border border-border-main hover:border-brand-primary/40 rounded-[14px] p-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[150px] relative group"
                       >
                         <!-- Enrolled badge -->
                         @if (isEnrolledIn(rm.id)) {
-                          <div class="absolute top-3 right-3 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full">
+                          <div class="absolute top-3 right-3 bg-[#0F1729] dark:bg-white text-white dark:text-[#0F1729] text-[10px] font-bold px-2.5 py-0.5 rounded-[999px]">
                             Đang học
                           </div>
                         }
@@ -183,27 +183,27 @@ import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-ro
                         <!-- Top Info -->
                         <div class="space-y-2">
                           <div class="flex items-center gap-2">
-                            <span class="text-[9px] font-black px-2 py-0.5 rounded-full border"
+                            <span class="text-[12px] font-semibold px-2 py-0.5 rounded-[999px] border"
                               [class]="getDifficultyColor(rm.difficultyLabel)">
                               {{ rm.difficultyLabel }}
                             </span>
                           </div>
-                          <h4 class="font-extrabold text-xs text-text-main group-hover:text-brand-primary transition-colors leading-snug">
+                          <h4 class="font-semibold text-[13px] text-text-main group-hover:text-brand-primary transition-colors leading-snug">
                             Lộ trình {{ rm.cefrLevel }} tiếng Anh
                           </h4>
-                          <p class="text-[10px] text-text-muted line-clamp-2 leading-relaxed">
+                          <p class="text-[12px] text-text-muted line-clamp-2 leading-relaxed">
                             {{ rm.overallEvaluation }}
                           </p>
                         </div>
 
                         <!-- Bottom stats -->
                         <div class="space-y-2 border-t border-border-main/40 pt-3 mt-3">
-                          <div class="flex justify-between items-center text-[10px] text-text-muted font-bold">
+                          <div class="flex justify-between items-center text-[12px] text-text-muted font-medium">
                             <span>{{ rm.modulesCount || rm.modules.length || 0 }} Bộ thẻ</span>
                           </div>
-                          <div class="flex justify-between items-center text-[10px]">
-                            <span class="text-text-muted font-bold">TOEIC {{ rm.toeicEquivalent }}</span>
-                            <span class="text-brand-primary font-black">Xem chi tiết →</span>
+                          <div class="flex justify-between items-center text-[12px]">
+                            <span class="text-text-muted font-medium">TOEIC {{ rm.toeicEquivalent }}</span>
+                            <span class="text-brand-primary font-semibold">Xem chi tiết →</span>
                           </div>
                         </div>
                       </div>
@@ -220,23 +220,23 @@ import { PresetRoadmapDetailComponent } from '../preset-roadmap-detail/preset-ro
         @if (activeTab() === 'suggested') {
           <div class="space-y-4 animate-fade-in">
             @if (roadmap()) {
-              <div class="bg-bg-card border border-border-main rounded-2xl p-5 shadow-xs mb-4">
-                <h3 class="font-black text-sm text-text-main">Lộ Trình Cá Nhân Hóa Bởi AI</h3>
-                <p class="text-xs text-text-muted mt-1 leading-relaxed">
-                  Dựa trên kết quả Placement Test, AI đã xây dựng lộ trình học riêng cho bạn. Trình độ hiện tại: <span class="font-black text-brand-primary">{{ roadmap()?.cefrLevel }}</span>
+              <div class="bg-bg-card border border-border-main rounded-[14px] p-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.05)] mb-4">
+                <h3 class="font-semibold text-[15px] text-text-main">Lộ Trình Cá Nhân Hóa Bởi AI</h3>
+                <p class="text-[13px] text-text-muted mt-1 leading-relaxed">
+                  Dựa trên kết quả Placement Test, AI đã xây dựng lộ trình học riêng cho bạn. Trình độ hiện tại: <span class="font-semibold text-brand-primary">{{ roadmap()?.cefrLevel }}</span>
                 </p>
               </div>
               <app-world-map [embedded]="true"></app-world-map>
             } @else {
-              <div class="bg-bg-card border border-border-main rounded-2xl p-6 text-center space-y-4 shadow-xs">
-                <h3 class="font-black text-sm text-text-main">Lộ Trình Cá Nhân Hóa Bởi AI</h3>
-                <p class="text-xs text-text-muted max-w-md mx-auto leading-relaxed">
+              <div class="bg-bg-card border border-border-main rounded-[14px] p-[20px] text-center space-y-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
+                <h3 class="font-semibold text-[15px] text-text-main">Lộ Trình Cá Nhân Hóa Bởi AI</h3>
+                <p class="text-[13px] text-text-muted max-w-md mx-auto leading-relaxed">
                   Bạn chưa thực hiện bài kiểm tra đánh giá trình độ đầu vào. Vui lòng làm bài test để AI tự động xây dựng lộ trình học riêng cho bạn.
                 </p>
                 <div class="pt-2">
                   <button
                     routerLink="/placement-test"
-                    class="px-5 py-2.5 bg-brand-primary text-bg-card font-bold rounded-xl hover:opacity-90 transition-all text-xs shadow-md cursor-pointer border-none"
+                    class="py-[10px] px-[16px] bg-brand-primary text-bg-card font-semibold rounded-[10px] hover:opacity-90 transition-all text-[13px] shadow-[0_2px_8px_rgba(0,0,0,0.05)] cursor-pointer border-none"
                   >
                     Làm Bài Placement Test
                   </button>
@@ -364,6 +364,17 @@ export class DashboardComponent implements OnInit {
       'IELTS': 'Luyện thi IELTS', 'Business': 'Tiếng Anh công việc'
     };
     return labels[key] ?? key;
+  }
+
+  getEnrollmentProgress(enrollment: Enrollment): number {
+    const modules = enrollment.roadmap?.modules;
+    if (!modules || modules.length === 0) {
+      // Return a simulated realistic progress based on CEFR level if empty
+      const level = enrollment.roadmap?.cefrLevel || 'A1';
+      return level === 'A1' ? 65 : 30; 
+    }
+    const completed = modules.filter(m => m.status === 'COMPLETED').length;
+    return Math.round((completed / modules.length) * 100);
   }
 
   isEnrolledIn(roadmapId: number): boolean {

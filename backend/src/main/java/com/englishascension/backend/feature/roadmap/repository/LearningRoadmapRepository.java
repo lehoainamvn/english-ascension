@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface LearningRoadmapRepository extends JpaRepository<LearningRoadmap, Long> {
-    Optional<LearningRoadmap> findByUserId(Long userId);
     List<LearningRoadmap> findByIsPresetTrueOrderByIdAsc();
 }
