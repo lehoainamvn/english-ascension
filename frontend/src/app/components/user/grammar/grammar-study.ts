@@ -24,7 +24,7 @@ import { TtsService } from '../../../services/tts.service';
         <!-- Header -->
         <div class="flex justify-between items-center mb-6 pb-4 border-b border-border-main">
           <div class="flex items-center gap-2">
-            <h2 class="text-lg font-black tracking-tight bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent uppercase">
+            <h2 class="text-lg font-black tracking-tight text-brand-primary uppercase">
               HỌC NGỮ PHÁP
             </h2>
             <span class="text-[9px] bg-bg-input text-text-muted border border-border-main/50 px-2 py-0.5 rounded font-extrabold uppercase tracking-wider">

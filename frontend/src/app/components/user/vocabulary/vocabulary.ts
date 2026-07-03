@@ -19,7 +19,7 @@ import { VocabularyService, VocabTopic } from '../../../services/vocabulary.serv
         <!-- Header -->
         <div class="text-center space-y-2 max-w-2xl mx-auto">
           <h1 class="text-2xl md:text-4xl font-black tracking-tight text-text-main">
-            Kho <span class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent">Từ Vựng Tiếng Anh</span>
+            Kho <span class="text-brand-primary">Từ Vựng Tiếng Anh</span>
           </h1>
           <p class="text-xs md:text-sm text-text-muted">
             Học từ vựng theo chủ đề với lộ trình cá nhân hóa CEFR và luyện thi TOEIC chuyên sâu

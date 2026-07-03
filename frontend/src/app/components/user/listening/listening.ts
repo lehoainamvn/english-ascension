@@ -19,7 +19,7 @@ import { ListeningService, ListeningTopic } from '../../../services/listening.se
         <!-- Header -->
         <div class="text-center space-y-2 max-w-2xl mx-auto">
           <h1 class="text-2xl md:text-4xl font-black tracking-tight text-text-main">
-            Kho <span class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent">Luyện Nghe Tiếng Anh</span>
+            Kho <span class="text-brand-primary">Luyện Nghe Tiếng Anh</span>
           </h1>
           <p class="text-xs md:text-sm text-text-muted">
             Nâng cao phản xạ nghe hiểu qua phương pháp lặp lại, ghi chép chính tả và kiểm tra transcript.

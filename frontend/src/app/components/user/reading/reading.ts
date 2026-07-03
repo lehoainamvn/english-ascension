@@ -20,7 +20,7 @@ import { ReadingService, ReadingArticle } from '../../../services/reading.servic
         <div class="text-center space-y-2 max-w-2xl mx-auto">
           <!-- Removed progress tabs -->
           <h1 class="text-2xl md:text-4xl font-black tracking-tight text-text-main mt-4">
-            Luyện đọc <span class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent">TOEIC Part 7 song ngữ</span>
+            Luyện đọc <span class="text-brand-primary">TOEIC Part 7 song ngữ</span>
           </h1>
           <p class="text-xs md:text-sm text-text-muted">
             Luyện đọc song ngữ Anh – Việt theo các chủ đề thường gặp trong bài thi TOEIC, từ cơ bản đến nâng cao.

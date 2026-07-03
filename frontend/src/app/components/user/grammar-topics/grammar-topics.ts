@@ -19,7 +19,7 @@ import { GrammarService, GrammarLesson } from '../../../services/grammar.service
         <!-- Header Title & Subtitle -->
         <div class="text-center space-y-2 max-w-2xl mx-auto">
           <h1 class="text-2xl md:text-4xl font-black tracking-tight text-text-main">
-            Chinh phục <span class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent">Ngữ pháp TOEIC</span>
+            Chinh phục <span class="text-brand-primary">Ngữ pháp TOEIC</span>
           </h1>
           <p class="text-xs md:text-sm text-text-muted">
             Hệ thống bài học từ cơ bản đến nâng cao, giúp bạn nắm vững ngữ pháp và đạt điểm cao trong kỳ thi TOEIC.

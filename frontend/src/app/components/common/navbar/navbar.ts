@@ -15,23 +15,23 @@ import { ToastService } from '../../../services/toast.service';
     <!-- TOP HORIZONTAL NAVIGATION BAR -->
     <nav class="sticky top-0 z-50 w-full bg-bg-card border-b border-border-main transition-colors duration-300 select-none">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-14">
+        <div class="flex items-center justify-between h-16">
           
           <!-- Left: Logo -->
-          <div class="flex items-center gap-2.5 shrink-0">
-            <img src="logo.png" class="w-8 h-8 object-contain rounded-lg shadow-md" alt="Logo" />
-            <span class="text-sm font-black text-text-main tracking-tight">
+          <div class="flex items-center gap-3 shrink-0">
+            <img src="logo.png" class="w-8 h-8 object-contain" alt="Logo" />
+            <span class="text-base font-black text-text-main tracking-tight">
               English Ascension
             </span>
           </div>
 
           <!-- Middle: Navigation Tabs -->
-          <div class="hidden md:flex items-center space-x-1 font-bold">
+          <div class="hidden md:flex items-center space-x-1 font-semibold">
             <a
               routerLink="/dashboard"
-              routerLinkActive="bg-bg-input text-text-main"
+              routerLinkActive="bg-bg-input"
               [routerLinkActiveOptions]="{exact: true}"
-              class="px-3 py-1.5 rounded-lg text-xs transition-all text-text-muted hover:text-text-main cursor-pointer"
+              class="px-3.5 py-2 rounded-lg text-sm transition-all text-text-main hover:bg-bg-input cursor-pointer"
             >
               Trang chủ
             </a>
@@ -39,8 +39,8 @@ import { ToastService } from '../../../services/toast.service';
             @if (isAdmin()) {
               <a
                 routerLink="/admin-roadmap"
-                routerLinkActive="bg-bg-input text-text-main"
-                class="px-3 py-1.5 rounded-lg text-xs transition-all text-text-muted hover:text-text-main cursor-pointer"
+                routerLinkActive="bg-bg-input"
+                class="px-3.5 py-2 rounded-lg text-sm transition-all text-text-main hover:bg-bg-input cursor-pointer"
               >
                 Quản trị Lộ trình
               </a>
@@ -50,9 +50,8 @@ import { ToastService } from '../../../services/toast.service';
             <div class="relative">
               <button
                 (click)="toggleLearningDropdown($event)"
-                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-text-muted hover:text-text-main flex items-center gap-1.5 cursor-pointer focus:outline-none bg-transparent border-none"
+                class="px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-text-main hover:bg-bg-input flex items-center gap-1.5 cursor-pointer focus:outline-none bg-transparent border-none"
                 [class.bg-bg-input]="isLearningDropdownOpen() || isLearningActive()"
-                [class.text-text-main]="isLearningDropdownOpen() || isLearningActive()"
               >
                 Học tập
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down transition-transform duration-200 shrink-0" [class.rotate-180]="isLearningDropdownOpen()"><path d="m6 9 6 6 6-6"/></svg>
@@ -92,9 +91,8 @@ import { ToastService } from '../../../services/toast.service';
             <div class="relative">
               <button
                 (click)="toggleResourceDropdown($event)"
-                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-text-muted hover:text-text-main flex items-center gap-1.5 cursor-pointer focus:outline-none bg-transparent border-none"
+                class="px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-text-main hover:bg-bg-input flex items-center gap-1.5 cursor-pointer focus:outline-none bg-transparent border-none"
                 [class.bg-bg-input]="isResourceDropdownOpen() || isResourceActive()"
-                [class.text-text-main]="isResourceDropdownOpen() || isResourceActive()"
               >
                 Kho tài nguyên
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down transition-transform duration-200 shrink-0" [class.rotate-180]="isResourceDropdownOpen()"><path d="m6 9 6 6 6-6"/></svg>
@@ -138,9 +136,8 @@ import { ToastService } from '../../../services/toast.service';
             <div class="relative">
               <button
                 (click)="toggleUtilityDropdown($event)"
-                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-text-muted hover:text-text-main flex items-center gap-1.5 cursor-pointer focus:outline-none bg-transparent border-none"
+                class="px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-text-main hover:bg-bg-input flex items-center gap-1.5 cursor-pointer focus:outline-none bg-transparent border-none"
                 [class.bg-bg-input]="isUtilityDropdownOpen() || isUtilityActive()"
-                [class.text-text-main]="isUtilityDropdownOpen() || isUtilityActive()"
               >
                 Tiện ích
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down transition-transform duration-200 shrink-0" [class.rotate-180]="isUtilityDropdownOpen()"><path d="m6 9 6 6 6-6"/></svg>
