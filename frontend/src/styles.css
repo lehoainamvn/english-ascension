@@ -5,6 +5,18 @@
 @import "./styles/theme.css";
 
 @theme {
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  /* Legacy utility mappings for existing UI elements */
   --color-bg-main: var(--bg-main);
   --color-bg-card: var(--bg-card);
   --color-bg-input: var(--bg-input);

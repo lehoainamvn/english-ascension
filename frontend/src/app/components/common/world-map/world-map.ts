@@ -306,7 +306,7 @@ export interface WorldMapItem {
                         <!-- Estimated TOEIC -->
                         <div class="p-2 bg-bg-input rounded-xl border border-border-main/40 text-[10px] flex items-center justify-between font-bold">
                           <span class="text-text-muted">TOEIC tương đương:</span>
-                          <span class="text-brand-secondary font-black">{{ pop.estimatedToeic }}</span>
+                          <span class="text-brand-primary font-black">{{ pop.estimatedToeic }}</span>
                         </div>
 
                         <!-- Status -->

@@ -18,41 +18,32 @@ interface UserAnswer {
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="min-h-screen bg-bg-main text-text-main p-4 md:p-8 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-300">
-      <!-- Decorative Glows -->
-      <div class="absolute top-1/4 left-1/4 w-80 h-80 bg-brand-secondary/15 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-brand-primary/15 rounded-full blur-3xl pointer-events-none"></div>
 
       <!-- Main container -->
-      <div class="relative w-full max-w-2xl backdrop-blur-xl bg-bg-card border border-border-main shadow-2xl rounded-2xl p-6 md:p-8 transition-colors duration-300">
+      <div class="relative w-full max-w-2xl bg-bg-card border border-border-main shadow-sm rounded-2xl p-6 md:p-8 transition-colors duration-300">
         
         <!-- Welcome Screen -->
         @if (testState() === 'welcome') {
           <div class="text-center py-6 space-y-6">
-            <span class="bg-brand-primary/10 text-brand-primary text-xs px-3 py-1 rounded-full font-bold uppercase tracking-widest">
-              Đánh Giá Đầu Vào
-            </span>
-            <h2 class="text-3xl font-extrabold text-text-main tracking-tight">
-              Placement Test & AI Roadmap
+            <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest">ĐÁNH GIÁ ĐẦU VÀO</p>
+            <h2 class="text-2xl font-extrabold text-text-main tracking-tight">
+              Placement Test &amp; AI Roadmap
             </h2>
             <p class="text-text-muted text-sm leading-relaxed max-w-md mx-auto">
-              Chào mừng bạn đến với bài kiểm tra năng lực tiếng Anh. Hệ thống sẽ cung cấp **12 câu hỏi** bao gồm 4 kỹ năng chính:
+              Chào mừng bạn đến với bài kiểm tra năng lực tiếng Anh. Hệ thống sẽ cung cấp <strong>12 câu hỏi</strong> bao gồm 4 kỹ năng chính:
             </p>
             
             <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto text-left">
-              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-languages text-green-500 shrink-0"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+              <div class="p-3 bg-bg-input border border-border-main rounded-xl">
                 <span class="text-xs font-bold text-text-main">Vocabulary</span>
               </div>
-              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-spell-check text-purple-500 shrink-0"><path d="m6 16 6-12 6 12"/><path d="M8 12h8"/><path d="m16 20 2 2 4-4"/></svg>
+              <div class="p-3 bg-bg-input border border-border-main rounded-xl">
                 <span class="text-xs font-bold text-text-main">Grammar</span>
               </div>
-              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headphones text-blue-500 shrink-0"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+              <div class="p-3 bg-bg-input border border-border-main rounded-xl">
                 <span class="text-xs font-bold text-text-main">Listening</span>
               </div>
-              <div class="p-3 bg-bg-input border border-border-main rounded-xl flex items-center gap-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open text-orange-500 shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              <div class="p-3 bg-bg-input border border-border-main rounded-xl">
                 <span class="text-xs font-bold text-text-main">Reading</span>
               </div>
             </div>
@@ -62,7 +53,7 @@ interface UserAnswer {
               <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider">Mục tiêu điểm số TOEIC của bạn:</label>
               <select
                 [(ngModel)]="selectedGoal"
-                class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-3 text-xs text-text-main font-semibold focus:outline-none focus:ring-1 focus:ring-brand-primary cursor-pointer"
+                class="w-full bg-bg-input border border-border-main rounded-xl px-3.5 py-3 text-xs text-text-main font-semibold focus:outline-none focus:ring-1 focus:ring-text-muted cursor-pointer"
               >
                 <option value="TOEIC 450">Mục tiêu: TOEIC 450+ (Cơ bản)</option>
                 <option value="TOEIC 550">Mục tiêu: TOEIC 550+ (Tốt nghiệp / Đi làm)</option>
@@ -77,20 +68,19 @@ interface UserAnswer {
               *Lưu ý: Kỹ năng Listening sẽ cần phát âm thanh. Vui lòng bật âm lượng thiết bị của bạn trước khi làm bài.
             </p>
 
-            <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <div class="flex flex-col sm:flex-row gap-3 justify-center pt-4">
               <button
                 (click)="startTest()"
-                class="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-brand-primary/20 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 border-none"
+                class="bg-text-main text-bg-main font-bold px-8 py-3.5 rounded-xl active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 border-none hover:opacity-90"
               >
-                <span>Bắt Đầu Làm Bài</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rocket shrink-0"><path d="M4.5 16.5c-1.5 1.26-2 3.38-2 3.38s2.12-.5 3.38-2c.86-.86.86-2.24 0-3.1a2.2 2.2 0 0 0-3.38 0z"/><path d="M12 15c-3.5 3.5-7.9 3.5-7.9 3.5s-.1-4.4 3.4-7.9c1-1 2.2-1.5 3.4-1.5L12 10l-1.5 1.5L12 13l1.5-1.5 1 1.1c0 1.2-.5 2.4-1.5 3.4z"/><path d="M16.5 4.5c1.26-1.5 3.38-2 3.38-2s-.5 2.12-2 3.38c-.86.86-2.24.86-3.1 0a2.2 2.2 0 0 1 0-3.38z"/><path d="m9 15 3-3"/><path d="m15 9 3-3"/></svg>
+                Bắt Đầu Làm Bài →
               </button>
-              <a
-                routerLink="/dashboard"
-                class="bg-bg-input border border-border-main hover:bg-bg-card px-6 py-3.5 rounded-xl font-bold transition-all flex items-center justify-center text-text-muted hover:text-text-main"
+              <button
+                (click)="cancelAndLogout()"
+                class="bg-bg-input border border-border-main hover:bg-bg-card px-6 py-3.5 rounded-xl font-bold transition-all flex items-center justify-center text-text-muted hover:text-text-main cursor-pointer"
               >
                 Hủy bỏ
-              </a>
+              </button>
             </div>
           </div>
         }
@@ -282,17 +272,17 @@ interface UserAnswer {
                 <button
                   (click)="nextQuestion()"
                   [disabled]="!getSelectedOption()"
-                  class="bg-brand-primary hover:bg-brand-secondary text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer border-none"
+                  class="bg-text-main text-bg-main px-5 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer border-none hover:opacity-90"
                 >
-                  Tiếp theo &rarr;
+                  Tiếp theo →
                 </button>
               } @else {
                 <button
                   (click)="submitTest()"
                   [disabled]="!allQuestionsAnswered()"
-                  class="bg-gradient-to-r from-brand-primary to-brand-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-brand-primary/15 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1.5 border-none"
+                  class="bg-text-main text-bg-main px-6 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer border-none hover:opacity-90"
                 >
-                  <span>Nộp bài</span>
+                  Nộp bài
                 </button>
               }
             </div>
@@ -336,79 +326,72 @@ interface UserAnswer {
         <!-- Results Screen -->
         @if (testState() === 'results' && roadmapResult()) {
           <div class="text-center py-6 space-y-6">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold uppercase tracking-wider animate-bounce">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award shrink-0"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+
+            <!-- Completion badge -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-bg-input border border-border-main text-text-muted text-xs font-bold uppercase tracking-wider">
               Chúc mừng bạn đã hoàn thành bài thi!
             </div>
 
-            <div class="flex justify-center gap-4 text-xs font-bold my-1">
-              <span class="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-3 py-1.5 rounded-full flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap fill-current shrink-0"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                +100 EXP
-              </span>
-              <span class="bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 px-3 py-1.5 rounded-full flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins shrink-0"><circle cx="8" cy="8" r="6"/><circle cx="18" cy="18" r="4"/><path d="M12 18a6 6 0 0 0-6-6"/></svg>
-                +50 Xu
-              </span>
+            <!-- Rewards -->
+            <div class="flex justify-center gap-3 text-xs font-bold">
+              <span class="bg-bg-input border border-border-main text-text-muted px-3 py-1.5 rounded-full">+100 EXP</span>
+              <span class="bg-bg-input border border-border-main text-text-muted px-3 py-1.5 rounded-full">+50 Xu</span>
             </div>
             
-            <h2 class="text-3xl font-extrabold text-text-main tracking-tight">
+            <h2 class="text-2xl font-extrabold text-text-main tracking-tight">
               KẾT QUẢ KIỂM TRA ĐẦU VÀO
             </h2>
 
             <!-- Score Summary Cards -->
             <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
               <!-- CEFR Card -->
-              <div class="p-5 bg-gradient-to-br from-brand-primary/10 to-brand-secondary/5 border border-brand-primary/20 rounded-2xl relative overflow-hidden shadow-md">
-                <div class="absolute -top-3 -right-3 w-12 h-12 bg-brand-primary/5 rounded-full blur-xl"></div>
-                <h4 class="text-[10px] font-black text-brand-primary uppercase tracking-widest">Trình độ CEFR</h4>
+              <div class="p-5 bg-bg-input border border-border-main rounded-2xl text-left">
+                <h4 class="text-[10px] font-black text-text-muted uppercase tracking-widest">Trình độ CEFR</h4>
                 <p class="text-4xl font-black text-text-main mt-1.5">{{ roadmapResult().cefrLevel }}</p>
-                <span class="text-xxs text-text-muted font-bold block mt-1">Lộ trình học tập đề xuất</span>
+                <span class="text-[10px] text-text-muted font-semibold block mt-1">Lộ trình học tập đề xuất</span>
               </div>
               
               <!-- TOEIC Card -->
-              <div class="p-5 bg-gradient-to-br from-brand-accent/10 to-brand-primary/5 border border-brand-accent/20 rounded-2xl relative overflow-hidden shadow-md">
-                <div class="absolute -top-3 -right-3 w-12 h-12 bg-brand-accent/5 rounded-full blur-xl"></div>
-                <h4 class="text-[10px] font-black text-brand-accent uppercase tracking-widest">TOEIC Ước Lượng</h4>
+              <div class="p-5 bg-bg-input border border-border-main rounded-2xl text-left">
+                <h4 class="text-[10px] font-black text-text-muted uppercase tracking-widest">TOEIC Ước Lượng</h4>
                 <p class="text-4xl font-black text-text-main mt-1.5">{{ roadmapResult().toeicEquivalent }}</p>
-                <span class="text-xxs text-text-muted font-bold block mt-1">Điểm số quy đổi</span>
+                <span class="text-[10px] text-text-muted font-semibold block mt-1">Điểm số quy đổi</span>
               </div>
             </div>
 
             <!-- AI Evaluation Box -->
-            <div class="bg-bg-input border border-border-main rounded-2xl p-5 text-left space-y-2 border-l-4 border-l-brand-primary">
-              <h4 class="text-xs font-black text-brand-primary uppercase tracking-wider">Đánh giá tổng quan từ AI Mentor</h4>
-              <p class="text-xs text-text-muted leading-relaxed font-medium">
+            <div class="bg-bg-input border border-border-main rounded-xl p-5 text-left space-y-2">
+              <h4 class="text-[10px] font-black text-text-muted uppercase tracking-wider">Đánh giá tổng quan từ AI Mentor</h4>
+              <p class="text-xs text-text-muted leading-relaxed">
                 {{ roadmapResult().overallEvaluation }}
               </p>
             </div>
 
             <!-- Generated Modules list -->
             <div class="text-left space-y-3">
-              <h4 class="text-xs font-black text-text-muted uppercase tracking-wider mb-2">Lộ trình học AI được thiết lập:</h4>
-              <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
+              <h4 class="text-[10px] font-black text-text-muted uppercase tracking-wider mb-2">Lộ trình học AI được thiết lập:</h4>
+              <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
                 @for (mod of roadmapResult().modules; track mod.id; let idx = $index) {
-                  <div class="p-3.5 bg-bg-card border border-border-main rounded-xl flex items-start gap-3 shadow-sm hover:border-brand-primary/20 transition-all">
-                    <span class="w-6 h-6 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-black flex items-center justify-center shrink-0">
+                  <div class="p-3.5 bg-bg-card border border-border-main rounded-xl flex items-start gap-3 hover:bg-bg-input transition-all">
+                    <span class="w-6 h-6 rounded-full bg-bg-input border border-border-main text-text-muted text-xs font-black flex items-center justify-center shrink-0">
                       {{ idx + 1 }}
                     </span>
                     <div>
-                      <h5 class="text-xs font-black text-text-main leading-tight">{{ mod.title }}</h5>
-                      <p class="text-xxs text-text-muted leading-normal mt-0.5">{{ mod.description }}</p>
+                      <h5 class="text-xs font-bold text-text-main leading-tight">{{ mod.title }}</h5>
+                      <p class="text-[11px] text-text-muted leading-normal mt-0.5">{{ mod.description }}</p>
                     </div>
                   </div>
                 }
               </div>
             </div>
 
-            <!-- Action Button to navigate to World Map -->
-            <div class="pt-6 border-t border-border-main/50">
+            <!-- Action Button -->
+            <div class="pt-4 border-t border-border-main/50">
               <button
                 (click)="goToWorldMap()"
-                class="w-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent hover:shadow-brand-primary/20 text-white font-extrabold py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition-all cursor-pointer text-sm flex items-center justify-center gap-2 border-none"
+                class="w-full bg-text-main text-bg-main font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all cursor-pointer text-sm border-none hover:opacity-90"
               >
-                <span>Bắt Đầu Hành Trình Luyện Tập</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-swords shrink-0"><polyline points="20 4 20 8 16 8"/><polyline points="4 20 4 16 8 16"/><line x1="4" x2="20" y1="20" y2="4"/><line x1="14" x2="20" y1="14" y2="20"/><line x1="4" x2="10" y1="4" y2="10"/></svg>
+                Bắt Đầu Hành Trình Luyện Tập →
               </button>
             </div>
           </div>
@@ -594,5 +577,10 @@ export class PlacementTestComponent implements OnInit, OnDestroy {
 
   goToWorldMap(): void {
     this.router.navigate(['/dashboard'], { queryParams: { tab: 'suggested' } });
+  }
+
+  cancelAndLogout(): void {
+    this.authService.logout();
+    this.router.navigate(['/intro']);
   }
 }

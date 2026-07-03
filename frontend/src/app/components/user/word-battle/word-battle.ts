@@ -32,7 +32,7 @@ interface BattleQuestion {
         <!-- Header -->
         <div class="flex justify-between items-center mb-6 pb-3 border-b border-border-main">
           <div class="flex items-center gap-2">
-            <h2 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-red-500 via-brand-secondary to-brand-accent bg-clip-text text-transparent">
+            <h2 class="text-xl font-extrabold tracking-tight text-red-500">
               WORD BATTLE
             </h2>
             <span class="text-xxs bg-red-500/10 text-red-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider text-[10px]">
