@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { PlacementTestService, Question } from '../../../services/placement-test.service';
 import { AuthService } from '../../../services/auth.service';
 import { TtsService } from '../../../services/tts.service';
+import { retry, delay } from 'rxjs/operators';
 
 interface UserAnswer {
   questionId: number;
@@ -94,6 +95,19 @@ interface UserAnswer {
           </div>
         }
 
+        <!-- Loading/Cold-start Screen -->
+        @if (testState() === 'loading') {
+          <div class="text-center py-10 space-y-5">
+            <div class="w-16 h-16 border-4 border-border-main border-t-text-main rounded-full animate-spin mx-auto"></div>
+            <h3 class="text-lg font-bold text-text-main">Đang khởi động máy chủ...</h3>
+            <p class="text-text-muted text-sm max-w-sm mx-auto leading-relaxed">
+              Backend đang được khởi động lại (Free tier).<br/>
+              Vui lòng chờ khoảng <strong class="text-text-main">30–60 giây</strong>, hệ thống sẽ tự động tải đề thi.
+            </p>
+            <p class="text-text-muted text-xs">Đang thử lại lần {{ retryCount() }}/3...</p>
+          </div>
+        }
+
         <!-- Error Screen -->
         @if (testState() === 'error') {
           <div class="text-center py-10 space-y-4">
@@ -102,14 +116,14 @@ interface UserAnswer {
             </div>
             <h3 class="text-xl font-bold text-text-main">Không thể tải đề thi</h3>
             <p class="text-text-muted text-sm max-w-sm mx-auto">
-              Đã xảy ra sự cố trong quá trình kết nối với máy chủ. Vui lòng đảm bảo backend đang chạy và thử lại.
+              Máy chủ không phản hồi sau nhiều lần thử. Vui lòng đợi thêm rồi thử lại.
             </p>
             <div class="pt-4">
               <button
                 (click)="loadQuestions()"
                 class="bg-brand-primary hover:bg-brand-secondary text-white font-bold px-6 py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 mx-auto border-none"
               >
-                <span>Tải Lại Đề</span>
+                <span>Thử Lại</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw shrink-0"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
               </button>
             </div>
@@ -411,9 +425,10 @@ export class PlacementTestComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   readonly tts = inject(TtsService);
 
-  // States: 'welcome' | 'running' | 'evaluating' | 'error' | 'results'
-  testState = signal<'welcome' | 'running' | 'evaluating' | 'error' | 'results'>('welcome');
+  // States: 'welcome' | 'loading' | 'running' | 'evaluating' | 'error' | 'results'
+  testState = signal<'welcome' | 'loading' | 'running' | 'evaluating' | 'error' | 'results'>('welcome');
   roadmapResult = signal<any>(null);
+  retryCount = signal<number>(0);
 
   questions: Question[] = [];
   currentQuestionIndex = 0;
@@ -433,18 +448,36 @@ export class PlacementTestComponent implements OnInit, OnDestroy {
   }
 
   loadQuestions(): void {
-    this.placementService.getQuestions().subscribe({
-      next: (data) => {
-        this.questions = data;
-        if (this.questions.length === 0) {
-          this.testState.set('error');
+    this.retryCount.set(0);
+    this.testState.set('loading');
+    let attempt = 0;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 10000; // 10s between retries for cold-start
+
+    const tryFetch = () => {
+      attempt++;
+      this.retryCount.set(attempt);
+      this.placementService.getQuestions().subscribe({
+        next: (data) => {
+          this.questions = data;
+          if (this.questions.length === 0) {
+            this.testState.set('error');
+          } else {
+            this.testState.set('welcome');
+          }
+        },
+        error: (err) => {
+          console.error(`Error fetching questions (attempt ${attempt})`, err);
+          if (attempt < MAX_RETRIES) {
+            setTimeout(() => tryFetch(), RETRY_DELAY_MS);
+          } else {
+            this.testState.set('error');
+          }
         }
-      },
-      error: (err) => {
-        console.error('Error fetching questions', err);
-        this.testState.set('error');
-      }
-    });
+      });
+    };
+
+    tryFetch();
   }
 
   startTest(): void {
