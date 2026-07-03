@@ -59,7 +59,7 @@ interface DictionaryEntry {
                   Từ vựng
                 </button>
                 <span class="px-2 py-1 bg-brand-primary/10 text-brand-primary rounded-md uppercase tracking-wider font-extrabold text-[9px]">
-                  Level {{ articleLevel() }} - {{ articleLevel() === 1 ? 'Cơ bản' : 'Nâng cao' }}
+                  Level {{ articleLevel() }} - {{ isBasicLevel(articleLevel()) ? 'Cơ bản' : 'Nâng cao' }}
                 </span>
               </div>
             </div>
@@ -381,8 +381,14 @@ export class ReadingStudyComponent implements OnInit {
   roadmapId: number | null = null;
   articleId = 0;
   articleTitle = signal<string>('Article');
-  articleLevel = signal<number>(1);
+  articleLevel = signal<any>('A1');
   isCompleted = signal<boolean>(false);
+
+  isBasicLevel(lvl: any): boolean {
+    if (!lvl) return true;
+    const l = String(lvl).toLowerCase().trim();
+    return l === 'a1' || l === 'a2' || l === '1' || l === 'basic';
+  }
   
   passageLines = signal<{ eng: string; vie: string }[]>([]);
   dictionary = signal<Record<string, DictionaryEntry>>({});
@@ -440,9 +446,24 @@ export class ReadingStudyComponent implements OnInit {
         this.articleLevel.set(art.level);
         this.isCompleted.set(art.isCompleted);
         
+        // Parse raw description (stored in vietnameseContent) to extract translation and keywords
+        let rawVie = art.vietnameseContent || '';
+        let vieText = rawVie;
+        let keywordsText = '';
+        
+        const keywordsIndex = rawVie.toLowerCase().indexOf('keywords:');
+        if (keywordsIndex !== -1) {
+          keywordsText = rawVie.substring(keywordsIndex + 9).trim();
+          vieText = rawVie.substring(0, keywordsIndex).trim();
+        }
+        
+        if (vieText.toLowerCase().startsWith('vietnamese translation:')) {
+          vieText = vieText.substring(23).trim();
+        }
+        
         // Parse passage lines (by splitting newlines)
-        const engLines = art.content.split('\n').filter(l => l.trim().length > 0);
-        const vieLines = art.vietnameseContent.split('\n').filter(l => l.trim().length > 0);
+        const engLines = art.content ? art.content.split('\n').filter(l => l.trim().length > 0) : [];
+        const vieLines = vieText ? vieText.split('\n').filter(l => l.trim().length > 0) : [];
         
         const lines: { eng: string; vie: string }[] = [];
         const maxLines = Math.max(engLines.length, vieLines.length);
@@ -454,22 +475,36 @@ export class ReadingStudyComponent implements OnInit {
         }
         this.passageLines.set(lines);
 
-        // Parse vocabulary dictionary
+        // Parse vocabulary dictionary from raw comma-separated keywords
         const dict: Record<string, DictionaryEntry> = {};
-        if (art.vocabularyJson) {
-          try {
-            const vocabs: DictionaryEntry[] = JSON.parse(art.vocabularyJson);
-            vocabs.forEach(v => {
-              dict[v.word.toLowerCase().trim()] = v;
-            });
-          } catch (e) {
-            console.error('Error parsing vocabulary JSON', e);
-          }
+        if (keywordsText) {
+          const parts = keywordsText.split(',');
+          parts.forEach(p => {
+            const colon = p.indexOf(':');
+            if (colon !== -1) {
+              const wordPart = p.substring(0, colon).trim();
+              const meaning = p.substring(colon + 1).trim();
+              
+              const parenStart = wordPart.indexOf('(');
+              let word = wordPart;
+              let phonetic = '';
+              if (parenStart !== -1) {
+                word = wordPart.substring(0, parenStart).trim();
+                phonetic = wordPart.substring(parenStart).trim();
+              }
+              
+              dict[word.toLowerCase().trim()] = {
+                word: word,
+                phonetic: phonetic,
+                meaning: meaning
+              };
+            }
+          });
         }
         this.dictionary.set(dict);
 
         // Setup questions
-        this.questions.set(art.questions.map(q => ({
+        this.questions.set((art.questions || []).map(q => ({
           ...q,
           selectedAnswer: '',
           isSubmitted: q.isCorrect // if already answered correctly in backend

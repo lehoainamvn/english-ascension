@@ -2,6 +2,7 @@ package com.englishascension.backend.feature.user.repository;
 
 import com.englishascension.backend.feature.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Boolean existsByEmail(String email);
+
+    @Query("SELECT u FROM User u LEFT JOIN u.userGameStats s ORDER BY COALESCE(s.exp, 0) DESC")
     List<User> findAllByOrderByExpDesc();
-    Optional<User> findByResetToken(String resetToken);
 }

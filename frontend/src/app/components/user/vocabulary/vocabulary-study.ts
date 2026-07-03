@@ -6,6 +6,7 @@ import { VocabularyService, VocabTopic, VocabWord, RewardResult } from '../../..
 import { UserWordService, UserWord } from '../../../services/user-word.service';
 import { ToastService } from '../../../services/toast.service';
 import { StudyService } from '../../../services/study.service';
+import { TtsService } from '../../../services/tts.service';
 
 
 interface MatchCard {
@@ -695,6 +696,7 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
   private readonly userWordService = inject(UserWordService);
   private readonly toastService = inject(ToastService);
   private readonly studyService = inject(StudyService);
+  readonly tts = inject(TtsService);
 
   isRoadmap = false;
   roadmapId: number | null = null;
@@ -1189,14 +1191,9 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
     });
   }
 
-  speakWord(word: string) {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(word);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
-    }
+  /** Phát âm từ tiếng Anh — dùng TtsService (Web Speech API, miễn phí) */
+  speakWord(word: string, rate = 0.85) {
+    this.tts.speak(word, rate);
   }
 
   speakWordWithEvent(word: string, event: Event) {
@@ -1336,6 +1333,7 @@ export class VocabularyStudyComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
+    this.tts.stop();
     if (this.isRoadmap && this.roadmapId) {
       this.router.navigate(['/preset-roadmap', this.roadmapId]);
     } else {

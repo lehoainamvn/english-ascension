@@ -32,13 +32,17 @@ public class CommunityService {
         
         for (int i = 0; i < users.size(); i++) {
             User u = users.get(i);
-            String name = u.getCharacterName() != null ? u.getCharacterName() : u.getEmail().split("@")[0];
+            String name = u.getEmail().split("@")[0];
+            int lvl = u.getUserGameStats() != null ? u.getUserGameStats().getLevel() : 1;
+            int xp = u.getUserGameStats() != null ? u.getUserGameStats().getExp() : 0;
+            int streak = u.getUserGameStats() != null ? u.getUserGameStats().getStreak() : 0;
+
             entries.add(Map.of(
                 "rank", i + 1,
                 "name", name,
-                "level", u.getLevel(),
-                "exp", u.getExp(),
-                "streak", u.getStreak(),
+                "level", lvl,
+                "exp", xp,
+                "streak", streak,
                 "email", u.getEmail()
             ));
         }
@@ -51,7 +55,7 @@ public class CommunityService {
         Collections.reverse(sortedMessages);
 
         return sortedMessages.stream().map(m -> {
-            String name = m.getUser().getCharacterName() != null ? m.getUser().getCharacterName() : m.getUser().getEmail().split("@")[0];
+            String name = m.getUser().getEmail().split("@")[0];
             return Map.<String, Object>of(
                 "senderName", name,
                 "senderEmail", m.getUser().getEmail(),
@@ -72,7 +76,7 @@ public class CommunityService {
 
         chatMessageRepository.save(message);
 
-        String name = user.getCharacterName() != null ? user.getCharacterName() : user.getEmail().split("@")[0];
+        String name = user.getEmail().split("@")[0];
         return Map.of(
             "senderName", name,
             "senderEmail", user.getEmail(),

@@ -80,13 +80,6 @@ import { ToastService } from '../../../services/toast.service';
               </a>
             </div>
 
-            <!-- Alert Message -->
-            @if (errorMessage()) {
-              <div class="mb-5 bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                <span>{{ errorMessage() }}</span>
-              </div>
-            }
 
             <!-- Social Logins (Google only) -->
             <div class="space-y-2.5">
@@ -126,7 +119,7 @@ import { ToastService } from '../../../services/toast.service';
               <div>
                 <div class="flex justify-between items-center mb-1.5">
                   <label for="password" class="block text-[10px] font-bold text-text-muted uppercase tracking-wider">Mật khẩu</label>
-                  <a (click)="viewMode = 'forgot'; forgotError.set('')" class="text-[10px] font-bold text-brand-primary hover:text-brand-secondary cursor-pointer transition-colors no-underline">Quên mật khẩu?</a>
+                  <a (click)="viewMode = 'forgot'" class="text-[10px] font-bold text-brand-primary hover:text-brand-secondary cursor-pointer transition-colors no-underline">Quên mật khẩu?</a>
                 </div>
                 <input
                   id="password"
@@ -172,13 +165,6 @@ import { ToastService } from '../../../services/toast.service';
                 <p class="text-xxs text-text-muted mt-1 leading-relaxed">Nhập địa chỉ email của bạn. Chúng tôi sẽ gửi mã xác nhận OTP gồm 6 chữ số để đặt lại mật khẩu mới.</p>
               </div>
 
-              <!-- Alert Message -->
-              @if (forgotError()) {
-                <div class="bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                  <span>{{ forgotError() }}</span>
-                </div>
-              }
 
               <form (ngSubmit)="onForgotPasswordSubmit()" #forgotForm="ngForm" class="space-y-4">
                 <div>
@@ -213,7 +199,7 @@ import { ToastService } from '../../../services/toast.service';
                   </button>
                   <button
                     type="button"
-                    (click)="viewMode = 'login'; errorMessage.set('')"
+                    (click)="viewMode = 'login'"
                     class="w-full bg-bg-input border border-border-main text-text-muted py-3 rounded-xl hover:bg-bg-card transition-all cursor-pointer"
                   >
                     Quay lại đăng nhập
@@ -229,13 +215,6 @@ import { ToastService } from '../../../services/toast.service';
                 <p class="text-xxs text-text-muted mt-1 leading-relaxed">Mã xác nhận đã được gửi đến: <span class="font-bold text-text-main">{{ forgotEmail }}</span>. Vui lòng nhập mã và điền mật khẩu mới của bạn.</p>
               </div>
 
-              <!-- Alert Message -->
-              @if (resetError()) {
-                <div class="bg-rose-500/10 border border-border-main border-l-4 border-l-rose-500 text-rose-600 dark:text-rose-200 text-xs p-3.5 rounded-xl flex items-center gap-2.5 font-bold animate-fade-in">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-500 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                  <span>{{ resetError() }}</span>
-                </div>
-              }
 
               <form (ngSubmit)="onResetPasswordSubmit()" #resetForm="ngForm" class="space-y-4">
                 <!-- OTP Code -->
@@ -309,7 +288,7 @@ import { ToastService } from '../../../services/toast.service';
                   </button>
                   <button
                     type="button"
-                    (click)="viewMode = 'forgot'; resetError.set('')"
+                    (click)="viewMode = 'forgot'"
                     class="w-full bg-bg-input border border-border-main text-text-muted py-3 rounded-xl hover:bg-bg-card transition-all cursor-pointer"
                   >
                     Quay lại nhập email
@@ -329,11 +308,14 @@ export class LoginComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
+  // Prevent Google Sign-In from being initialized multiple times
+  private static googleInitialized = false;
+  private googleInitInterval: any = null;
+
   email = '';
   password = '';
   
   isLoading = signal(false);
-  errorMessage = signal('');
 
   // Forgot / Reset Password properties
   viewMode: 'login' | 'forgot' | 'reset' = 'login';
@@ -344,8 +326,6 @@ export class LoginComponent implements OnInit {
 
   isSendingOtp = signal(false);
   isResettingPassword = signal(false);
-  forgotError = signal('');
-  resetError = signal('');
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
@@ -362,19 +342,27 @@ export class LoginComponent implements OnInit {
 
   private checkAndInitGoogle(): void {
     if (typeof window === 'undefined') return;
+    // If already initialized once in this session, just re-render the button
+    if (LoginComponent.googleInitialized) {
+      setTimeout(() => this.initGoogleSignIn(), 100);
+      return;
+    }
 
     let attempts = 0;
-    const interval = setInterval(() => {
+    this.googleInitInterval = setInterval(() => {
       attempts++;
       // @ts-ignore
       const googleDefined = typeof google !== 'undefined' && google.accounts && google.accounts.id;
       const elementExists = document.getElementById('googleBtn') !== null;
 
       if (googleDefined && elementExists) {
-        clearInterval(interval);
+        clearInterval(this.googleInitInterval);
+        this.googleInitInterval = null;
+        LoginComponent.googleInitialized = true;
         this.initGoogleSignIn();
       } else if (attempts > 30) { // Stop after 15 seconds
-        clearInterval(interval);
+        clearInterval(this.googleInitInterval);
+        this.googleInitInterval = null;
         console.warn('Google Sign-In API or button container not found after 15 seconds.');
       }
     }, 500);
@@ -400,22 +388,19 @@ export class LoginComponent implements OnInit {
   handleGoogleCredentialResponse(response: any): void {
     if (response && response.credential) {
       this.isLoading.set(true);
-      this.errorMessage.set('');
       this.authService.googleLogin(response.credential).subscribe({
         next: (res) => {
           this.isLoading.set(false);
           this.toastService.success('Đăng nhập thành công! Chào mừng quay trở lại.');
           if (res && res.role === 'ROLE_ADMIN') {
             this.router.navigate(['/admin-roadmap']);
-          } else if (res && !res.hasCharacter) {
-            this.router.navigate(['/character-customization']);
           } else {
             this.router.navigate(['/dashboard']);
           }
         },
         error: (err) => {
           this.isLoading.set(false);
-          this.errorMessage.set(err.error?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
+          this.toastService.error(err.error?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
         }
       });
     }
@@ -425,7 +410,6 @@ export class LoginComponent implements OnInit {
     if (!this.email || !this.password) return;
 
     this.isLoading.set(true);
-    this.errorMessage.set('');
 
     this.authService.login(this.email, this.password).subscribe({
       next: (res) => {
@@ -433,8 +417,6 @@ export class LoginComponent implements OnInit {
         this.toastService.success('Đăng nhập thành công! Chào mừng quay trở lại.');
         if (res && res.role === 'ROLE_ADMIN') {
           this.router.navigate(['/admin-roadmap']);
-        } else if (res && !res.hasCharacter) {
-          this.router.navigate(['/character-customization']);
         } else {
           this.router.navigate(['/dashboard']);
         }
@@ -442,9 +424,9 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         this.isLoading.set(false);
         if (err.status === 401 || err.status === 403) {
-          this.errorMessage.set('Email hoặc mật khẩu không chính xác.');
+          this.toastService.error('Email hoặc mật khẩu không chính xác.');
         } else {
-          this.errorMessage.set(err.error?.message || 'Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại sau.');
+          this.toastService.error(err.error?.message || 'Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại sau.');
         }
       }
     });
@@ -454,7 +436,6 @@ export class LoginComponent implements OnInit {
     if (!this.forgotEmail) return;
 
     this.isSendingOtp.set(true);
-    this.forgotError.set('');
 
     this.authService.forgotPassword(this.forgotEmail).subscribe({
       next: () => {
@@ -464,24 +445,23 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         this.isSendingOtp.set(false);
-        this.forgotError.set(err.error?.message || 'Không thể gửi yêu cầu khôi phục. Vui lòng thử lại.');
+        this.toastService.error(err.error?.message || 'Không thể gửi yêu cầu khôi phục. Vui lòng thử lại.');
       }
     });
   }
 
   onResetPasswordSubmit(): void {
     if (!this.resetOtp || !this.resetNewPassword || this.resetNewPassword !== this.resetConfirmPassword) {
-      this.resetError.set('Vui lòng điền đúng thông tin và khớp mật khẩu mới.');
+      this.toastService.error('Vui lòng điền đúng thông tin và khớp mật khẩu mới.');
       return;
     }
 
     if (this.resetNewPassword.length < 6) {
-      this.resetError.set('Mật khẩu mới phải dài ít nhất 6 ký tự.');
+      this.toastService.error('Mật khẩu mới phải dài ít nhất 6 ký tự.');
       return;
     }
 
     this.isResettingPassword.set(true);
-    this.resetError.set('');
 
     this.authService.resetPassword(this.resetOtp, this.resetNewPassword).subscribe({
       next: () => {
@@ -495,7 +475,7 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         this.isResettingPassword.set(false);
-        this.resetError.set(err.error?.message || 'Khôi phục mật khẩu thất bại. Vui lòng thử lại.');
+        this.toastService.error(err.error?.message || 'Khôi phục mật khẩu thất bại. Vui lòng thử lại.');
       }
     });
   }

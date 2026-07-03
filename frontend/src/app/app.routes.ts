@@ -7,7 +7,6 @@ import { PlacementTestComponent } from './components/user/placement-test/placeme
 import { StudyComponent } from './components/user/study/study';
 import { WordBattleComponent } from './components/user/word-battle/word-battle';
 import { AiDocumentLearningComponent } from './components/user/ai-document-learning/ai-document-learning';
-import { CharacterCustomizationComponent } from './components/user/character-customization/character-customization';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { AdminRoadmapComponent } from './components/admin/admin-roadmap/admin-roadmap';
@@ -26,7 +25,6 @@ import { ProgressComponent } from './components/user/progress/progress';
 import { MyVocabularyComponent } from './components/user/my-vocabulary/my-vocabulary';
 import { CommunityComponent } from './components/user/community/community';
 import { IntroComponent } from './components/user/intro/intro';
-import { ShopComponent } from './components/user/shop/shop';
 import { PresetRoadmapDetailComponent } from './components/user/preset-roadmap-detail/preset-roadmap-detail';
 import { ClassroomComponent } from './components/user/classroom/classroom';
 
@@ -36,12 +34,12 @@ export const routes: Routes = [
   { path: 'intro', component: IntroComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
-  { path: 'character-customization', component: CharacterCustomizationComponent, canActivate: [authGuard] },
+  { path: 'character-customization', redirectTo: 'profile' },
   { path: 'placement-test', component: PlacementTestComponent, canActivate: [authGuard] },
   { path: 'study/:moduleId', component: StudyComponent, canActivate: [authGuard] },
   { path: 'word-battle/:moduleId', component: WordBattleComponent, canActivate: [authGuard] },
   { path: 'document-learning', component: AiDocumentLearningComponent, canActivate: [authGuard] },
-  { path: 'shop', component: ShopComponent, canActivate: [authGuard] },
+  { path: 'shop', redirectTo: 'dashboard' },
   
   // New paths
   { path: 'vocabulary', component: VocabularyComponent, canActivate: [authGuard] },

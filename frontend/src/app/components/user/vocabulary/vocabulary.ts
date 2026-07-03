@@ -36,7 +36,6 @@ import { VocabularyService, VocabTopic } from '../../../services/vocabulary.serv
             [class.text-text-muted]="activeTab() !== 'CEFR'"
             class="flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target shrink-0"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
             Từ Vựng CEFR
           </button>
           <button
@@ -47,7 +46,6 @@ import { VocabularyService, VocabTopic } from '../../../services/vocabulary.serv
             [class.text-text-muted]="activeTab() !== 'TOEIC'"
             class="flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase shrink-0"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
             Luyện Thi TOEIC
           </button>
         </div>
@@ -101,6 +99,18 @@ import { VocabularyService, VocabTopic } from '../../../services/vocabulary.serv
           </div>
         </div>
 
+        <!-- Result count -->
+        <div class="flex justify-between items-center text-[11px] text-text-muted font-bold -mt-4">
+          <div>
+            Hiển thị {{ filteredTopics().length }} chủ đề
+            @if (levelFilter() !== 'ALL') { · cấp <strong>{{ levelFilter() }}</strong> }
+            @if (searchQuery()) { · tìm "<strong>{{ searchQuery() }}</strong>" }
+          </div>
+          <div>
+            Đã hoàn thành: <span class="text-brand-primary">{{ getCompletedTopicsCount() }}</span> / {{ topics().length }} chủ đề
+          </div>
+        </div>
+
         <!-- Topics List -->
         @if (isLoading()) {
           <div class="flex flex-col items-center justify-center py-20 space-y-4">
@@ -120,14 +130,26 @@ import { VocabularyService, VocabTopic } from '../../../services/vocabulary.serv
                 <!-- Top Header -->
                 <div class="space-y-2">
                   <div class="flex justify-between items-center">
-                    <span class="text-[9px] font-extrabold px-2 py-0.5 rounded bg-brand-primary/10 text-brand-primary uppercase tracking-wide">
+                    <span class="text-[9px] font-extrabold px-2 py-0.5 rounded bg-bg-input text-text-muted border border-border-main/50 uppercase tracking-wide">
                       {{ topic.category === 'TỪ VỰNG CEFR' ? 'CEFR Level' : (topic.category === 'VOCABULARY' ? 'Từ vựng TOEIC' : topic.category) }}
                     </span>
-                    @if (topic.isCompleted) {
-                      <span class="text-[9px] font-extrabold text-green-500 flex items-center gap-0.5">
-                        ✓ Đã thuộc
-                      </span>
-                    }
+                    <span 
+                      [class.bg-green-500/10]="topic.learnedCount === topic.wordsCount && topic.wordsCount > 0"
+                      [class.text-green-500]="topic.learnedCount === topic.wordsCount && topic.wordsCount > 0"
+                      [class.border-green-500/20]="topic.learnedCount === topic.wordsCount && topic.wordsCount > 0"
+                      
+                      [class.bg-amber-500/10]="topic.learnedCount > 0 && topic.learnedCount < topic.wordsCount"
+                      [class.text-amber-500]="topic.learnedCount > 0 && topic.learnedCount < topic.wordsCount"
+                      [class.border-amber-500/20]="topic.learnedCount > 0 && topic.learnedCount < topic.wordsCount"
+                      
+                      [class.bg-bg-input]="topic.learnedCount === 0"
+                      [class.text-text-muted]="topic.learnedCount === 0"
+                      [class.border-border-main]="topic.learnedCount === 0"
+                      
+                      class="text-[9px] font-bold px-2 py-0.5 rounded-full border shrink-0 uppercase tracking-wide"
+                    >
+                      {{ topic.learnedCount === topic.wordsCount && topic.wordsCount > 0 ? 'Đã học' : (topic.learnedCount > 0 ? 'Đang học' : 'Chưa học') }}
+                    </span>
                   </div>
                   
                   <h2 class="text-base font-black text-text-main group-hover:text-brand-primary transition-colors">
@@ -349,5 +371,9 @@ export class VocabularyComponent implements OnInit {
     this.searchQuery.set('');
     this.statusFilter.set('ALL');
     this.levelFilter.set('ALL');
+  }
+
+  getCompletedTopicsCount() {
+    return this.topics().filter(t => t.learnedCount === t.wordsCount && t.wordsCount > 0).length;
   }
 }

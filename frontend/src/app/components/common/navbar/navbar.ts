@@ -156,14 +156,6 @@ import { ToastService } from '../../../services/toast.service';
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square shrink-0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     Cộng đồng
                   </a>
-                  <a
-                    routerLink="/shop"
-                    (click)="isUtilityDropdownOpen.set(false)"
-                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-main hover:bg-bg-input/60 transition-colors cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag shrink-0"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    Cửa hàng
-                  </a>
                 </div>
               }
             </div>
@@ -174,9 +166,7 @@ import { ToastService } from '../../../services/toast.service';
             <!-- Stats -->
             @if (profile()) {
               <div class="hidden lg:flex items-center gap-2 text-[10px] font-bold text-text-muted bg-bg-input/50 px-2.5 py-1 rounded-lg border border-border-main/40">
-                <span>Streak: {{ profile()?.streak || 0 }}</span>
-                <span class="text-text-muted/30">|</span>
-                <span>Xu: {{ profile()?.coins || 0 }}</span>
+                <span>Streak: {{ profile()?.streak || 0 }} ngày</span>
               </div>
             }
 
@@ -401,14 +391,6 @@ import { ToastService } from '../../../services/toast.service';
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square shrink-0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     Cộng đồng
                   </a>
-                  <a
-                    routerLink="/shop"
-                    (click)="isMobileMenuOpen.set(false); isMobileUtilityOpen.set(false)"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/20 transition-all cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag shrink-0"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    Cửa hàng
-                  </a>
                 </div>
               }
             </div>
@@ -496,7 +478,6 @@ import { ToastService } from '../../../services/toast.service';
                 Đang xử lý...
               } @else {
                 Lưu mật khẩu
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 15.01 9 12.01"/></svg>
               }
             </button>
             <button

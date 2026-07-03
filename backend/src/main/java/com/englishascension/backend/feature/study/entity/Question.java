@@ -1,7 +1,11 @@
 package com.englishascension.backend.feature.study.entity;
 
+import com.englishascension.backend.feature.roadmap.entity.Lesson;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "questions")
@@ -11,19 +15,27 @@ public class Question {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "source_type", length = 50) private String sourceType;
-    @Column(name = "parent_id")   private Long parentId;
-    @Column(name = "question_number") private Integer questionNumber;
-    @Column(name = "type", nullable = true, length = 50) private String type;
-    @Column(nullable = true) private String difficulty;
-    @Column(name = "question_text", columnDefinition = "TEXT", nullable = false) private String questionText;
-    @Column(name = "audio_url", length = 555) private String audioUrl;
-    @Column(name = "image_url", length = 555) private String imageUrl;
-    @Column(name = "option_a") private String optionA;
-    @Column(name = "option_b") private String optionB;
-    @Column(name = "option_c") private String optionC;
-    @Column(name = "option_d") private String optionD;
-    @Column(name = "correct_option", length = 50) private String correctOption;
-    @Column(name = "correct_answer")  private String correctAnswer;
-    @Column(columnDefinition = "TEXT") private String explanation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_id", nullable = false)
+    @JsonIgnore
+    private Lesson lesson;
+
+    @Column(name = "source_type", length = 50)
+    private String sourceType; // e.g. PLACEMENT_TEST, ROADMAP_QUIZ, etc.
+
+    @Column(name = "question_text", columnDefinition = "TEXT", nullable = false)
+    private String questionText;
+
+    @Column(name = "image_url", length = 555)
+    private String imageUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String explanation;
+
+    @Column(length = 50)
+    private String difficulty;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<QuestionOption> options = new ArrayList<>();
 }

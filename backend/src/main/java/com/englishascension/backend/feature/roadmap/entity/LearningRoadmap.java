@@ -1,29 +1,21 @@
 package com.englishascension.backend.feature.roadmap.entity;
 
-import com.englishascension.backend.feature.user.entity.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "learning_roadmaps")
+@Table(name = "roadmaps")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class LearningRoadmap {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true)
-    @JsonIgnore
-    private User user;
 
     @Column(name = "cefr_level", nullable = false, length = 50)
     private String cefrLevel;
@@ -37,31 +29,15 @@ public class LearningRoadmap {
     @JsonProperty("isPreset")
     @Column(name = "is_preset", nullable = false)
     @Builder.Default
-    private boolean isPreset = false;
+    private boolean isPreset = true;
 
-    @Column(name = "thumbnail_emoji", length = 50) private String thumbnailEmoji;
-    @Column(name = "difficulty_label",  length = 50) private String difficultyLabel;
-    @Column(name = "modules_count")    private Integer modulesCount;
+    @Column(name = "thumbnail_emoji", length = 50) 
+    private String thumbnailEmoji;
+
+    @Column(name = "difficulty_label", length = 50) 
+    private String difficultyLabel;
 
     @OneToMany(mappedBy = "roadmap", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default @OrderBy("orderIndex ASC")
     private List<LearningModule> modules = new ArrayList<>();
-
-    @ManyToMany
-    @JoinTable(
-        name = "roadmap_lessons",
-        joinColumns = @JoinColumn(name = "roadmap_id"),
-        inverseJoinColumns = @JoinColumn(name = "lesson_id")
-    )
-    @Builder.Default
-    private List<Lesson> lessons = new ArrayList<>();
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist  protected void onCreate() { createdAt = LocalDateTime.now(); updatedAt = LocalDateTime.now(); }
-    @PreUpdate   protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 }

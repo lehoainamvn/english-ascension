@@ -6,9 +6,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "learning_modules")
+@Table(name = "modules")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class LearningModule {
@@ -36,6 +38,10 @@ public class LearningModule {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Builder.Default @OrderBy("orderIndex ASC")
+    private List<Lesson> lessons = new ArrayList<>();
 
     @PrePersist protected void onCreate() { createdAt = LocalDateTime.now(); }
 }

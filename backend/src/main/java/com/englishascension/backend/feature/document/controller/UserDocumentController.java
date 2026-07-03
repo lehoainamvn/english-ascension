@@ -1,10 +1,12 @@
 package com.englishascension.backend.feature.document.controller;
 
-import com.englishascension.backend.feature.user.entity.User;
-import com.englishascension.backend.feature.study.entity.StudyContent;
-import com.englishascension.backend.feature.study.entity.Flashcard;
-import com.englishascension.backend.feature.user.repository.UserRepository;
+import com.englishascension.backend.feature.document.entity.UserDocument;
+import com.englishascension.backend.feature.document.entity.DocumentFlashcard;
+import com.englishascension.backend.feature.document.entity.DocumentQuestion;
+import com.englishascension.backend.feature.document.entity.DocumentQuestionOption;
 import com.englishascension.backend.feature.document.service.UserDocumentService;
+import com.englishascension.backend.feature.user.entity.User;
+import com.englishascension.backend.feature.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,7 +30,8 @@ public class UserDocumentController {
     private final UserRepository userRepository;
     private final UserDocumentService userDocumentService;
 
-    public UserDocumentController(UserRepository userRepository, UserDocumentService userDocumentService) {
+    public UserDocumentController(UserRepository userRepository, 
+                                  UserDocumentService userDocumentService) {
         this.userRepository = userRepository;
         this.userDocumentService = userDocumentService;
     }
@@ -47,7 +50,7 @@ public class UserDocumentController {
             User currentUser = getCurrentUser();
             log.info("User {} uploading document: {}, flashcardCount: {}", currentUser.getEmail(), file.getOriginalFilename(), flashcardCount);
             
-            StudyContent doc = userDocumentService.uploadAndProcess(file, currentUser, flashcardCount);
+            UserDocument doc = userDocumentService.uploadAndProcess(file, currentUser, flashcardCount);
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Tải lên và phân tích tài liệu thành công!");
@@ -66,7 +69,7 @@ public class UserDocumentController {
     public ResponseEntity<?> listDocuments() {
         try {
             User currentUser = getCurrentUser();
-            List<StudyContent> docs = userDocumentService.getMyDocuments(currentUser);
+            List<UserDocument> docs = userDocumentService.getMyDocuments(currentUser);
             
             List<Map<String, Object>> response = docs.stream().map(doc -> {
                 Map<String, Object> map = new HashMap<>();
@@ -74,7 +77,7 @@ public class UserDocumentController {
                 map.put("fileName", doc.getTitle());
                 map.put("createdAt", doc.getCreatedAt());
                 map.put("flashcardCount", doc.getFlashcards().size());
-                map.put("quizCount", doc.getQuizQuestions().size());
+                map.put("quizCount", doc.getQuestions().size());
                 return map;
             }).toList();
             
@@ -90,15 +93,64 @@ public class UserDocumentController {
     public ResponseEntity<?> getDocumentDetails(@PathVariable Long id) {
         try {
             User currentUser = getCurrentUser();
-            StudyContent doc = userDocumentService.getDocumentById(id, currentUser);
+            UserDocument doc = userDocumentService.getDocumentById(id, currentUser);
             
+            List<DocumentFlashcard> flashcards = doc.getFlashcards();
+            List<DocumentQuestion> questions = doc.getQuestions();
+
+            List<Map<String, Object>> flashcardList = flashcards.stream().map(fc -> {
+                Map<String, Object> fcMap = new HashMap<>();
+                fcMap.put("id", fc.getId());
+                fcMap.put("word", fc.getWord());
+                fcMap.put("partOfSpeech", fc.getPartOfSpeech());
+                fcMap.put("phonetic", fc.getPhonetic());
+                fcMap.put("definition", fc.getDefinition());
+                fcMap.put("exampleSentence", fc.getExampleSentence());
+                fcMap.put("exampleTranslation", fc.getExampleTranslation());
+                return fcMap;
+            }).toList();
+
+            List<Map<String, Object>> quizQuestions = questions.stream().map(q -> {
+                Map<String, Object> qDto = new HashMap<>();
+                qDto.put("id", q.getId());
+                qDto.put("questionText", q.getQuestionText());
+                qDto.put("explanation", q.getExplanation());
+
+                qDto.put("optionA", "");
+                qDto.put("optionB", "");
+                qDto.put("optionC", "");
+                qDto.put("optionD", "");
+                String correct = "A";
+
+                for (DocumentQuestionOption opt : q.getOptions()) {
+                    if ("A".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionA", opt.getOptionValue());
+                    if ("B".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionB", opt.getOptionValue());
+                    if ("C".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionC", opt.getOptionValue());
+                    if ("D".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionD", opt.getOptionValue());
+                    if (opt.isCorrect()) {
+                        correct = opt.getOptionKey();
+                    }
+                }
+
+                boolean isMcq = false;
+                for (DocumentQuestionOption opt : q.getOptions()) {
+                    if ("A".equalsIgnoreCase(opt.getOptionKey()) && opt.getOptionValue() != null && !opt.getOptionValue().trim().isEmpty()) {
+                        isMcq = true;
+                    }
+                }
+                qDto.put("type", isMcq ? "MULTIPLE_CHOICE" : "FILL_IN_BLANK");
+
+                qDto.put("correctAnswer", correct);
+                return qDto;
+            }).toList();
+
             Map<String, Object> response = new HashMap<>();
             response.put("id", doc.getId());
             response.put("fileName", doc.getTitle());
             response.put("extractedText", doc.getBodyText());
             response.put("createdAt", doc.getCreatedAt());
-            response.put("flashcards", doc.getFlashcards());
-            response.put("quizQuestions", doc.getQuizQuestions());
+            response.put("flashcards", flashcardList);
+            response.put("quizQuestions", quizQuestions);
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -125,10 +177,10 @@ public class UserDocumentController {
     }
 
     @PostMapping("/{docId}/flashcards")
-    public ResponseEntity<?> addFlashcardToDocument(@PathVariable Long docId, @RequestBody Flashcard flashcard) {
+    public ResponseEntity<?> addFlashcardToDocument(@PathVariable Long docId, @RequestBody DocumentFlashcard flashcard) {
         try {
             User currentUser = getCurrentUser();
-            Flashcard saved = userDocumentService.addFlashcard(docId, flashcard, currentUser);
+            DocumentFlashcard saved = userDocumentService.addFlashcard(docId, flashcard, currentUser);
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
             log.error("Lỗi khi thêm flashcard thủ công", e);
@@ -158,14 +210,49 @@ public class UserDocumentController {
     public ResponseEntity<?> regenerateQuiz(
             @PathVariable Long docId,
             @RequestParam(value = "questionCount", defaultValue = "5") int questionCount,
-            @RequestParam(value = "questionType", defaultValue = "MIXED") String questionType) {
+            @RequestParam(value = "questionType", defaultValue = "MULTIPLE_CHOICE") String questionType) {
         try {
             User currentUser = getCurrentUser();
             log.info("User {} regenerating quiz for doc {}: count={}, type={}", currentUser.getEmail(), docId, questionCount, questionType);
-            var newQuestions = userDocumentService.regenerateQuiz(docId, currentUser, questionCount, questionType);
+            List<DocumentQuestion> newQuestions = userDocumentService.regenerateQuiz(docId, currentUser, questionCount, questionType);
+            
+            List<Map<String, Object>> qDtos = newQuestions.stream().map(q -> {
+                Map<String, Object> qDto = new HashMap<>();
+                qDto.put("id", q.getId());
+                qDto.put("questionText", q.getQuestionText());
+                qDto.put("explanation", q.getExplanation());
+
+                qDto.put("optionA", "");
+                qDto.put("optionB", "");
+                qDto.put("optionC", "");
+                qDto.put("optionD", "");
+                String correct = "A";
+
+                for (DocumentQuestionOption opt : q.getOptions()) {
+                    if ("A".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionA", opt.getOptionValue());
+                    if ("B".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionB", opt.getOptionValue());
+                    if ("C".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionC", opt.getOptionValue());
+                    if ("D".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionD", opt.getOptionValue());
+                    if (opt.isCorrect()) {
+                        correct = opt.getOptionKey();
+                    }
+                }
+
+                boolean isMcq = false;
+                for (DocumentQuestionOption opt : q.getOptions()) {
+                    if ("A".equalsIgnoreCase(opt.getOptionKey()) && opt.getOptionValue() != null && !opt.getOptionValue().trim().isEmpty()) {
+                        isMcq = true;
+                    }
+                }
+                qDto.put("type", isMcq ? "MULTIPLE_CHOICE" : "FILL_IN_BLANK");
+
+                qDto.put("correctAnswer", correct);
+                return qDto;
+            }).toList();
+
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Tạo lại quiz thành công!");
-            response.put("quizQuestions", newQuestions);
+            response.put("quizQuestions", qDtos);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Lỗi khi tạo lại quiz", e);

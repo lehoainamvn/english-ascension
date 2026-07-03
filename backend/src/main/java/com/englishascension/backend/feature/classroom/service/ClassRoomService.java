@@ -2,17 +2,22 @@ package com.englishascension.backend.feature.classroom.service;
 
 import com.englishascension.backend.feature.classroom.entity.ClassRoom;
 import com.englishascension.backend.feature.classroom.entity.ClassMember;
-import com.englishascension.backend.feature.classroom.entity.ClassQuiz;
+import com.englishascension.backend.feature.classroom.entity.ClassAssignment;
 import com.englishascension.backend.feature.classroom.entity.ClassRole;
 import com.englishascension.backend.feature.classroom.repository.ClassRoomRepository;
 import com.englishascension.backend.feature.classroom.repository.ClassMemberRepository;
-import com.englishascension.backend.feature.classroom.repository.ClassQuizRepository;
+import com.englishascension.backend.feature.classroom.repository.ClassAssignmentRepository;
 
+import com.englishascension.backend.feature.roadmap.entity.Lesson;
+import com.englishascension.backend.feature.roadmap.entity.LessonType;
+import com.englishascension.backend.feature.roadmap.repository.LessonRepository;
 import com.englishascension.backend.feature.study.entity.Question;
+import com.englishascension.backend.feature.study.entity.QuestionOption;
 import com.englishascension.backend.feature.study.repository.QuestionRepository;
 import com.englishascension.backend.feature.user.entity.User;
-import com.englishascension.backend.feature.user.entity.UserProgress;
-import com.englishascension.backend.feature.user.repository.UserProgressRepository;
+import com.englishascension.backend.feature.user.entity.UserGameStats;
+import com.englishascension.backend.feature.user.entity.UserLessonState;
+import com.englishascension.backend.feature.user.repository.UserLessonStateRepository;
 import com.englishascension.backend.feature.user.repository.UserRepository;
 
 import org.slf4j.Logger;
@@ -20,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,27 +37,29 @@ public class ClassRoomService {
 
     private final ClassRoomRepository classRoomRepository;
     private final ClassMemberRepository classMemberRepository;
-    private final ClassQuizRepository classQuizRepository;
+    private final ClassAssignmentRepository classAssignmentRepository;
+    private final LessonRepository lessonRepository;
     private final QuestionRepository questionRepository;
-    private final UserProgressRepository userProgressRepository;
+    private final UserLessonStateRepository userLessonStateRepository;
     private final UserRepository userRepository;
 
     public ClassRoomService(
             ClassRoomRepository classRoomRepository,
             ClassMemberRepository classMemberRepository,
-            ClassQuizRepository classQuizRepository,
+            ClassAssignmentRepository classAssignmentRepository,
+            LessonRepository lessonRepository,
             QuestionRepository questionRepository,
-            UserProgressRepository userProgressRepository,
+            UserLessonStateRepository userLessonStateRepository,
             UserRepository userRepository) {
         this.classRoomRepository = classRoomRepository;
         this.classMemberRepository = classMemberRepository;
-        this.classQuizRepository = classQuizRepository;
+        this.classAssignmentRepository = classAssignmentRepository;
+        this.lessonRepository = lessonRepository;
         this.questionRepository = questionRepository;
-        this.userProgressRepository = userProgressRepository;
+        this.userLessonStateRepository = userLessonStateRepository;
         this.userRepository = userRepository;
     }
 
-    /** Tạo class mới, người tạo tự động là OWNER */
     public Map<String, Object> createClassRoom(String name, String description, User creator) {
         String code = generateUniqueCode();
         ClassRoom classRoom = ClassRoom.builder()
@@ -62,7 +70,6 @@ public class ClassRoomService {
                 .build();
         classRoom = classRoomRepository.save(classRoom);
 
-        // Tự động thêm người tạo là OWNER
         ClassMember ownerMember = ClassMember.builder()
                 .classRoom(classRoom)
                 .user(creator)
@@ -73,20 +80,17 @@ public class ClassRoomService {
         return buildClassRoomDto(classRoom, creator);
     }
 
-    /** Lấy danh sách class của user (tạo hoặc tham gia) */
     public List<Map<String, Object>> getMyClasses(User user) {
         List<ClassRoom> rooms = classRoomRepository.findAllByUserInvolved(user);
         return rooms.stream().map(r -> buildClassRoomDto(r, user)).collect(Collectors.toList());
     }
 
-    /** Lấy chi tiết class với members và quizzes */
     public Map<String, Object> getClassRoomDetails(Long classRoomId, User user) {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertMember(classRoom, user);
         return buildClassRoomDetailsDto(classRoom, user);
     }
 
-    /** Tham gia class bằng invite code */
     public Map<String, Object> joinClass(String inviteCode, User user) {
         ClassRoom classRoom = classRoomRepository.findByInviteCode(inviteCode.trim().toUpperCase())
                 .orElseThrow(() -> new RuntimeException("Mã mời không hợp lệ hoặc class không tồn tại."));
@@ -105,14 +109,12 @@ public class ClassRoomService {
         return buildClassRoomDto(classRoom, user);
     }
 
-    /** Xóa class (chỉ owner) */
     public void deleteClassRoom(Long classRoomId, User user) {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertOwner(classRoom, user);
         classRoomRepository.delete(classRoom);
     }
 
-    /** Xóa thành viên (chỉ owner, không thể xóa chính mình) */
     public void removeMember(Long classRoomId, Long memberUserId, User owner) {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertOwner(classRoom, owner);
@@ -125,121 +127,132 @@ public class ClassRoomService {
         classMemberRepository.delete(member);
     }
 
-    /** Tạo quiz cho class (chỉ owner) */
     public Map<String, Object> createQuiz(Long classRoomId, String title, String description,
                                            List<Map<String, Object>> questions, User owner) {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertOwner(classRoom, owner);
 
-        ClassQuiz quiz = ClassQuiz.builder()
+        // A Quiz is represented as a Lesson of type 'CLASS_QUIZ'
+        String slug = "class-quiz-" + UUID.randomUUID();
+        Lesson lesson = Lesson.builder()
+                .type(LessonType.CLASS_QUIZ)
+                .title(title)
+                .slug(slug)
+                .orderIndex(1)
+                .difficultyScore(1.0)
+                .topic(title)
+                .build();
+        lesson = lessonRepository.save(lesson);
+
+        // Save questions
+        saveQuestions(lesson, questions);
+
+        // Create assignment for class
+        ClassAssignment assignment = ClassAssignment.builder()
                 .classRoom(classRoom)
                 .title(title)
                 .description(description)
+                .lesson(lesson)
                 .createdBy(owner)
-                .isActive(true)
+                .active(true)
                 .build();
-        quiz = classQuizRepository.save(quiz);
+        assignment = classAssignmentRepository.save(assignment);
 
-        saveQuestions(quiz, questions);
-        return buildQuizDto(quiz, owner);
+        return buildAssignmentDto(assignment, owner);
     }
 
-    /** Sửa quiz (chỉ owner) - cập nhật title, description và thay toàn bộ câu hỏi */
     public Map<String, Object> updateQuiz(Long classRoomId, Long quizId, String title, String description,
                                            List<Map<String, Object>> questions, User owner) {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertOwner(classRoom, owner);
-        ClassQuiz quiz = findQuizOrThrow(quizId, classRoom);
+        ClassAssignment assignment = classAssignmentRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found."));
 
-        quiz.setTitle(title);
-        if (description != null) quiz.setDescription(description);
-        quiz = classQuizRepository.save(quiz);
+        Lesson lesson = assignment.getLesson();
+        if (lesson != null) {
+            lesson.setTitle(title);
+            lessonRepository.save(lesson);
 
-        // Replace all questions
-        List<Question> oldQuestions = questionRepository.findBySourceTypeAndParentId("CLASS_QUIZ", quiz.getId());
-        questionRepository.deleteAll(oldQuestions);
-        saveQuestions(quiz, questions);
-        return buildQuizDto(quiz, owner);
+            // Replace questions
+            List<Question> oldQuestions = questionRepository.findByLessonId(lesson.getId());
+            questionRepository.deleteAll(oldQuestions);
+            saveQuestions(lesson, questions);
+        }
+
+        assignment.setTitle(title);
+        assignment.setDescription(description);
+        classAssignmentRepository.save(assignment);
+
+        return buildAssignmentDto(assignment, owner);
     }
 
-    /** Xóa quiz (chỉ owner) */
     public void deleteQuiz(Long classRoomId, Long quizId, User owner) {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertOwner(classRoom, owner);
-        ClassQuiz quiz = findQuizOrThrow(quizId, classRoom);
-        
-        // Delete related questions first
-        List<Question> questions = questionRepository.findBySourceTypeAndParentId("CLASS_QUIZ", quizId);
-        questionRepository.deleteAll(questions);
-        
-        classQuizRepository.delete(quiz);
+        ClassAssignment assignment = classAssignmentRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found."));
+
+        Lesson lesson = assignment.getLesson();
+        classAssignmentRepository.delete(assignment);
+        if (lesson != null) {
+            lessonRepository.delete(lesson);
+        }
     }
 
-    /** Nộp bài thi */
     public Map<String, Object> submitQuiz(Long classRoomId, Long quizId,
                                            Map<Long, String> answers, User user) {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertMember(classRoom, user);
-        ClassQuiz quiz = findQuizOrThrow(quizId, classRoom);
+        ClassAssignment assignment = classAssignmentRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found."));
 
-        List<Question> questions = questionRepository.findBySourceTypeAndParentIdOrderByQuestionNumberAsc("CLASS_QUIZ", quiz.getId());
+        Lesson lesson = assignment.getLesson();
+        if (lesson == null) {
+            throw new RuntimeException("Lesson not found for this assignment.");
+        }
+        List<Question> questions = questionRepository.findByLessonId(lesson.getId());
+
         int correct = 0;
         for (Question q : questions) {
             String userAnswer = answers.get(q.getId());
             if (userAnswer != null) {
-                if ("MULTIPLE_CHOICE".equals(q.getType())) {
-                    // For MC, correct answer is "A"/"B"/"C"/"D" - compare with the option text
-                    String correctOptionText = getOptionText(q, q.getCorrectAnswer());
-                    if (userAnswer.trim().equalsIgnoreCase(q.getCorrectAnswer().trim()) ||
-                        userAnswer.trim().equalsIgnoreCase(correctOptionText.trim())) {
-                        correct++;
-                    }
-                } else {
-                    // FILL_IN_BLANK
-                    if (userAnswer.trim().equalsIgnoreCase(q.getCorrectAnswer().trim())) {
-                        correct++;
-                    }
+                boolean isCorrect = q.getOptions().stream()
+                        .anyMatch(opt -> opt.getOptionKey().equalsIgnoreCase(userAnswer.trim()) && opt.isCorrect());
+                if (isCorrect) {
+                    correct++;
                 }
             }
         }
 
-        // Save or update attempt (allow re-attempt, keep best score)
-        Optional<UserProgress> existingAttempt = userProgressRepository.findByResourceTypeAndResourceIdAndUser("CLASS_QUIZ", quiz.getId(), user);
-        UserProgress attempt;
-        if (existingAttempt.isPresent()) {
-            attempt = existingAttempt.get();
-            // Update if new score is higher
-            if (correct >= attempt.getScore()) {
-                attempt.setScore(correct);
-                attempt.setTotalQuestions(questions.size());
-                attempt.setCompletedAt(java.time.LocalDateTime.now());
-            }
-        } else {
-            attempt = UserProgress.builder()
-                    .resourceType("CLASS_QUIZ")
-                    .resourceId(quiz.getId())
-                    .user(user)
-                    .completed(true)
-                    .completedAt(java.time.LocalDateTime.now())
-                    .score(correct)
-                    .totalQuestions(questions.size())
-                    .build();
+        // Save progress using UserLessonState
+        UserLessonState state = userLessonStateRepository
+                .findByUserIdAndLessonId(user.getId(), lesson.getId())
+                .orElseGet(() -> UserLessonState.builder()
+                        .user(user)
+                        .lesson(lesson)
+                        .status("UNLOCKED")
+                        .build());
+
+        if (state.getScore() == null || correct >= state.getScore()) {
+            state.setStatus("COMPLETED");
+            state.setScore(correct);
+            state.setCompletedAt(LocalDateTime.now());
+            userLessonStateRepository.save(state);
         }
-        userProgressRepository.save(attempt);
 
-        // Thưởng điểm EXP và Xu cho Quiz lớp học: 20 EXP và 5 Xu cho mỗi câu trả lời đúng
         int xpGained = correct * 20;
-        int coinsGained = correct * 5;
 
-        int currentExp = user.getExp();
-        int currentLevel = user.getLevel();
-        int currentCoins = user.getCoins();
+        UserGameStats stats = user.getUserGameStats();
+        if (stats == null) {
+            stats = UserGameStats.builder().user(user).streak(0).exp(0).level(1).build();
+            user.setUserGameStats(stats);
+        }
 
-        currentExp += xpGained;
-        currentCoins += coinsGained;
-
+        int currentExp = stats.getExp() + xpGained;
+        int currentLevel = stats.getLevel();
         boolean leveledUp = false;
-        int previousLevel = user.getLevel();
+        int previousLevel = stats.getLevel();
+
         while (true) {
             int expNeeded = currentLevel * 100;
             if (currentExp >= expNeeded) {
@@ -251,15 +264,8 @@ public class ClassRoomService {
             }
         }
 
-        user.setExp(currentExp);
-        user.setLevel(currentLevel);
-        user.setCoins(currentCoins);
-
-        String newTitle = user.getCharacterTitle() != null ? user.getCharacterTitle() : "Novice";
-        if (leveledUp) {
-            newTitle = calculateTitle(currentLevel);
-            user.setCharacterTitle(newTitle);
-        }
+        stats.setExp(currentExp);
+        stats.setLevel(currentLevel);
         userRepository.save(user);
 
         Map<String, Object> result = new HashMap<>();
@@ -268,45 +274,50 @@ public class ClassRoomService {
         result.put("percentage", questions.isEmpty() ? 0 : Math.round((correct * 100.0) / questions.size()));
         
         result.put("xpGained", xpGained);
-        result.put("coinsGained", coinsGained);
+        result.put("coinsGained", 0);
         result.put("newXp", currentExp);
         result.put("newLevel", currentLevel);
-        result.put("newCoins", currentCoins);
+        result.put("newCoins", 0);
         result.put("leveledUp", leveledUp);
         result.put("previousLevel", previousLevel);
-        result.put("newTitle", newTitle);
+        result.put("newTitle", null);
 
         return result;
     }
 
-    private String calculateTitle(int level) {
-        if (level >= 100) return "Language Legend";
-        if (level >= 80) return "Grand Sage";
-        if (level >= 60) return "Master";
-        if (level >= 40) return "Knight";
-        if (level >= 20) return "Scholar";
-        if (level >= 10) return "Student";
-        if (level >= 5) return "Adventurer";
-        return "Novice";
-    }
-
-    /** Bảng xếp hạng quiz */
     public List<Map<String, Object>> getLeaderboard(Long classRoomId, Long quizId, User user) {
         ClassRoom classRoom = findClassRoomOrThrow(classRoomId);
         assertMember(classRoom, user);
-        ClassQuiz quiz = findQuizOrThrow(quizId, classRoom);
+        ClassAssignment assignment = classAssignmentRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found."));
 
-        List<UserProgress> attempts = userProgressRepository.findByResourceTypeAndResourceIdOrderByScoreDescCompletedAtAsc("CLASS_QUIZ", quiz.getId());
+        Lesson lesson = assignment.getLesson();
+        if (lesson == null) {
+            return Collections.emptyList();
+        }
+
+        // For classroom leaderboard, query states of all users in classroom
+        List<ClassMember> members = classMemberRepository.findByClassRoomOrderByJoinedAtAsc(classRoom);
         List<Map<String, Object>> leaderboard = new ArrayList<>();
         int rank = 1;
-        for (UserProgress a : attempts) {
+
+        List<UserLessonState> allStates = new ArrayList<>();
+        for (ClassMember member : members) {
+            userLessonStateRepository.findByUserIdAndLessonId(member.getUser().getId(), lesson.getId())
+                    .ifPresent(allStates::add);
+        }
+
+        allStates.sort((a, b) -> Integer.compare(b.getScore() != null ? b.getScore() : 0, a.getScore() != null ? a.getScore() : 0));
+
+        for (UserLessonState a : allStates) {
+            List<Question> questions = questionRepository.findByLessonId(lesson.getId());
             Map<String, Object> entry = new HashMap<>();
             entry.put("rank", rank++);
             entry.put("userId", a.getUser().getId());
             entry.put("email", a.getUser().getEmail());
             entry.put("score", a.getScore());
-            entry.put("totalQuestions", a.getTotalQuestions());
-            entry.put("percentage", a.getTotalQuestions() == null || a.getTotalQuestions() == 0 ? 0 : Math.round((a.getScore() * 100.0) / a.getTotalQuestions()));
+            entry.put("totalQuestions", questions.size());
+            entry.put("percentage", questions.isEmpty() ? 0 : Math.round((a.getScore() * 100.0) / questions.size()));
             entry.put("completedAt", a.getCompletedAt());
             leaderboard.add(entry);
         }
@@ -318,15 +329,6 @@ public class ClassRoomService {
     private ClassRoom findClassRoomOrThrow(Long id) {
         return classRoomRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lớp học không tồn tại."));
-    }
-
-    private ClassQuiz findQuizOrThrow(Long quizId, ClassRoom classRoom) {
-        ClassQuiz quiz = classQuizRepository.findById(quizId)
-                .orElseThrow(() -> new RuntimeException("Quiz không tồn tại."));
-        if (!quiz.getClassRoom().getId().equals(classRoom.getId())) {
-            throw new RuntimeException("Quiz không thuộc lớp học này.");
-        }
-        return quiz;
     }
 
     private void assertMember(ClassRoom classRoom, User user) {
@@ -343,29 +345,34 @@ public class ClassRoomService {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void saveQuestions(ClassQuiz quiz, List<Map<String, Object>> questionDtos) {
+    private void saveQuestions(Lesson lesson, List<Map<String, Object>> questionDtos) {
         if (questionDtos == null) return;
-        List<Question> questions = new ArrayList<>();
-        int num = 1;
         for (Map<String, Object> dto : questionDtos) {
             Question q = Question.builder()
+                    .lesson(lesson)
                     .sourceType("CLASS_QUIZ")
-                    .parentId(quiz.getId())
-                    .questionNumber(num++)
-                    .type(String.valueOf(dto.getOrDefault("type", "MULTIPLE_CHOICE")))
                     .questionText(String.valueOf(dto.get("questionText")))
-                    .optionA(dto.containsKey("optionA") ? String.valueOf(dto.get("optionA")) : null)
-                    .optionB(dto.containsKey("optionB") ? String.valueOf(dto.get("optionB")) : null)
-                    .optionC(dto.containsKey("optionC") ? String.valueOf(dto.get("optionC")) : null)
-                    .optionD(dto.containsKey("optionD") ? String.valueOf(dto.get("optionD")) : null)
-                    .correctAnswer(dto.containsKey("correctAnswer") ? String.valueOf(dto.get("correctAnswer")) : null)
-                    .correctOption(dto.containsKey("correctAnswer") ? String.valueOf(dto.get("correctAnswer")) : null) // Set both for compatibility
                     .explanation(dto.containsKey("explanation") ? String.valueOf(dto.get("explanation")) : null)
                     .build();
-            questions.add(q);
+
+            List<QuestionOption> options = new ArrayList<>();
+            String correct = dto.containsKey("correctAnswer") ? String.valueOf(dto.get("correctAnswer")) : "A";
+
+            if (dto.containsKey("optionA")) {
+                options.add(QuestionOption.builder().question(q).optionKey("A").optionValue(String.valueOf(dto.get("optionA"))).correct("A".equalsIgnoreCase(correct)).build());
+            }
+            if (dto.containsKey("optionB")) {
+                options.add(QuestionOption.builder().question(q).optionKey("B").optionValue(String.valueOf(dto.get("optionB"))).correct("B".equalsIgnoreCase(correct)).build());
+            }
+            if (dto.containsKey("optionC")) {
+                options.add(QuestionOption.builder().question(q).optionKey("C").optionValue(String.valueOf(dto.get("optionC"))).correct("C".equalsIgnoreCase(correct)).build());
+            }
+            if (dto.containsKey("optionD")) {
+                options.add(QuestionOption.builder().question(q).optionKey("D").optionValue(String.valueOf(dto.get("optionD"))).correct("D".equalsIgnoreCase(correct)).build());
+            }
+            q.setOptions(options);
+            questionRepository.save(q);
         }
-        questionRepository.saveAll(questions);
     }
 
     private String generateUniqueCode() {
@@ -382,17 +389,6 @@ public class ClassRoomService {
         return code;
     }
 
-    private String getOptionText(Question q, String option) {
-        if (option == null) return "";
-        return switch (option.toUpperCase()) {
-            case "A" -> q.getOptionA() != null ? q.getOptionA() : "";
-            case "B" -> q.getOptionB() != null ? q.getOptionB() : "";
-            case "C" -> q.getOptionC() != null ? q.getOptionC() : "";
-            case "D" -> q.getOptionD() != null ? q.getOptionD() : "";
-            default -> "";
-        };
-    }
-
     private Map<String, Object> buildClassRoomDto(ClassRoom cr, User currentUser) {
         Map<String, Object> dto = new HashMap<>();
         dto.put("id", cr.getId());
@@ -402,7 +398,7 @@ public class ClassRoomService {
         dto.put("createdByEmail", cr.getCreatedBy().getEmail());
         dto.put("createdAt", cr.getCreatedAt());
         dto.put("memberCount", cr.getMembers().size());
-        dto.put("quizCount", cr.getQuizzes().size());
+        dto.put("quizCount", classAssignmentRepository.findByClassRoomId(cr.getId()).size());
         dto.put("isOwner", cr.getCreatedBy().getId().equals(currentUser.getId()));
         return dto;
     }
@@ -422,38 +418,52 @@ public class ClassRoomService {
         }).collect(Collectors.toList());
         dto.put("members", memberDtos);
 
-        // Quizzes
-        List<ClassQuiz> quizzes = classQuizRepository.findByClassRoomOrderByCreatedAtDesc(cr);
-        List<Map<String, Object>> quizDtos = quizzes.stream()
-                .map(q -> buildQuizDto(q, currentUser))
+        // Quizzes (Class Assignments)
+        List<ClassAssignment> assignments = classAssignmentRepository.findByClassRoomId(cr.getId());
+        List<Map<String, Object>> quizDtos = assignments.stream()
+                .map(q -> buildAssignmentDto(q, currentUser))
                 .collect(Collectors.toList());
         dto.put("quizzes", quizDtos);
 
         return dto;
     }
 
-    private Map<String, Object> buildQuizDto(ClassQuiz quiz, User currentUser) {
-        List<Question> questions = questionRepository.findBySourceTypeAndParentIdOrderByQuestionNumberAsc("CLASS_QUIZ", quiz.getId());
+    private Map<String, Object> buildAssignmentDto(ClassAssignment assignment, User currentUser) {
+        Lesson lesson = assignment.getLesson();
+        List<Question> questions = lesson != null ? questionRepository.findByLessonId(lesson.getId()) : Collections.emptyList();
         Map<String, Object> dto = new HashMap<>();
-        dto.put("id", quiz.getId());
-        dto.put("title", quiz.getTitle());
-        dto.put("description", quiz.getDescription());
-        dto.put("createdByEmail", quiz.getCreatedBy().getEmail());
-        dto.put("isActive", quiz.isActive());
-        dto.put("createdAt", quiz.getCreatedAt());
+        dto.put("id", assignment.getId());
+        dto.put("title", assignment.getTitle());
+        dto.put("description", assignment.getDescription());
+        dto.put("createdByEmail", assignment.getCreatedBy().getEmail());
+        dto.put("isActive", assignment.isActive());
+        dto.put("createdAt", assignment.getCreatedAt());
         dto.put("questionCount", questions.size());
 
         List<Map<String, Object>> qDtos = questions.stream().map(q -> {
             Map<String, Object> qDto = new LinkedHashMap<>();
             qDto.put("id", q.getId());
-            qDto.put("questionNumber", q.getQuestionNumber());
-            qDto.put("type", q.getType());
+            qDto.put("questionNumber", 1); // Virtual order index
+            qDto.put("type", "MULTIPLE_CHOICE");
             qDto.put("questionText", q.getQuestionText());
-            qDto.put("optionA", q.getOptionA());
-            qDto.put("optionB", q.getOptionB());
-            qDto.put("optionC", q.getOptionC());
-            qDto.put("optionD", q.getOptionD());
-            qDto.put("correctAnswer", q.getCorrectAnswer());
+
+            qDto.put("optionA", "");
+            qDto.put("optionB", "");
+            qDto.put("optionC", "");
+            qDto.put("optionD", "");
+            String correct = "A";
+
+            for (QuestionOption opt : q.getOptions()) {
+                if ("A".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionA", opt.getOptionValue());
+                if ("B".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionB", opt.getOptionValue());
+                if ("C".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionC", opt.getOptionValue());
+                if ("D".equalsIgnoreCase(opt.getOptionKey())) qDto.put("optionD", opt.getOptionValue());
+                if (opt.isCorrect()) {
+                    correct = opt.getOptionKey();
+                }
+            }
+
+            qDto.put("correctAnswer", correct);
             qDto.put("explanation", q.getExplanation());
             return qDto;
         }).collect(Collectors.toList());

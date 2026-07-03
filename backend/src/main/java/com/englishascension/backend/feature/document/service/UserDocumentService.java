@@ -1,14 +1,14 @@
 package com.englishascension.backend.feature.document.service;
 
 import com.englishascension.backend.feature.ai.service.GroqService;
-import com.englishascension.backend.feature.study.entity.Flashcard;
-import com.englishascension.backend.feature.study.entity.Question;
-import com.englishascension.backend.feature.study.entity.StudyContent;
-import com.englishascension.backend.feature.study.repository.FlashcardRepository;
-import com.englishascension.backend.feature.study.repository.QuestionRepository;
-import com.englishascension.backend.feature.study.repository.StudyContentRepository;
+import com.englishascension.backend.feature.document.entity.UserDocument;
+import com.englishascension.backend.feature.document.entity.DocumentFlashcard;
+import com.englishascension.backend.feature.document.entity.DocumentQuestion;
+import com.englishascension.backend.feature.document.entity.DocumentQuestionOption;
+import com.englishascension.backend.feature.document.repository.UserDocumentRepository;
+import com.englishascension.backend.feature.document.repository.DocumentFlashcardRepository;
+import com.englishascension.backend.feature.document.repository.DocumentQuestionRepository;
 import com.englishascension.backend.feature.user.entity.User;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -23,9 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -33,60 +33,43 @@ public class UserDocumentService {
 
     private static final Logger log = LoggerFactory.getLogger(UserDocumentService.class);
 
-    private final StudyContentRepository studyContentRepository;
-    private final FlashcardRepository flashcardRepository;
-    private final QuestionRepository questionRepository;
+    private final UserDocumentRepository userDocumentRepository;
+    private final DocumentFlashcardRepository documentFlashcardRepository;
+    private final DocumentQuestionRepository documentQuestionRepository;
     private final GroqService groqService;
     private final ObjectMapper objectMapper;
 
     public UserDocumentService(
-            StudyContentRepository studyContentRepository,
-            FlashcardRepository flashcardRepository,
-            QuestionRepository questionRepository,
+            UserDocumentRepository userDocumentRepository,
+            DocumentFlashcardRepository documentFlashcardRepository,
+            DocumentQuestionRepository documentQuestionRepository,
             GroqService groqService) {
-        this.studyContentRepository = studyContentRepository;
-        this.flashcardRepository = flashcardRepository;
-        this.questionRepository = questionRepository;
+        this.userDocumentRepository = userDocumentRepository;
+        this.documentFlashcardRepository = documentFlashcardRepository;
+        this.documentQuestionRepository = documentQuestionRepository;
         this.groqService = groqService;
         this.objectMapper = new ObjectMapper();
     }
 
-    public List<StudyContent> getMyDocuments(User user) {
-        List<StudyContent> docs = studyContentRepository.findByUserOrderByCreatedAtDesc(user);
-        for (StudyContent doc : docs) {
-            doc.setQuizQuestions(questionRepository.findBySourceTypeAndParentId("DOCUMENT_QUIZ", doc.getId()));
-        }
-        return docs;
+    public List<UserDocument> getMyDocuments(User user) {
+        return userDocumentRepository.findByUserId(user.getId());
     }
 
-    public StudyContent getDocumentById(Long id, User user) {
-        StudyContent doc = studyContentRepository.findById(id)
+    public UserDocument getDocumentById(Long id, User user) {
+        UserDocument doc = userDocumentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tài liệu không tồn tại."));
         if (doc.getUser() == null || !doc.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Bạn không có quyền truy cập tài liệu này.");
         }
-        List<Question> questions = questionRepository.findBySourceTypeAndParentId("DOCUMENT_QUIZ", doc.getId());
-        for (Question q : questions) {
-            if (q.getType() == null) {
-                if (q.getOptionA() != null) {
-                    q.setType("MULTIPLE_CHOICE");
-                } else {
-                    q.setType("FILL_IN_BLANK");
-                }
-            }
-        }
-        doc.setQuizQuestions(questions);
         return doc;
     }
 
     public void deleteDocument(Long id, User user) {
-        StudyContent doc = getDocumentById(id, user);
-        List<Question> questions = questionRepository.findBySourceTypeAndParentId("DOCUMENT_QUIZ", id);
-        questionRepository.deleteAll(questions);
-        studyContentRepository.delete(doc);
+        UserDocument doc = getDocumentById(id, user);
+        userDocumentRepository.delete(doc);
     }
 
-    public StudyContent uploadAndProcess(MultipartFile file, User user, int flashcardCount) {
+    public UserDocument uploadAndProcess(MultipartFile file, User user, int flashcardCount) {
         String fileName = file.getOriginalFilename();
         if (fileName == null) {
             fileName = "untitled_document.txt";
@@ -115,22 +98,19 @@ public class UserDocumentService {
             truncatedTextForAi = extractedText.substring(0, 12000) + "\n...[Văn bản được cắt ngắn bớt bởi hệ thống]...";
         }
 
-        // Save StudyContent with type USER_DOCUMENT
-        StudyContent userDocument = StudyContent.builder()
+        // Save User Document
+        UserDocument userDocument = UserDocument.builder()
                 .user(user)
-                .type("USER_DOCUMENT")
-                .title(fileName) // mapping fileName to title
-                .category("USER_UPLOAD") // mapping category to USER_UPLOAD
-                .bodyText(extractedText) // mapping extractedText to bodyText
-                .createdAt(LocalDateTime.now())
+                .title(fileName)
+                .bodyText(extractedText)
                 .build();
-        userDocument = studyContentRepository.save(userDocument);
+        userDocument = userDocumentRepository.save(userDocument);
 
         try {
             generateStudyMaterials(userDocument, truncatedTextForAi, flashcardCount);
         } catch (Exception e) {
             log.error("Lỗi khi sinh học liệu từ AI cho tài liệu: {}", fileName, e);
-            studyContentRepository.delete(userDocument);
+            userDocumentRepository.delete(userDocument);
             throw new RuntimeException("AI gặp sự cố khi phân tích văn bản: " + e.getMessage());
         }
 
@@ -155,23 +135,21 @@ public class UserDocumentService {
         return new String(file.getBytes(), StandardCharsets.UTF_8);
     }
 
-    public List<Question> regenerateQuiz(Long docId, User user, int questionCount, String questionType) throws Exception {
-        StudyContent doc = getDocumentById(docId, user);
+    public List<DocumentQuestion> regenerateQuiz(Long docId, User user, int questionCount, String questionType) throws Exception {
+        UserDocument doc = getDocumentById(docId, user);
 
-        List<Question> oldQuestions = questionRepository.findBySourceTypeAndParentId("DOCUMENT_QUIZ", docId);
-        questionRepository.deleteAll(oldQuestions);
+        List<DocumentQuestion> oldQuestions = documentQuestionRepository.findByDocumentId(docId);
+        documentQuestionRepository.deleteAll(oldQuestions);
 
         String truncatedText = doc.getBodyText();
         if (truncatedText != null && truncatedText.length() > 12000) {
             truncatedText = truncatedText.substring(0, 12000) + "\n...[Văn bản được cắt ngắn]...";
         }
 
-        List<Question> newQuestions = generateQuizOnly(doc, truncatedText, questionCount, questionType);
-        doc.setQuizQuestions(newQuestions);
-        return newQuestions;
+        return generateQuizOnly(doc, truncatedText, questionCount, questionType);
     }
 
-    private List<Question> generateQuizOnly(StudyContent userDocument, String text, int count, String type) throws Exception {
+    private List<DocumentQuestion> generateQuizOnly(UserDocument userDocument, String text, int count, String type) throws Exception {
         String typeInstruction;
         switch (type.toUpperCase()) {
             case "MULTIPLE_CHOICE" -> typeInstruction = "ALL " + count + " questions must be MULTIPLE_CHOICE type with 4 options (A, B, C, D). correctAnswer must be \"A\", \"B\", \"C\", or \"D\"";
@@ -194,12 +172,6 @@ public class UserDocumentService {
                 "      \"optionD\": \"Option D text\",\n" +
                 "      \"correctAnswer\": \"A\",\n" +
                 "      \"explanation\": \"Giải thích bằng tiếng Việt.\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"questionText\": \"Complete: She wants to ____ her skills.\",\n" +
-                "      \"type\": \"FILL_IN_BLANK\",\n" +
-                "      \"correctAnswer\": \"improve\",\n" +
-                "      \"explanation\": \"Giải thích bằng tiếng Việt.\"\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}";
@@ -207,38 +179,45 @@ public class UserDocumentService {
         String userPrompt = "Text to analyze:\n\n" + text;
         log.info("Regenerating {} {} quiz questions for doc ID: {}", count, type, userDocument.getId());
         String jsonResponse = groqService.generateJsonResponse(systemPrompt, userPrompt);
-
+        
+        jsonResponse = cleanJsonResponse(jsonResponse);
         JsonNode root = objectMapper.readTree(jsonResponse);
         JsonNode quizzesNode = root.get("quizzes");
-        List<Question> quizList = new ArrayList<>();
+        List<DocumentQuestion> quizList = new ArrayList<>();
         if (quizzesNode != null && quizzesNode.isArray()) {
-            int qNum = 1;
             for (JsonNode qNode : quizzesNode) {
-                Question quiz = Question.builder()
-                        .sourceType("DOCUMENT_QUIZ")
-                        .parentId(userDocument.getId())
-                        .questionNumber(qNum++)
-                        .type(qNode.path("type").asText())
+                DocumentQuestion q = DocumentQuestion.builder()
+                        .document(userDocument)
                         .questionText(qNode.path("questionText").asText())
-                        .optionA(qNode.has("optionA") ? qNode.get("optionA").asText() : null)
-                        .optionB(qNode.has("optionB") ? qNode.get("optionB").asText() : null)
-                        .optionC(qNode.has("optionC") ? qNode.get("optionC").asText() : null)
-                        .optionD(qNode.has("optionD") ? qNode.get("optionD").asText() : null)
-                        .correctOption(qNode.path("correctAnswer").asText())
-                        .correctAnswer(qNode.path("correctAnswer").asText())
                         .explanation(qNode.path("explanation").asText())
                         .build();
-                quizList.add(quiz);
+
+                List<DocumentQuestionOption> options = new ArrayList<>();
+                String correct = qNode.path("correctAnswer").asText();
+                if (qNode.has("optionA")) {
+                    options.add(DocumentQuestionOption.builder().question(q).optionKey("A").optionValue(qNode.get("optionA").asText()).correct("A".equalsIgnoreCase(correct)).build());
+                }
+                if (qNode.has("optionB")) {
+                    options.add(DocumentQuestionOption.builder().question(q).optionKey("B").optionValue(qNode.get("optionB").asText()).correct("B".equalsIgnoreCase(correct)).build());
+                }
+                if (qNode.has("optionC")) {
+                    options.add(DocumentQuestionOption.builder().question(q).optionKey("C").optionValue(qNode.get("optionC").asText()).correct("C".equalsIgnoreCase(correct)).build());
+                }
+                if (qNode.has("optionD")) {
+                    options.add(DocumentQuestionOption.builder().question(q).optionKey("D").optionValue(qNode.get("optionD").asText()).correct("D".equalsIgnoreCase(correct)).build());
+                }
+                q.setOptions(options);
+                quizList.add(q);
+                documentQuestionRepository.save(q);
             }
-            questionRepository.saveAll(quizList);
         }
         return quizList;
     }
 
-    private void generateStudyMaterials(StudyContent userDocument, String text, int flashcardCount) throws Exception {
+    private void generateStudyMaterials(UserDocument userDocument, String text, int flashcardCount) throws Exception {
         String systemPrompt = "You are an AI learning assistant. Your task is to analyze the provided English text and generate exactly two items:\n" +
                 "1. A list of exactly " + flashcardCount + " key English vocabulary words (Flashcards) found in the text, each with phonetic spelling, part of speech, Vietnamese definition, and an example English sentence with its Vietnamese translation.\n" +
-                "2. A list of exactly 5 quiz questions mixing MULTIPLE_CHOICE and FILL_IN_BLANK types (QuizQuestions) testing vocabulary or reading comprehension.\n\n" +
+                "2. A list of exactly 5 quiz questions of MULTIPLE_CHOICE type (QuizQuestions) testing vocabulary or reading comprehension.\n\n" +
                 "You MUST output raw JSON matching this format:\n" +
                 "{\n" +
                 "  \"flashcards\": [\n" +
@@ -261,12 +240,6 @@ public class UserDocumentService {
                 "      \"optionD\": \"D...\",\n" +
                 "      \"correctAnswer\": \"A\",\n" +
                 "      \"explanation\": \"Giải thích lý do đúng bằng tiếng Việt.\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"questionText\": \"Complete the sentence: She wants to ____ her English skills.\",\n" +
-                "      \"type\": \"FILL_IN_BLANK\",\n" +
-                "      \"correctAnswer\": \"enhance\",\n" +
-                "      \"explanation\": \"Giải thích nghĩa từ vựng và câu bằng tiếng Việt.\"\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}\n" +
@@ -278,15 +251,15 @@ public class UserDocumentService {
         String jsonResponse = groqService.generateJsonResponse(systemPrompt, userPrompt);
         log.info("Received AI response: {}", jsonResponse);
 
+        jsonResponse = cleanJsonResponse(jsonResponse);
         JsonNode root = objectMapper.readTree(jsonResponse);
 
         // Parse and save Flashcards
         JsonNode flashcardsNode = root.get("flashcards");
         if (flashcardsNode != null && flashcardsNode.isArray()) {
-            List<Flashcard> flashcardList = new ArrayList<>();
             for (JsonNode fNode : flashcardsNode) {
-                Flashcard flashcard = Flashcard.builder()
-                        .studyContent(userDocument)
+                DocumentFlashcard vocab = DocumentFlashcard.builder()
+                        .document(userDocument)
                         .word(fNode.path("word").asText())
                         .partOfSpeech(fNode.path("partOfSpeech").asText())
                         .phonetic(fNode.path("phonetic").asText())
@@ -294,52 +267,82 @@ public class UserDocumentService {
                         .exampleSentence(fNode.path("exampleSentence").asText())
                         .exampleTranslation(fNode.path("exampleTranslation").asText())
                         .build();
-                flashcardList.add(flashcard);
+                documentFlashcardRepository.save(vocab);
             }
-            flashcardRepository.saveAll(flashcardList);
-            userDocument.setFlashcards(flashcardList);
         }
 
         // Parse and save QuizQuestions
         JsonNode quizzesNode = root.get("quizzes");
         if (quizzesNode != null && quizzesNode.isArray()) {
-            List<Question> quizList = new ArrayList<>();
-            int qNum = 1;
             for (JsonNode qNode : quizzesNode) {
-                Question quiz = Question.builder()
-                        .sourceType("DOCUMENT_QUIZ")
-                        .parentId(userDocument.getId())
-                        .questionNumber(qNum++)
-                        .type(qNode.path("type").asText())
+                DocumentQuestion q = DocumentQuestion.builder()
+                        .document(userDocument)
                         .questionText(qNode.path("questionText").asText())
-                        .optionA(qNode.has("optionA") ? qNode.get("optionA").asText() : null)
-                        .optionB(qNode.has("optionB") ? qNode.get("optionB").asText() : null)
-                        .optionC(qNode.has("optionC") ? qNode.get("optionC").asText() : null)
-                        .optionD(qNode.has("optionD") ? qNode.get("optionD").asText() : null)
-                        .correctOption(qNode.path("correctAnswer").asText())
-                        .correctAnswer(qNode.path("correctAnswer").asText())
                         .explanation(qNode.path("explanation").asText())
                         .build();
-                quizList.add(quiz);
+
+                List<DocumentQuestionOption> options = new ArrayList<>();
+                String correct = qNode.path("correctAnswer").asText();
+                if (qNode.has("optionA")) {
+                    options.add(DocumentQuestionOption.builder().question(q).optionKey("A").optionValue(qNode.get("optionA").asText()).correct("A".equalsIgnoreCase(correct)).build());
+                }
+                if (qNode.has("optionB")) {
+                    options.add(DocumentQuestionOption.builder().question(q).optionKey("B").optionValue(qNode.get("optionB").asText()).correct("B".equalsIgnoreCase(correct)).build());
+                }
+                if (qNode.has("optionC")) {
+                    options.add(DocumentQuestionOption.builder().question(q).optionKey("C").optionValue(qNode.get("optionC").asText()).correct("C".equalsIgnoreCase(correct)).build());
+                }
+                if (qNode.has("optionD")) {
+                    options.add(DocumentQuestionOption.builder().question(q).optionKey("D").optionValue(qNode.get("optionD").asText()).correct("D".equalsIgnoreCase(correct)).build());
+                }
+                q.setOptions(options);
+                documentQuestionRepository.save(q);
             }
-            questionRepository.saveAll(quizList);
-            userDocument.setQuizQuestions(quizList);
+        }
+
+        // Fallback: If quizzes count is 0, run dedicated call to generate exactly 5 quizzes
+        int questionsCount = documentQuestionRepository.findByDocumentId(userDocument.getId()).size();
+        if (questionsCount == 0) {
+            log.warn("No quizzes generated in initial joint prompt. Running separate quiz generation fallback for doc ID: {}", userDocument.getId());
+            try {
+                generateQuizOnly(userDocument, text, 5, "MULTIPLE_CHOICE");
+            } catch (Exception e) {
+                log.error("Failed to generate fallback quizzes: {}", e.getMessage(), e);
+            }
         }
     }
 
-    public Flashcard addFlashcard(Long docId, Flashcard flashcard, User user) {
-        StudyContent doc = getDocumentById(docId, user);
-        flashcard.setStudyContent(doc);
-        return flashcardRepository.save(flashcard);
+    public DocumentFlashcard addFlashcard(Long docId, DocumentFlashcard flashcard, User user) {
+        UserDocument doc = getDocumentById(docId, user);
+        flashcard.setDocument(doc);
+        return documentFlashcardRepository.save(flashcard);
     }
 
     public void deleteFlashcard(Long docId, Long flashcardId, User user) {
-        StudyContent doc = getDocumentById(docId, user);
-        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+        UserDocument doc = getDocumentById(docId, user);
+        DocumentFlashcard flashcard = documentFlashcardRepository.findById(flashcardId)
                 .orElseThrow(() -> new RuntimeException("Flashcard không tồn tại."));
-        if (flashcard.getStudyContent() == null || !flashcard.getStudyContent().getId().equals(doc.getId())) {
+        if (flashcard.getDocument() == null || !flashcard.getDocument().getId().equals(doc.getId())) {
             throw new RuntimeException("Flashcard không thuộc tài liệu này.");
         }
-        flashcardRepository.delete(flashcard);
+        documentFlashcardRepository.delete(flashcard);
+    }
+
+    private String cleanJsonResponse(String json) {
+        if (json == null) return "{}";
+        json = json.trim();
+        if (json.startsWith("```")) {
+            int firstLineEnd = json.indexOf("\n");
+            if (firstLineEnd != -1) {
+                json = json.substring(firstLineEnd + 1);
+            } else {
+                json = json.substring(3);
+            }
+            if (json.endsWith("```")) {
+                json = json.substring(0, json.length() - 3);
+            }
+            json = json.trim();
+        }
+        return json;
     }
 }

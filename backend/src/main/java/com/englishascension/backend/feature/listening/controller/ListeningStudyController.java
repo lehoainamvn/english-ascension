@@ -1,12 +1,13 @@
 package com.englishascension.backend.feature.listening.controller;
 
+import com.englishascension.backend.feature.listening.dto.ListeningTopicResponse;
+import com.englishascension.backend.feature.listening.dto.ListeningSectionResponse;
 import com.englishascension.backend.feature.listening.service.ListeningService;
 import com.englishascension.backend.shared.reward.RewardResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Listening study REST controller – HTTP layer only.
@@ -24,12 +25,12 @@ public class ListeningStudyController {
     }
 
     @GetMapping("/topics")
-    public ResponseEntity<List<Map<String, Object>>> getTopics() {
+    public ResponseEntity<List<ListeningTopicResponse>> getTopics() {
         return ResponseEntity.ok(listeningService.getTopics());
     }
 
     @GetMapping("/topics/{topicId}/sections")
-    public ResponseEntity<List<Map<String, Object>>> getTopicSections(@PathVariable Long topicId) {
+    public ResponseEntity<List<ListeningSectionResponse>> getTopicSections(@PathVariable Long topicId) {
         return ResponseEntity.ok(listeningService.getTopicSections(topicId));
     }
 

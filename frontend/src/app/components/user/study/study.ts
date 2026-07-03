@@ -194,7 +194,6 @@ import { ToastService } from '../../../services/toast.service';
                         (click)="finishStudyAndGoToTest()"
                         class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
                         <span>Bắt đầu làm bài kiểm tra</span>
                       </button>
                     } @else {
@@ -354,7 +353,6 @@ import { ToastService } from '../../../services/toast.service';
                         (click)="finishStudyAndGoToTest()"
                         class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
                         <span>Bắt đầu làm bài kiểm tra</span>
                       </button>
                     } @else {
@@ -696,7 +694,6 @@ import { ToastService } from '../../../services/toast.service';
                         (click)="studyMode.set('test'); updateLocalProgress('TEST')"
                         class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-1.5"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         <span>Đã học xong! Bắt đầu làm bài test để qua màn</span>
                       </button>
                     }
@@ -853,8 +850,7 @@ import { ToastService } from '../../../services/toast.service';
                     [disabled]="!allQuizQuestionsAnswered()"
                     class="w-full bg-brand-primary text-bg-main hover:opacity-90 font-black py-3.5 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer text-xs text-center border-none flex items-center justify-center gap-2"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                    Nộp Bài Kiểm Tra & Xem Kết Quả
+                    Nộp bài
                   </button>
                   @if (!allQuizQuestionsAnswered()) {
                     <p class="text-center text-[10px] text-red-500/80 font-bold mt-2 flex items-center justify-center gap-1">
@@ -1163,7 +1159,7 @@ export class StudyComponent implements OnInit, OnDestroy {
   private readonly userWordService = inject(UserWordService);
   private readonly toastService = inject(ToastService);
 
-  moduleId = 0;
+  moduleId: string | number = 0;
   
   // Tab selected: 'grammar' | 'vocabulary' | 'listening' | 'pronunciation'
   activeTab = signal<'grammar' | 'vocabulary' | 'listening' | 'pronunciation'>('grammar');
@@ -1232,7 +1228,13 @@ export class StudyComponent implements OnInit, OnDestroy {
   } | null>(null);
 
   ngOnInit(): void {
-    this.moduleId = Number(this.route.snapshot.paramMap.get('moduleId'));
+    const idParam = this.route.snapshot.paramMap.get('moduleId');
+    if (idParam) {
+      const parsed = Number(idParam);
+      this.moduleId = isNaN(parsed) ? idParam : parsed;
+    } else {
+      this.moduleId = 0;
+    }
     
     // Read the query parameter mode ('study' or 'test')
     const modeParam = this.route.snapshot.queryParamMap.get('mode');
@@ -1696,6 +1698,44 @@ export class StudyComponent implements OnInit, OnDestroy {
     this.studyMode.set('test');
   }
 
+  /** Parse markdown-like body text from DB into structured sections for grammar display */
+  parseBodyTextToSections(body: string): { heading: string; detail: string; example?: string }[] {
+    const lines = body.split('\n');
+    const sections: { heading: string; detail: string; example?: string }[] = [];
+    let currentHeading = '';
+    let currentDetails: string[] = [];
+
+    const flush = () => {
+      if (currentHeading && currentDetails.length > 0) {
+        const text = currentDetails.join('\n').trim();
+        sections.push({ heading: currentHeading, detail: text });
+        currentDetails = [];
+      }
+    };
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) continue;
+
+      // Detect section headers: ##, ###, or bold markdown **Section:**
+      if (line.startsWith('### ') || line.startsWith('## ') || line.startsWith('#### ')) {
+        flush();
+        currentHeading = line.replace(/^#{2,4}\s*/, '').trim();
+      } else if (line.startsWith('# ')) {
+        // Top-level title – skip (shown in module title area)
+        flush();
+      } else if (line.startsWith('**') && line.endsWith('**') && line.length > 4) {
+        flush();
+        currentHeading = line.replace(/\*\*/g, '').trim();
+      } else {
+        currentDetails.push(line.replace(/^[-*•]\s*/, '').trim());
+      }
+    }
+    flush();
+
+    return sections.length > 0 ? sections : [{ heading: 'Nội dung bài học', detail: body.trim() }];
+  }
+
   getGrammarTheory(): { title: string; sections: { heading: string; detail: string; example?: string }[] } {
     const grammarCards = this.flashcards.filter(fc => fc.partOfSpeech && fc.partOfSpeech.toLowerCase() === 'ngữ pháp');
     
@@ -1730,75 +1770,26 @@ export class StudyComponent implements OnInit, OnDestroy {
       };
     }
 
-    if (this.moduleId === 1) {
+    // Parse bodyText from DB (grammar lessons return body_text, not flashcards)
+    const body = this.bodyText();
+    if (body && body.trim()) {
+      const sections = this.parseBodyTextToSections(body);
       return {
-        title: 'Lý thuyết Ngữ pháp: Các từ loại trong Tiếng Anh (Parts of Speech)',
-        sections: [
-          {
-            heading: '1. Danh từ (Noun - N)',
-            detail: 'Từ dùng để chỉ người, sự vật, địa điểm, khái niệm. Ví dụ các từ vựng trong bài học: achievement (thành tựu), vocabulary (từ vựng).',
-            example: 'Example: "Passing the exam was a great achievement."'
-          },
-          {
-            heading: '2. Động từ (Verb - V)',
-            detail: 'Từ dùng để chỉ hành động hoặc trạng thái của một chủ thể. Ví dụ: consolidate (củng cố, hợp nhất).',
-            example: 'Example: "We need to consolidate our basic grammar."'
-          },
-          {
-            heading: '3. Tính từ (Adjective - Adj)',
-            detail: 'Từ bổ nghĩa cho danh từ, mô tả đặc tính, tính chất của sự vật. Ví dụ: fundamental (cơ bản, chủ chốt).',
-            example: 'Example: "Grammar is a fundamental part of learning English."'
-          },
-          {
-            heading: '4. Giới từ (Preposition - Prep)',
-            detail: 'Từ biểu thị mối tương quan giữa hai danh từ hoặc đại từ. Ví dụ: preposition (giới từ).',
-            example: 'Example: "In, on, and at are common prepositions."'
-          }
-        ]
-      };
-    } else if (this.moduleId === 2) {
-      return {
-        title: 'Lý thuyết Ngữ pháp: Từ vựng giao tiếp & đàm phán công sở (Business English)',
-        sections: [
-          {
-            heading: '1. Động từ hợp tác (Collaborate)',
-            detail: 'Dùng để mô tả việc làm việc chung giữa nhiều người. Thường đi kèm giới từ "on" (hợp tác về cái gì) hoặc "with" (hợp tác với ai).',
-            example: 'Example: "We should collaborate on this project."'
-          },
-          {
-            heading: '2. Cấu trúc đàm phán (Negotiation)',
-            detail: 'Danh từ chỉ sự thương lượng. Cấu trúc thường dùng: "under negotiation" (đang đàm phán) hoặc "end with a successful agreement" (kết thúc bằng hợp đồng thành công).',
-            example: 'Example: "The contract is under negotiation."'
-          },
-          {
-            heading: '3. Danh từ chỉ mối quan hệ (Colleague)',
-            detail: 'Chỉ người làm việc chung, đồng nghiệp trong công ty.',
-            example: 'Example: "My colleague helped me write the report."'
-          }
-        ]
-      };
-    } else {
-      return {
-        title: 'Lý thuyết Ngữ pháp: Nghe hiểu & Đọc hiểu học thuật (Academic English)',
-        sections: [
-          {
-            heading: '1. Danh từ chỉ quan điểm (Perspective)',
-            detail: 'Chỉ góc nhìn, cách nhìn nhận một vấn đề. Thường sử dụng cụm từ "perspective on something" (quan điểm về cái gì).',
-            example: 'Example: "Try to see it from my perspective."'
-          },
-          {
-            heading: '2. Danh từ số nhiều bất quy tắc (Irregular Plural)',
-            detail: 'Một số danh từ học thuật khi chuyển sang số nhiều có quy tắc thay đổi đặc biệt. Ví dụ: "analysis" (số ít) chuyển thành "analyses" (số nhiều).',
-            example: 'Example: "The data analysis was very helpful. We need more analyses."'
-          },
-          {
-            heading: '3. Thuật ngữ chuyên ngành (Terminology)',
-            detail: 'Chỉ hệ thống các từ ngữ chuyên sâu trong một lĩnh vực học thuật cụ thể.',
-            example: 'Example: "Medical terminology is hard to learn."'
-          }
-        ]
+        title: this.moduleTitle() || 'Lý thuyết Ngữ pháp',
+        sections
       };
     }
+
+    // Fallback: minimal placeholder
+    return {
+      title: 'Lý thuyết Ngữ pháp: ' + (this.moduleTitle() || 'Bài học'),
+      sections: [
+        {
+          heading: 'Nội dung đang được cập nhật',
+          detail: 'Nội dung chi tiết cho bài học này sẽ sớm được thêm vào. Vui lòng làm bài kiểm tra để tiếp tục tiến trình học.'
+        }
+      ]
+    };
   }
 
   submitQuiz(): void {

@@ -1,5 +1,6 @@
 package com.englishascension.backend.feature.reading.controller;
 
+import com.englishascension.backend.feature.reading.dto.ReadingArticleResponse;
 import com.englishascension.backend.feature.reading.service.ReadingService;
 import com.englishascension.backend.shared.reward.RewardResult;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class ReadingStudyController {
     }
 
     @GetMapping("/articles")
-    public ResponseEntity<List<Map<String, Object>>> getArticles() {
+    public ResponseEntity<List<ReadingArticleResponse>> getArticles() {
         return ResponseEntity.ok(readingService.getArticles());
     }
 

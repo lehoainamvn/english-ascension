@@ -65,7 +65,7 @@ export class StudyService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/api/study`;
 
-  getModuleContent(moduleId: number, category?: string): Observable<StudyContent> {
+  getModuleContent(moduleId: string | number, category?: string): Observable<StudyContent> {
     let url = `${this.baseUrl}/modules/${moduleId}/content`;
     if (category) {
       url += `?category=${category}`;
@@ -73,19 +73,19 @@ export class StudyService {
     return this.http.get<StudyContent>(url);
   }
 
-  completeModule(moduleId: number, correctAnswers: number): Observable<CompletionResult> {
+  completeModule(moduleId: string | number, correctAnswers: number): Observable<CompletionResult> {
     return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/complete`, { correctAnswers });
   }
 
-  completeStep(moduleId: number, step: string): Observable<CompletionResult> {
+  completeStep(moduleId: string | number, step: string): Observable<CompletionResult> {
     return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/complete-step`, { step });
   }
 
-  completeBattle(moduleId: number): Observable<CompletionResult> {
+  completeBattle(moduleId: string | number): Observable<CompletionResult> {
     return this.http.post<CompletionResult>(`${this.baseUrl}/modules/${moduleId}/battle-complete`, {});
   }
 
-  getBattleWords(moduleId: number): Observable<BattleWord[]> {
+  getBattleWords(moduleId: string | number): Observable<BattleWord[]> {
     return this.http.get<BattleWord[]>(`${this.baseUrl}/modules/${moduleId}/battle-words`);
   }
 

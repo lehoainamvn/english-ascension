@@ -3,7 +3,10 @@ package com.englishascension.backend.feature.auth.service;
 import com.englishascension.backend.feature.auth.dto.*;
 import com.englishascension.backend.feature.user.entity.Role;
 import com.englishascension.backend.feature.user.entity.User;
+import com.englishascension.backend.feature.user.entity.UserGameStats;
+import com.englishascension.backend.feature.user.entity.PasswordResetToken;
 import com.englishascension.backend.feature.user.repository.UserRepository;
+import com.englishascension.backend.feature.user.repository.PasswordResetTokenRepository;
 import com.englishascension.backend.security.JwtTokenProvider;
 import com.englishascension.backend.security.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -24,11 +28,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-/**
- * Business logic for all authentication operations.
- * The controller delegates all work here.
- */
 @Service
+@Transactional
 public class AuthService {
 
     @Value("${google.client.id}")
@@ -36,17 +37,20 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder encoder;
     private final JwtTokenProvider jwtUtils;
     private final JavaMailSender mailSender;
 
     public AuthService(AuthenticationManager authenticationManager,
                        UserRepository userRepository,
+                       PasswordResetTokenRepository passwordResetTokenRepository,
                        PasswordEncoder encoder,
                        JwtTokenProvider jwtUtils,
                        JavaMailSender mailSender) {
         this.authenticationManager = authenticationManager;
         this.userRepository        = userRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.encoder               = encoder;
         this.jwtUtils              = jwtUtils;
         this.mailSender            = mailSender;
@@ -69,10 +73,7 @@ public class AuthService {
                 .findFirst()
                 .orElse("ROLE_USER");
 
-        User user = userRepository.findById(userDetails.getId()).orElseThrow();
-        boolean hasCharacter = user.getCharacterName() != null;
-
-        return new AuthResponse(jwt, userDetails.getId(), userDetails.getEmail(), role, hasCharacter);
+        return new AuthResponse(jwt, userDetails.getId(), userDetails.getEmail(), role, true);
     }
 
     // ------------------------------------------------------------------
@@ -89,6 +90,14 @@ public class AuthService {
                 .password(encoder.encode(request.getPassword()))
                 .role(Role.ROLE_USER)
                 .build();
+
+        UserGameStats stats = UserGameStats.builder()
+                .user(user)
+                .streak(0)
+                .exp(0)
+                .level(1)
+                .build();
+        user.setUserGameStats(stats);
 
         userRepository.save(user);
     }
@@ -148,13 +157,21 @@ public class AuthService {
                     .role(Role.ROLE_USER)
                     .active(true)
                     .build();
+
+            UserGameStats stats = UserGameStats.builder()
+                    .user(user)
+                    .streak(0)
+                    .exp(0)
+                    .level(1)
+                    .build();
+            user.setUserGameStats(stats);
+
             userRepository.save(user);
         }
 
         String jwt = jwtUtils.generateToken(email);
-        boolean hasCharacter = user.getCharacterName() != null;
 
-        return new AuthResponse(jwt, user.getId(), user.getEmail(), user.getRole().name(), hasCharacter);
+        return new AuthResponse(jwt, user.getId(), user.getEmail(), user.getRole().name(), true);
     }
 
     // ------------------------------------------------------------------
@@ -167,10 +184,16 @@ public class AuthService {
             throw new IllegalArgumentException("Error: Email không tồn tại trong hệ thống!");
         }
 
+        // Xóa token cũ của người dùng này nếu có
+        passwordResetTokenRepository.deleteByUser(user);
+
         String code = String.format("%06d", new Random().nextInt(1_000_000));
-        user.setResetToken(code);
-        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
-        userRepository.save(user);
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .user(user)
+                .token(code)
+                .expiryDate(LocalDateTime.now().plusMinutes(15))
+                .build();
+        passwordResetTokenRepository.save(resetToken);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("naml75803@gmail.com");
@@ -189,16 +212,17 @@ public class AuthService {
     // ------------------------------------------------------------------
 
     public void resetPassword(ResetPasswordRequest request) {
-        User user = userRepository.findByResetToken(request.getToken()).orElse(null);
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new IllegalArgumentException("Error: Mã khôi phục không hợp lệ hoặc đã hết hạn!"));
 
-        if (user == null || user.getResetTokenExpiry() == null
-                || LocalDateTime.now().isAfter(user.getResetTokenExpiry())) {
+        if (resetToken.getExpiryDate() == null || LocalDateTime.now().isAfter(resetToken.getExpiryDate())) {
             throw new IllegalArgumentException("Error: Mã khôi phục không hợp lệ hoặc đã hết hạn!");
         }
 
+        User user = resetToken.getUser();
         user.setPassword(encoder.encode(request.getNewPassword()));
-        user.setResetToken(null);
-        user.setResetTokenExpiry(null);
         userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
     }
 }

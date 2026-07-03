@@ -52,7 +52,7 @@ import { AuthService } from '../../../services/auth.service';
           <ng-template #loggedInMenu>
             <span class="text-xs text-text-muted font-bold hidden sm:inline">{{ userEmail }}</span>
             <a
-              routerLink="/character-customization"
+              routerLink="/dashboard"
               class="bg-text-main text-bg-main text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md active:scale-98 cursor-pointer text-center hover:opacity-90 border-none"
             >
               Vào học
@@ -84,7 +84,7 @@ import { AuthService } from '../../../services/auth.service';
 
           <div class="pt-2">
             <a
-              [routerLink]="isLoggedIn ? '/character-customization' : '/register'"
+              [routerLink]="isLoggedIn ? '/dashboard' : '/register'"
               class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full border border-border-main hover:bg-bg-input bg-bg-card text-text-main text-xs font-black uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md active:scale-98 cursor-pointer group"
             >
               {{ isLoggedIn ? 'Tiếp tục hành trình' : 'Bắt đầu hành trình' }}
@@ -237,7 +237,7 @@ import { AuthService } from '../../../services/auth.service';
             </p>
             <div class="pt-2">
               <a
-                [routerLink]="isLoggedIn ? '/character-customization' : '/register'"
+                [routerLink]="isLoggedIn ? '/dashboard' : '/register'"
                 class="bg-text-main text-bg-main hover:opacity-90 text-xs font-black uppercase tracking-wider px-8 py-3.5 rounded-full shadow-lg active:scale-98 transition-all inline-block border-none cursor-pointer"
               >
                 {{ isLoggedIn ? 'Vào học ngay' : 'Đăng ký ngay' }}

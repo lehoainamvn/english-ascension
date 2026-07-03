@@ -14,8 +14,15 @@ export class ToastService {
   private counter = 0;
 
   show(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success', duration = 3500) {
+    let cleanMessage = message;
+    if (type === 'error' && message) {
+      const lowerMsg = message.toLowerCase();
+      if (lowerMsg.includes('groq') || lowerMsg.includes('429') || lowerMsg.includes('too many requests') || lowerMsg.includes('rate limit') || lowerMsg.includes('limit reached')) {
+        cleanMessage = 'Lỗi hệ thống hoặc quá giới hạn lượt yêu cầu. Vui lòng thử lại sau!';
+      }
+    }
     const id = this.counter++;
-    const newToast: ToastMessage = { id, message, type };
+    const newToast: ToastMessage = { id, message: cleanMessage, type };
     
     // Chỉ hiển thị thông báo mới nhất để tránh spam
     this.toasts.set([newToast]);

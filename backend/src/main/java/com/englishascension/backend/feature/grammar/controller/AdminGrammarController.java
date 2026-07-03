@@ -1,13 +1,20 @@
 package com.englishascension.backend.feature.grammar.controller;
 
+import com.englishascension.backend.feature.roadmap.entity.LearningModule;
+import com.englishascension.backend.feature.roadmap.entity.Lesson;
+import com.englishascension.backend.feature.roadmap.entity.LessonContent;
+import com.englishascension.backend.feature.roadmap.entity.LessonType;
+import com.englishascension.backend.feature.roadmap.repository.LearningModuleRepository;
+import com.englishascension.backend.feature.roadmap.repository.LessonRepository;
 import com.englishascension.backend.feature.study.entity.Question;
+import com.englishascension.backend.feature.study.entity.QuestionOption;
 import com.englishascension.backend.feature.study.repository.QuestionRepository;
-import com.englishascension.backend.feature.study.entity.StudyContent;
-import com.englishascension.backend.feature.study.repository.StudyContentRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,149 +24,185 @@ import java.util.Map;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminGrammarController {
 
-    private final StudyContentRepository lessonRepository;
+    private final LessonRepository lessonRepository;
+    private final LearningModuleRepository moduleRepository;
     private final QuestionRepository questionRepository;
 
-    public AdminGrammarController(StudyContentRepository lessonRepository, QuestionRepository questionRepository) {
+    public AdminGrammarController(LessonRepository lessonRepository, 
+                                  LearningModuleRepository moduleRepository,
+                                  QuestionRepository questionRepository) {
         this.lessonRepository = lessonRepository;
+        this.moduleRepository = moduleRepository;
         this.questionRepository = questionRepository;
     }
 
-    /** GET /api/admin/grammar/lessons - Lấy danh sách các bài học ngữ pháp */
+    private LearningModule getOrCreateModuleForLevel(String level) {
+        String lvl = level != null ? level.toUpperCase().trim() : "A1";
+        Long modId;
+        switch (lvl) {
+            case "A2" -> modId = 1006L;
+            case "B1" -> modId = 1010L;
+            case "B2" -> modId = 1014L;
+            case "C1" -> modId = 1018L;
+            default -> modId = 1002L;
+        }
+        return moduleRepository.findById(modId).orElse(null);
+    }
+
     @GetMapping("/lessons")
-    public ResponseEntity<List<StudyContent>> getLessons() {
-        List<StudyContent> lessons = lessonRepository.findByType("GRAMMAR");
+    public ResponseEntity<List<Lesson>> getLessons() {
+        List<Lesson> lessons = lessonRepository.findByType(LessonType.GRAMMAR);
         return ResponseEntity.ok(lessons);
     }
 
-    /** POST /api/admin/grammar/lessons - Tạo bài học ngữ pháp mới */
     @PostMapping("/lessons")
-    public ResponseEntity<StudyContent> createLesson(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Lesson> createLesson(@RequestBody Map<String, String> request) {
         String title = request.get("title");
-        String category = request.get("category"); // Category trong GRAMMAR dùng để lưu tên tiếng Việt
-        String bodyText = request.get("bodyText"); // Nội dung lý thuyết ngữ pháp
+        String category = request.get("category"); // Level: A1, A2...
+        String bodyText = request.get("bodyText");
 
-        StudyContent lesson = StudyContent.builder()
+        LearningModule module = getOrCreateModuleForLevel(category);
+        String slug = "grammar-" + (category != null ? category.toLowerCase() : "a1") + "-" + title.toLowerCase().replace(" ", "-");
+
+        Lesson lesson = Lesson.builder()
                 .title(title)
-                .category(category != null ? category : "")
-                .bodyText(bodyText != null ? bodyText : "")
-                .type("GRAMMAR")
-                .questionsCount(0)
+                .slug(slug)
+                .module(module)
+                .type(LessonType.GRAMMAR)
+                .level(category != null ? category : "A1")
+                .orderIndex(1)
+                .difficultyScore(1.0)
+                .topic(title)
                 .build();
 
-        StudyContent saved = lessonRepository.save(lesson);
-        return ResponseEntity.ok(saved);
+        lesson = lessonRepository.save(lesson);
+
+        LessonContent content = LessonContent.builder()
+                .lesson(lesson)
+                .bodyText(bodyText != null ? bodyText : "")
+                .durationSeconds(900)
+                .build();
+        lesson.setLessonContent(content);
+        lessonRepository.save(lesson);
+
+        return ResponseEntity.ok(lesson);
     }
 
-    /** PUT /api/admin/grammar/lessons/{id} - Cập nhật bài học ngữ pháp */
     @PutMapping("/lessons/{id}")
-    public ResponseEntity<StudyContent> updateLesson(@PathVariable Long id, @RequestBody Map<String, String> request) {
-        StudyContent lesson = lessonRepository.findById(id).orElse(null);
-        if (lesson == null || !"GRAMMAR".equals(lesson.getType())) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (request.containsKey("title")) lesson.setTitle(request.get("title"));
-        if (request.containsKey("category")) lesson.setCategory(request.get("category"));
-        if (request.containsKey("bodyText")) lesson.setBodyText(request.get("bodyText"));
-
-        StudyContent updated = lessonRepository.save(lesson);
-        return ResponseEntity.ok(updated);
-    }
-
-    /** DELETE /api/admin/grammar/lessons/{id} - Xóa bài học ngữ pháp và câu hỏi liên quan */
-    @DeleteMapping("/lessons/{id}")
-    public ResponseEntity<?> deleteLesson(@PathVariable Long id) {
-        StudyContent lesson = lessonRepository.findById(id).orElse(null);
-        if (lesson == null || !"GRAMMAR".equals(lesson.getType())) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Xóa các câu hỏi của bài học
-        List<Question> questions = questionRepository.findBySourceTypeAndParentId("GRAMMAR", id);
-        questionRepository.deleteAll(questions);
-
-        lessonRepository.delete(lesson);
-        return ResponseEntity.ok(Map.of("message", "Deleted lesson and its questions successfully"));
-    }
-
-    /** GET /api/admin/grammar/lessons/{lessonId}/questions - Lấy danh sách câu hỏi của bài học */
-    @GetMapping("/lessons/{lessonId}/questions")
-    public ResponseEntity<List<Question>> getLessonQuestions(@PathVariable Long lessonId) {
-        List<Question> questions = questionRepository.findBySourceTypeAndParentId("GRAMMAR", lessonId);
-        return ResponseEntity.ok(questions);
-    }
-
-    /** POST /api/admin/grammar/lessons/{lessonId}/questions - Thêm câu hỏi vào bài học */
-    @PostMapping("/lessons/{lessonId}/questions")
-    public ResponseEntity<Question> createQuestion(@PathVariable Long lessonId, @RequestBody Map<String, Object> request) {
-        StudyContent lesson = lessonRepository.findById(lessonId).orElse(null);
+    public ResponseEntity<Lesson> updateLesson(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        Lesson lesson = lessonRepository.findById(id).orElse(null);
         if (lesson == null) {
             return ResponseEntity.notFound().build();
         }
 
-        // Đọc các trường option
-        @SuppressWarnings("unchecked")
-        List<String> options = (List<String>) request.get("options");
-        String optA = (options != null && options.size() > 0) ? options.get(0) : "";
-        String optB = (options != null && options.size() > 1) ? options.get(1) : "";
-        String optC = (options != null && options.size() > 2) ? options.get(2) : "";
-        String optD = (options != null && options.size() > 3) ? options.get(3) : "";
+        if (request.containsKey("title")) {
+            lesson.setTitle(request.get("title"));
+            lesson.setTopic(request.get("title"));
+        }
+        if (request.containsKey("category")) {
+            lesson.setLevel(request.get("category"));
+            lesson.setModule(getOrCreateModuleForLevel(request.get("category")));
+        }
+        if (request.containsKey("bodyText")) {
+            LessonContent content = lesson.getLessonContent();
+            if (content == null) {
+                content = LessonContent.builder().lesson(lesson).build();
+            }
+            content.setBodyText(request.get("bodyText"));
+            lesson.setLessonContent(content);
+        }
 
-        Question question = Question.builder()
-                .parentId(lessonId)
-                .sourceType("GRAMMAR")
-                .questionNumber(request.get("questionNumber") != null ? (Integer) request.get("questionNumber") : 1)
-                .questionText((String) request.get("questionText"))
-                .optionA(optA)
-                .optionB(optB)
-                .optionC(optC)
-                .optionD(optD)
-                .correctOption((String) request.get("correctOption"))
-                .correctAnswer((String) request.get("correctAnswer"))
-                .explanation((String) request.get("explanation"))
-                .difficulty("MEDIUM")
-                .build();
-
-        Question saved = questionRepository.save(question);
-
-        // Cập nhật số câu hỏi trong bài học
-        lesson.setQuestionsCount(questionRepository.findBySourceTypeAndParentId("GRAMMAR", lessonId).size());
-        lessonRepository.save(lesson);
-
-        return ResponseEntity.ok(saved);
+        Lesson updated = lessonRepository.save(lesson);
+        return ResponseEntity.ok(updated);
     }
 
-    /** PUT /api/admin/grammar/questions/{questionId} - Cập nhật câu hỏi */
+    @DeleteMapping("/lessons/{id}")
+    public ResponseEntity<?> deleteLesson(@PathVariable Long id) {
+        Lesson lesson = lessonRepository.findById(id).orElse(null);
+        if (lesson == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        lessonRepository.delete(lesson);
+        return ResponseEntity.ok(Map.of("message", "Deleted lesson successfully"));
+    }
+
+    @GetMapping("/lessons/{lessonId}/questions")
+    public ResponseEntity<?> getLessonQuestions(@PathVariable Long lessonId) {
+        List<Question> questions = questionRepository.findByLessonId(lessonId);
+        List<Map<String, Object>> response = questions.stream().map(q -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", q.getId());
+            map.put("questionText", q.getQuestionText());
+            map.put("explanation", q.getExplanation());
+            
+            map.put("optionA", "");
+            map.put("optionB", "");
+            map.put("optionC", "");
+            map.put("optionD", "");
+            String correct = "A";
+            for (QuestionOption opt : q.getOptions()) {
+                if ("A".equalsIgnoreCase(opt.getOptionKey())) map.put("optionA", opt.getOptionValue());
+                if ("B".equalsIgnoreCase(opt.getOptionKey())) map.put("optionB", opt.getOptionValue());
+                if ("C".equalsIgnoreCase(opt.getOptionKey())) map.put("optionC", opt.getOptionValue());
+                if ("D".equalsIgnoreCase(opt.getOptionKey())) map.put("optionD", opt.getOptionValue());
+                if (opt.isCorrect()) {
+                    correct = opt.getOptionKey();
+                }
+            }
+            map.put("correctAnswer", correct);
+            return map;
+        }).toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/lessons/{lessonId}/questions")
+    public ResponseEntity<?> createQuestion(@PathVariable Long lessonId, @RequestBody Map<String, Object> request) {
+        Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
+        if (lesson == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Question question = Question.builder()
+                .lesson(lesson)
+                .sourceType("ROADMAP_QUIZ")
+                .questionText((String) request.get("questionText"))
+                .explanation((String) request.get("explanation"))
+                .difficulty(lesson.getLevel())
+                .build();
+
+        @SuppressWarnings("unchecked")
+        List<String> optionsList = (List<String>) request.get("options");
+        String correct = (String) request.get("correctAnswer");
+        if (correct == null) correct = "A";
+
+        List<QuestionOption> options = new ArrayList<>();
+        if (optionsList != null) {
+            if (optionsList.size() > 0) options.add(QuestionOption.builder().question(question).optionKey("A").optionValue(optionsList.get(0)).correct("A".equalsIgnoreCase(correct)).build());
+            if (optionsList.size() > 1) options.add(QuestionOption.builder().question(question).optionKey("B").optionValue(optionsList.get(1)).correct("B".equalsIgnoreCase(correct)).build());
+            if (optionsList.size() > 2) options.add(QuestionOption.builder().question(question).optionKey("C").optionValue(optionsList.get(2)).correct("C".equalsIgnoreCase(correct)).build());
+            if (optionsList.size() > 3) options.add(QuestionOption.builder().question(question).optionKey("D").optionValue(optionsList.get(3)).correct("D".equalsIgnoreCase(correct)).build());
+        }
+        question.setOptions(options);
+        questionRepository.save(question);
+
+        return ResponseEntity.ok(Map.of("message", "Question created successfully"));
+    }
+
     @PutMapping("/questions/{questionId}")
-    public ResponseEntity<Question> updateQuestion(@PathVariable Long questionId, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> updateQuestion(@PathVariable Long questionId, @RequestBody Map<String, Object> request) {
         Question question = questionRepository.findById(questionId).orElse(null);
-        if (question == null || !"GRAMMAR".equals(question.getSourceType())) {
+        if (question == null) {
             return ResponseEntity.notFound().build();
         }
 
         if (request.containsKey("questionText")) question.setQuestionText((String) request.get("questionText"));
-        if (request.containsKey("correctOption")) question.setCorrectOption((String) request.get("correctOption"));
-        if (request.containsKey("correctAnswer")) question.setCorrectAnswer((String) request.get("correctAnswer"));
         if (request.containsKey("explanation")) question.setExplanation((String) request.get("explanation"));
-        if (request.containsKey("questionNumber")) question.setQuestionNumber((Integer) request.get("questionNumber"));
-        
-        if (request.containsKey("options")) {
-            @SuppressWarnings("unchecked")
-            List<String> options = (List<String>) request.get("options");
-            if (options != null) {
-                if (options.size() > 0) question.setOptionA(options.get(0));
-                if (options.size() > 1) question.setOptionB(options.get(1));
-                if (options.size() > 2) question.setOptionC(options.get(2));
-                if (options.size() > 3) question.setOptionD(options.get(3));
-            }
-        }
 
-        Question updated = questionRepository.save(question);
-        return ResponseEntity.ok(updated);
+        questionRepository.save(question);
+        return ResponseEntity.ok(Map.of("message", "Question updated successfully"));
     }
 
-    /** DELETE /api/admin/grammar/questions/{questionId} - Xóa câu hỏi */
     @DeleteMapping("/questions/{questionId}")
     public ResponseEntity<?> deleteQuestion(@PathVariable Long questionId) {
         Question question = questionRepository.findById(questionId).orElse(null);
@@ -167,16 +210,7 @@ public class AdminGrammarController {
             return ResponseEntity.notFound().build();
         }
 
-        Long lessonId = question.getParentId();
         questionRepository.delete(question);
-
-        // Cập nhật số câu hỏi trong bài học
-        StudyContent lesson = lessonRepository.findById(lessonId).orElse(null);
-        if (lesson != null) {
-            lesson.setQuestionsCount(questionRepository.findBySourceTypeAndParentId("GRAMMAR", lessonId).size());
-            lessonRepository.save(lesson);
-        }
-
         return ResponseEntity.ok(Map.of("message", "Question deleted successfully"));
     }
 }

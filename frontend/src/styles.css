@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -21,10 +21,35 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        sans-serif;
 }
 
 .btn-back {
   @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-input/60 border border-border-main bg-bg-card/40 transition-all duration-200 cursor-pointer select-none no-underline;
+}
+
+/* Global font weight overrides to prevent overly bold text platform-wide */
+.font-black,
+.font-extrabold,
+.font-bold {
+    font-weight: 600 !important;
+}
+
+strong {
+    font-weight: 600 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600 !important;
+}
+
+/* Card radius override to exactly 16px */
+.rounded-\[14px\] {
+  border-radius: 16px !important;
 }
 

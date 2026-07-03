@@ -1,55 +1,58 @@
 package com.englishascension.backend.feature.vocabulary.service;
 
 import com.englishascension.backend.feature.roadmap.entity.LearningModule;
+import com.englishascension.backend.feature.roadmap.entity.Lesson;
 import com.englishascension.backend.feature.roadmap.repository.LearningModuleRepository;
-import com.englishascension.backend.feature.study.entity.Flashcard;
-import com.englishascension.backend.feature.study.repository.FlashcardRepository;
+import com.englishascension.backend.feature.roadmap.repository.LessonRepository;
 import com.englishascension.backend.feature.user.entity.User;
-import com.englishascension.backend.feature.user.entity.UserProgress;
-import com.englishascension.backend.feature.user.repository.UserProgressRepository;
+import com.englishascension.backend.feature.user.entity.UserLessonState;
+import com.englishascension.backend.feature.user.entity.UserVocabularyState;
+import com.englishascension.backend.feature.user.repository.UserLessonStateRepository;
+import com.englishascension.backend.feature.user.repository.UserVocabularyStateRepository;
 import com.englishascension.backend.feature.user.repository.UserRepository;
 import com.englishascension.backend.feature.vocabulary.entity.VocabularyWord;
 import com.englishascension.backend.feature.vocabulary.repository.VocabularyWordRepository;
 import com.englishascension.backend.shared.exception.ResourceNotFoundException;
 import com.englishascension.backend.shared.reward.RewardResult;
 import com.englishascension.backend.shared.reward.RewardService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
-/**
- * Business logic for vocabulary study.
- */
 @Service
+@Transactional
 public class VocabularyService {
 
     private final UserRepository userRepository;
     private final LearningModuleRepository topicRepository;
-    private final FlashcardRepository wordRepository;
-    private final UserProgressRepository progressRepository;
+    private final LessonRepository lessonRepository;
     private final VocabularyWordRepository vocabularyWordRepository;
+    private final UserVocabularyStateRepository userVocabularyStateRepository;
+    private final UserLessonStateRepository userLessonStateRepository;
     private final RewardService rewardService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public VocabularyService(UserRepository userRepository,
                              LearningModuleRepository topicRepository,
-                             FlashcardRepository wordRepository,
-                             UserProgressRepository progressRepository,
+                             LessonRepository lessonRepository,
                              VocabularyWordRepository vocabularyWordRepository,
+                             UserVocabularyStateRepository userVocabularyStateRepository,
+                             UserLessonStateRepository userLessonStateRepository,
                              RewardService rewardService) {
-        this.userRepository          = userRepository;
-        this.topicRepository         = topicRepository;
-        this.wordRepository          = wordRepository;
-        this.progressRepository      = progressRepository;
+        this.userRepository = userRepository;
+        this.topicRepository = topicRepository;
+        this.lessonRepository = lessonRepository;
         this.vocabularyWordRepository = vocabularyWordRepository;
-        this.rewardService           = rewardService;
+        this.userVocabularyStateRepository = userVocabularyStateRepository;
+        this.userLessonStateRepository = userLessonStateRepository;
+        this.rewardService = rewardService;
     }
-
-    // ------------------------------------------------------------------
-    // Helpers
-    // ------------------------------------------------------------------
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -57,60 +60,69 @@ public class VocabularyService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
-    // ------------------------------------------------------------------
-    // Get topics
-    // ------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> parseAnswersJson(String json) {
+        if (json == null || json.isEmpty()) {
+            return new HashMap<>();
+        }
+        try {
+            return objectMapper.readValue(json, Map.class);
+        } catch (Exception e) {
+            return new HashMap<>();
+        }
+    }
+
+    private String serializeAnswersJson(Map<String, Object> map) {
+        try {
+            return objectMapper.writeValueAsString(map);
+        } catch (Exception e) {
+            return "{}";
+        }
+    }
 
     public List<Map<String, Object>> getTopics() {
         User user = getCurrentUser();
+        List<LearningModule> topics = topicRepository.findByCategory("TỪ VỰNG CEFR");
 
-        List<LearningModule> topics            = new ArrayList<>(topicRepository.findByCategoryIsNotNull());
-        // Filter out non-vocabulary modules
-        topics.removeIf(t -> "GRAMMAR".equalsIgnoreCase(t.getCategory())
-                || "READING".equalsIgnoreCase(t.getCategory())
-                || "LISTENING".equalsIgnoreCase(t.getCategory()));
-        List<UserProgress>   topicProgressList = progressRepository.findByUserIdAndResourceType(user.getId(), "MODULE");
-        List<UserProgress>   wordProgressList  = progressRepository.findByUserIdAndResourceType(user.getId(), "FLASHCARD");
-
-        Map<Long, Boolean> completedTopicsMap = new HashMap<>();
-        for (UserProgress p : topicProgressList) {
-            completedTopicsMap.put(p.getResourceId(), p.isCompleted());
-        }
-
-        List<Flashcard>    allWords       = wordRepository.findAll();
-        Map<Long, Long>    wordToTopicMap = new HashMap<>();
-        for (Flashcard w : allWords) {
-            if (w.getModule() != null) {
-                wordToTopicMap.put(w.getId(), w.getModule().getId());
-            }
-        }
-
-        Map<Long, Integer> learnedWordsCountMap = new HashMap<>();
-        for (UserProgress wp : wordProgressList) {
-            if (wp.isCompleted()) {
-                Long topicId = wordToTopicMap.get(wp.getResourceId());
-                if (topicId != null) {
-                    learnedWordsCountMap.put(topicId, learnedWordsCountMap.getOrDefault(topicId, 0) + 1);
-                }
-            }
-        }
+        List<UserVocabularyState> progressList = userVocabularyStateRepository.findByUserId(user.getId());
+        Set<Long> learnedWordIds = progressList.stream()
+                .filter(p -> "COMPLETED".equals(p.getStatus()))
+                .map(p -> p.getVocabularyWord().getId())
+                .collect(Collectors.toSet());
 
         List<Map<String, Object>> response = new ArrayList<>();
         for (LearningModule topic : topics) {
-            int wordsCount = (int) allWords.stream()
-                    .filter(w -> w.getModule() != null && w.getModule().getId().equals(topic.getId()))
+            List<Lesson> lessons = lessonRepository.findByModuleId(topic.getId());
+            List<VocabularyWord> words = new ArrayList<>();
+            for (Lesson l : lessons) {
+                words.addAll(vocabularyWordRepository.findByLessonId(l.getId()));
+            }
+
+            int wordsCount = words.size();
+            long learnedCount = words.stream()
+                    .filter(w -> learnedWordIds.contains(w.getId()))
                     .count();
 
-            int learnedCount = learnedWordsCountMap.getOrDefault(topic.getId(), 0);
-            boolean isCompleted = completedTopicsMap.getOrDefault(topic.getId(), false)
-                    || (wordsCount > 0 && learnedCount >= wordsCount);
+            boolean topicCompleted = false;
+            if (!lessons.isEmpty()) {
+                UserLessonState lessonState = userLessonStateRepository
+                        .findByUserIdAndLessonId(user.getId(), lessons.get(0).getId()).orElse(null);
+                if (lessonState != null) {
+                    Map<String, Object> meta = parseAnswersJson(lessonState.getAnswersJson());
+                    if (Boolean.TRUE.equals(meta.get("topicCompleted"))) {
+                        topicCompleted = true;
+                    }
+                }
+            }
+
+            boolean isCompleted = topicCompleted || (wordsCount > 0 && learnedCount >= wordsCount);
 
             Map<String, Object> item = new HashMap<>();
-            item.put("id",          topic.getId());
-            item.put("title",       topic.getTitle());
-            item.put("category",    topic.getCategory());
-            item.put("wordsCount",  wordsCount);
-            item.put("learnedCount", learnedCount);
+            item.put("id", topic.getId());
+            item.put("title", topic.getTitle());
+            item.put("category", topic.getCategory());
+            item.put("wordsCount", wordsCount);
+            item.put("learnedCount", (int) learnedCount);
             item.put("isCompleted", isCompleted);
             response.add(item);
         }
@@ -119,120 +131,87 @@ public class VocabularyService {
         return response;
     }
 
-    // ------------------------------------------------------------------
-    // Get words in a topic
-    // ------------------------------------------------------------------
-
     public List<Map<String, Object>> getTopicWords(Long topicId) {
         User user = getCurrentUser();
-
-        LearningModule topic = topicRepository.findById(topicId)
+        topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic", topicId));
 
-        List<Flashcard> words = wordRepository.findByModuleId(topicId);
-        if (words.isEmpty()) {
-            words = autoGenerateFlashcards(topic);
+        List<Lesson> lessons = lessonRepository.findByModuleId(topicId);
+        List<VocabularyWord> words = new ArrayList<>();
+        for (Lesson l : lessons) {
+            words.addAll(vocabularyWordRepository.findByLessonId(l.getId()));
         }
 
-        List<UserProgress>   userProgress = progressRepository.findByUserIdAndResourceType(user.getId(), "FLASHCARD");
-        Map<Long, Boolean>   learnedMap   = new HashMap<>();
-        for (UserProgress p : userProgress) {
-            if (p.isCompleted()) learnedMap.put(p.getResourceId(), true);
-        }
+        List<UserVocabularyState> progressList = userVocabularyStateRepository.findByUserId(user.getId());
+        Set<Long> learnedWordIds = progressList.stream()
+                .filter(p -> "COMPLETED".equals(p.getStatus()))
+                .map(p -> p.getVocabularyWord().getId())
+                .collect(Collectors.toSet());
 
         List<Map<String, Object>> response = new ArrayList<>();
-        for (Flashcard w : words) {
+        for (VocabularyWord w : words) {
             Map<String, Object> item = new HashMap<>();
-            item.put("id",               w.getId());
-            item.put("word",             w.getWord());
-            item.put("partOfSpeech",     w.getPartOfSpeech());
-            item.put("phonetic",         w.getPhonetic());
-            item.put("definition",       w.getDefinition());
-            item.put("exampleSentence",  w.getExampleSentence());
+            item.put("id", w.getId());
+            item.put("word", w.getWord());
+            item.put("partOfSpeech", w.getPartOfSpeech());
+            item.put("phonetic", w.getPhonetic());
+            item.put("definition", w.getDefinition());
+            item.put("exampleSentence", w.getExampleSentence());
             item.put("exampleTranslation", w.getExampleTranslation());
-            item.put("isLearned",        learnedMap.getOrDefault(w.getId(), false));
+            item.put("isLearned", learnedWordIds.contains(w.getId()));
             response.add(item);
         }
         return response;
     }
 
-    private List<Flashcard> autoGenerateFlashcards(LearningModule topic) {
-        String title = topic.getTitle();
-        String level = "A1";
-        int moduleIndex = topic.getOrderIndex() != null ? topic.getOrderIndex() : 1;
-
-        if      (title.toUpperCase().startsWith("A1")) { level = "A1"; }
-        else if (title.toUpperCase().startsWith("A2")) { level = "A2"; }
-        else if (title.toUpperCase().startsWith("B1")) { level = "B1"; }
-        else if (title.toUpperCase().startsWith("B2")) { level = "B2"; }
-        else if (title.toUpperCase().startsWith("C1")) { level = "C1"; }
-        else if (title.toLowerCase().contains("toeic"))    { level = "B1"; }
-        else if (title.toLowerCase().contains("business")) { level = "B2"; }
-
-        List<VocabularyWord> wordList =
-                vocabularyWordRepository.findByCefrLevelIgnoreCaseAndModuleIndex(level, moduleIndex);
-        if (wordList == null || wordList.isEmpty()) return Collections.emptyList();
-
-        List<Flashcard> saved = new ArrayList<>();
-        for (VocabularyWord vw : wordList) {
-            Flashcard fc = Flashcard.builder()
-                    .module(topic)
-                    .word(vw.getWord())
-                    .partOfSpeech(vw.getPartOfSpeech())
-                    .phonetic(vw.getPhonetic())
-                    .definition(vw.getDefinition())
-                    .exampleSentence(vw.getExampleSentence())
-                    .exampleTranslation(vw.getExampleTranslation())
-                    .build();
-            saved.add(wordRepository.save(fc));
-        }
-        return saved;
-    }
-
-    // ------------------------------------------------------------------
-    // Mark word learned
-    // ------------------------------------------------------------------
-
     public RewardResult markWordLearned(Long wordId) {
         User user = getCurrentUser();
-
-        wordRepository.findById(wordId)
+        VocabularyWord word = vocabularyWordRepository.findById(wordId)
                 .orElseThrow(() -> new ResourceNotFoundException("Word", wordId));
 
-        UserProgress progress = progressRepository
-                .findByUserIdAndResourceTypeAndResourceId(user.getId(), "FLASHCARD", wordId)
-                .orElseGet(() -> UserProgress.builder()
-                        .user(user).resourceType("FLASHCARD").resourceId(wordId).completed(false).build());
+        UserVocabularyState progress = userVocabularyStateRepository
+                .findByUserIdAndVocabularyWordId(user.getId(), wordId)
+                .orElseGet(() -> UserVocabularyState.builder()
+                        .user(user)
+                        .vocabularyWord(word)
+                        .status("UNLOCKED")
+                        .build());
 
-        if (!progress.isCompleted()) {
-            progress.setCompleted(true);
+        if (!"COMPLETED".equals(progress.getStatus())) {
+            progress.setStatus("COMPLETED");
             progress.setCompletedAt(LocalDateTime.now());
-            progressRepository.save(progress);
-            return rewardService.addRewards(user, 10, 2); // +10 EXP, +2 Coins
+            userVocabularyStateRepository.save(progress);
+            return rewardService.addRewards(user, 10, 0); // +10 EXP
         }
         return rewardService.noReward(user);
     }
 
-    // ------------------------------------------------------------------
-    // Complete topic
-    // ------------------------------------------------------------------
-
     public RewardResult completeTopic(Long topicId) {
         User user = getCurrentUser();
-
         topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic", topicId));
 
-        UserProgress progress = progressRepository
-                .findByUserIdAndResourceTypeAndResourceId(user.getId(), "MODULE", topicId)
-                .orElseGet(() -> UserProgress.builder()
-                        .user(user).resourceType("MODULE").resourceId(topicId).completed(false).build());
+        List<Lesson> lessons = lessonRepository.findByModuleId(topicId);
+        if (lessons.isEmpty()) {
+            return rewardService.noReward(user);
+        }
 
-        if (!progress.isCompleted()) {
-            progress.setCompleted(true);
+        Lesson firstLesson = lessons.get(0);
+        UserLessonState progress = userLessonStateRepository
+                .findByUserIdAndLessonId(user.getId(), firstLesson.getId())
+                .orElseGet(() -> UserLessonState.builder()
+                        .user(user)
+                        .lesson(firstLesson)
+                        .status("UNLOCKED")
+                        .build());
+
+        Map<String, Object> meta = parseAnswersJson(progress.getAnswersJson());
+        if (!Boolean.TRUE.equals(meta.get("topicCompleted"))) {
+            meta.put("topicCompleted", true);
+            progress.setAnswersJson(serializeAnswersJson(meta));
             progress.setCompletedAt(LocalDateTime.now());
-            progressRepository.save(progress);
-            return rewardService.addRewards(user, 50, 15); // +50 EXP, +15 Coins
+            userLessonStateRepository.save(progress);
+            return rewardService.addRewards(user, 50, 0); // +50 EXP
         }
         return rewardService.noReward(user);
     }

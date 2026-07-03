@@ -1,7 +1,6 @@
 package com.englishascension.backend.feature.study.controller;
 
 import com.englishascension.backend.feature.user.entity.User;
-import com.englishascension.backend.feature.study.entity.Flashcard;
 import com.englishascension.backend.feature.user.repository.UserRepository;
 import com.englishascension.backend.feature.study.service.UserWordService;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +31,9 @@ public class UserWordController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Flashcard>> getAllUserWords() {
+    public ResponseEntity<?> getAllUserWords() {
         User user = getAuthenticatedUser();
-        List<Flashcard> words = userWordService.getAllUserWords(user);
+        List<Map<String, Object>> words = userWordService.getAllUserWords(user);
         return ResponseEntity.ok(words);
     }
 
@@ -42,7 +41,7 @@ public class UserWordController {
     public ResponseEntity<?> saveUserWord(@RequestBody Map<String, String> body) {
         User user = getAuthenticatedUser();
         try {
-            Flashcard saved = userWordService.saveUserWord(body, user);
+            Map<String, Object> saved = userWordService.saveUserWord(body, user);
             return ResponseEntity.ok(saved);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
@@ -52,7 +51,7 @@ public class UserWordController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUserWord(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         User user = getAuthenticatedUser();
-        Flashcard saved = userWordService.updateUserWord(id, body, user);
+        Map<String, Object> saved = userWordService.updateUserWord(id, body, user);
         if (saved == null) {
             return ResponseEntity.notFound().build();
         }

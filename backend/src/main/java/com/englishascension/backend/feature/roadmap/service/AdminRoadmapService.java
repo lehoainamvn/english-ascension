@@ -4,14 +4,12 @@ import com.englishascension.backend.feature.roadmap.dto.ModuleRequest;
 import com.englishascension.backend.feature.roadmap.dto.RoadmapRequest;
 import com.englishascension.backend.feature.roadmap.entity.LearningModule;
 import com.englishascension.backend.feature.roadmap.entity.LearningRoadmap;
+import com.englishascension.backend.feature.roadmap.entity.Lesson;
 import com.englishascension.backend.feature.roadmap.repository.LearningModuleRepository;
 import com.englishascension.backend.feature.roadmap.repository.LearningRoadmapRepository;
-import com.englishascension.backend.feature.study.entity.Flashcard;
-import com.englishascension.backend.feature.study.entity.Question;
-import com.englishascension.backend.feature.study.repository.FlashcardRepository;
-import com.englishascension.backend.feature.study.repository.QuestionRepository;
-import com.englishascension.backend.feature.user.entity.UserProgress;
-import com.englishascension.backend.feature.user.repository.UserProgressRepository;
+import com.englishascension.backend.feature.roadmap.repository.LessonRepository;
+import com.englishascension.backend.feature.roadmap.repository.UserRoadmapRepository;
+import com.englishascension.backend.feature.roadmap.entity.UserRoadmap;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,25 +19,23 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional
 public class AdminRoadmapService {
 
     private final LearningRoadmapRepository roadmapRepository;
     private final LearningModuleRepository moduleRepository;
-    private final FlashcardRepository flashcardRepository;
-    private final QuestionRepository questionRepository;
-    private final UserProgressRepository progressRepository;
+    private final LessonRepository lessonRepository;
+    private final UserRoadmapRepository userRoadmapRepository;
 
     public AdminRoadmapService(
             LearningRoadmapRepository roadmapRepository,
             LearningModuleRepository moduleRepository,
-            FlashcardRepository flashcardRepository,
-            QuestionRepository questionRepository,
-            UserProgressRepository progressRepository) {
+            LessonRepository lessonRepository,
+            UserRoadmapRepository userRoadmapRepository) {
         this.roadmapRepository = roadmapRepository;
         this.moduleRepository = moduleRepository;
-        this.flashcardRepository = flashcardRepository;
-        this.questionRepository = questionRepository;
-        this.progressRepository = progressRepository;
+        this.lessonRepository = lessonRepository;
+        this.userRoadmapRepository = userRoadmapRepository;
     }
 
     public List<LearningRoadmap> getAllPresetRoadmaps() {
@@ -52,7 +48,6 @@ public class AdminRoadmapService {
                 .orElse(null);
     }
 
-    @Transactional
     public LearningRoadmap createPresetRoadmap(RoadmapRequest request) {
         LearningRoadmap roadmap = LearningRoadmap.builder()
                 .cefrLevel(request.getCefrLevel())
@@ -79,11 +74,9 @@ public class AdminRoadmapService {
             }
         }
         roadmap.setModules(modules);
-        roadmap.setModulesCount(modules.size());
         return roadmapRepository.save(roadmap);
     }
 
-    @Transactional
     public LearningRoadmap updatePresetRoadmap(Long id, RoadmapRequest request) {
         LearningRoadmap roadmap = roadmapRepository.findById(id)
                 .filter(LearningRoadmap::isPreset)
@@ -132,29 +125,22 @@ public class AdminRoadmapService {
             }
         }
 
-        // Clean up removed modules' associated flashcards, questions, progress
+        // Clean up removed modules and their lessons
         for (LearningModule m : existingModules) {
             if (!retainedIds.contains(m.getId())) {
-                List<Flashcard> fcs = flashcardRepository.findByModuleId(m.getId());
-                flashcardRepository.deleteAll(fcs);
-
-                List<Question> qs = questionRepository.findBySourceTypeAndParentId("ROADMAP_QUIZ", m.getId());
-                questionRepository.deleteAll(qs);
-
-                List<UserProgress> prog = progressRepository.findByResourceTypeAndResourceId("MODULE", m.getId());
-                progressRepository.deleteAll(prog);
+                List<Lesson> lessons = lessonRepository.findByModuleId(m.getId());
+                for (Lesson lesson : lessons) {
+                    lessonRepository.delete(lesson);
+                }
             }
         }
 
-        // Trigger Jpa orphan removal on cleared elements
         roadmap.getModules().clear();
         roadmap.getModules().addAll(updatedModules);
-        roadmap.setModulesCount(updatedModules.size());
 
         return roadmapRepository.save(roadmap);
     }
 
-    @Transactional
     public boolean deletePresetRoadmap(Long id) {
         LearningRoadmap roadmap = roadmapRepository.findById(id)
                 .filter(LearningRoadmap::isPreset)
@@ -163,32 +149,22 @@ public class AdminRoadmapService {
             return false;
         }
 
+        // Xóa cascade: modules → lessons
         List<LearningModule> modules = roadmap.getModules();
-        List<Long> moduleIds = new ArrayList<>();
         for (LearningModule m : modules) {
-            moduleIds.add(m.getId());
-        }
-
-        if (!moduleIds.isEmpty()) {
-            // Delete user progress of the modules
-            List<UserProgress> moduleProgress = progressRepository.findByResourceTypeAndResourceIdIn("MODULE", moduleIds);
-            progressRepository.deleteAll(moduleProgress);
-
-            // Delete flashcards and questions for all modules
-            for (Long moduleId : moduleIds) {
-                List<Flashcard> fcs = flashcardRepository.findByModuleId(moduleId);
-                flashcardRepository.deleteAll(fcs);
-
-                List<Question> qs = questionRepository.findBySourceTypeAndParentId("ROADMAP_QUIZ", moduleId);
-                questionRepository.deleteAll(qs);
+            List<Lesson> lessons = lessonRepository.findByModuleId(m.getId());
+            for (Lesson lesson : lessons) {
+                lessonRepository.delete(lesson);
             }
         }
 
-        // Delete user progress of the roadmap itself
-        List<UserProgress> roadmapProgress = progressRepository.findByResourceTypeAndResourceId("ROADMAP", id);
-        progressRepository.deleteAll(roadmapProgress);
+        // Xóa tất cả enrollment của user với roadmap này
+        List<UserRoadmap> enrollments = userRoadmapRepository.findAll()
+                .stream()
+                .filter(ur -> ur.getRoadmap() != null && ur.getRoadmap().getId().equals(id))
+                .toList();
+        userRoadmapRepository.deleteAll(enrollments);
 
-        // Delete the roadmap itself (cascades to modules)
         roadmapRepository.delete(roadmap);
         return true;
     }

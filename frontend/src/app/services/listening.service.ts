@@ -11,6 +11,7 @@ export interface ListeningTopic {
   sectionsCount: number;
   questionsCount: number;
   completedCount: number;
+  mediaUrl?: string;
 }
 
 export interface ListeningQuestion {
@@ -20,6 +21,8 @@ export interface ListeningQuestion {
   translation: string;
   audioUrl: string | null;
   isCompleted: boolean;
+  options?: { key: string; value: string }[];
+  correctOption?: string;
 }
 
 export interface ListeningSection {

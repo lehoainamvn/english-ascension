@@ -19,7 +19,7 @@ interface Achievement {
       <div class="absolute top-1/4 left-1/4 w-80 h-80 bg-brand-primary/10 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-brand-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div class="max-w-4xl mx-auto relative z-10 space-y-6">
+      <div class="max-w-6xl mx-auto relative z-10 space-y-6">
         <!-- Header -->
         <div class="backdrop-blur-xl bg-bg-card border border-border-main rounded-2xl p-5 shadow-md">
           <div class="flex items-center gap-3">

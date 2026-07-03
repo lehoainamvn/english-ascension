@@ -12,13 +12,17 @@ import java.util.Set;
 public class Lesson {
 
     @Id
-    private String id; // e.g. "grammar_to_be", "vocab_basic", etc.
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String slug; // e.g. "grammar-to-be", "vocab-basic", etc.
 
     @Column(nullable = false)
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(name = "lesson_type", nullable = false, length = 50)
     private LessonType type; // VOCABULARY, GRAMMAR, LISTENING, READING
 
     @Column(nullable = false, length = 50)
@@ -29,8 +33,17 @@ public class Lesson {
 
     private String topic;
 
-    @Column(name = "content_id")
-    private Long contentId; // references study_contents.id or learning_modules.id
+    @Column(name = "order_index", nullable = false)
+    @Builder.Default
+    private Integer orderIndex = 1;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "module_id")
+    @JsonIgnore
+    private LearningModule module;
+
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private LessonContent lessonContent;
 
     @ManyToMany
     @JoinTable(

@@ -32,7 +32,7 @@ export interface Enrollment {
   id: number;
   userId: number;
   roadmap: PresetRoadmap;
-  status: string;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED';
   enrolledAt: string;
   lastAccessedAt: string;
 }
