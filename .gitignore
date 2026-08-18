@@ -83,3 +83,16 @@ out/
 credentials*
 secrets*
 client_secret*.json
+
+# Python & Temporary Files
+# ------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+venv/
+.venv/
+diff.txt
+*.log
+
